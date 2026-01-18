@@ -2,7 +2,8 @@
 module fifo_async #(
     parameter int BITWIDTH = 32,
     parameter int FIFO_SIZE = 8,  //only 2**n
-    parameter int SYNC_FF_DEPTH = 2
+    parameter int SYNC_FF_DEPTH = 2,
+    parameter int ALMOST_FULL_SIZE = 5
 ) (
     input wire W_CLK,
     input wire R_CLK,
@@ -156,10 +157,14 @@ module fifo_async #(
     always_ff @(posedge W_CLK or negedge RST_N_W_CLK) begin
         if (!RST_N_W_CLK) begin
             FULL <= 1'b0;
+            ALMOST_FULL <= 1'b0;
         end else begin
             FULL <= (fifo_cnt_w_clk >= FIFO_SIZE);
+            ALMOST_FULL <= (fifo_cnt_w_clk >= ALMOST_FULL_SIZE);
         end
     end
+
+
 
     always_ff @(posedge R_CLK or negedge RST_N_R_CLK) begin
         if (!RST_N_R_CLK) begin
@@ -169,6 +174,21 @@ module fifo_async #(
         end
     end
 
+
+    //synopsys translate_off   
+
+    wr_gray_check :
+    assert property (@(posedge W_CLK) disable iff (!RST_N_W_CLK) (write_valid) |=> $countones(
+        w_ptr_w_clk ^ w_ptr_next
+    ) == 1);
+
+    rd_gray_check :
+    assert property (@(posedge W_CLK) disable iff (!RST_N_W_CLK) (read_valid) |=> $countones(
+        r_ptr_r_clk ^ r_ptr_next
+    ) == 1);
+
+
+    //synopsys translate_on
 
 
 

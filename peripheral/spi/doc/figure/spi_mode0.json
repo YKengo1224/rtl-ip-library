@@ -1,0 +1,6 @@
+{ signal: [
+  { name: "spi_sclk_o_r",         wave: "l.hlhlhlhlhlhlhlhl." },
+  { name: "spi_csn_o_r",        wave: "10................1"},
+  { name: "spi_mosi0_o_r",     wave: "x2.2.2.2.2.2.2.2.x.","data":["TDATA0", "TDATA1", "TDATA2", "TDATA3", "TDATA4", "TDATA5", "TDATA6", "TDATA7"] },
+  { name: "spi_miso0_o_r",     wave: "x2.2.2.2.2.2.2.2.x." ,"data":["RDATA0", "RDATA1", "RDATA2", "RDATA3", "RDATA4", "RDATA5", "RDATA6", "RDATA7"] },
+]}

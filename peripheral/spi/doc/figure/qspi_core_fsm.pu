@@ -1,0 +1,46 @@
+@startuml
+hide empty description
+
+[*] --> S_IDLE : リセット || !qspi_enable || (qspi_slave_en_sysclk_i && qspi_csn_in_sysclk_r)
+
+S_IDLE :idle状態
+S_FETCH : tx fifoのデータをフェッチする
+S_SEND : マスターモードでデータを送受信する
+S_SEND_FETCH : マスターモードでデータを送受信しながら次のデータをフェッチする
+
+' S_S_RECEIVE : スレーブモードで受信のみを行う
+' S_S_FETCH : スレーブモードでtx fifoのデータをフェッチする
+' S_S_SEND : スレーブモードでデータを送信する
+' S_S_SEND_FETCH : スレーブモードでデータを送信しながら次のデータをフェッチする
+
+スレーブモード動作開始: 
+
+
+S_IDLE --> S_FETCH : (!slave_detect && !tx_fifo_empty) || \n {slave_detect &&  !qspi_csn_in_sysclk_r && !tx_fifo_empty}
+
+S_IDLE --> S_SEND : {slave_detect  && \n !qspi_csn_in_sysclk_r && tx_fifo_empty}
+
+S_FETCH --> S_SEND : tx_fifo_data_valid
+
+S_SEND --> S_SEND_FETCH : ((trans_bit_counter_sysclk_r+2) >= max_trans_bit_counter) && \n !tx_fifo_empty
+
+S_SEND --> S_IDLE : !slave_detect && trans_bit_counterがmax && \n (!spi_slave_en && 次のデータをフェッチできていない)
+
+S_SEND_FETCH --> S_SEND : tx_fifo_data_valid
+
+
+
+
+
+
+
+' S_IDLE --> S_S_RECEIVE : spi_slave_en && !qspi_csn_in_sysclk_r && \n (qspitrans_dir == "RECEIVE") && ()
+
+' S_IDLE --> S_S_FETCH : spi_slave_en && qspi_csn_in_sysclk_r && tx_fifo_not_empty
+
+' S_IDLE --> S_S_SEND : spi_slave_en && qspi_csn_in_sysclk_r && !tx_fifo_not_empty
+
+' S_S_FETCH --> S_S_SEND : tx_fifo_data_valid && (qspi_protocol_sel != "QSPI_MODE")
+
+
+@enduml

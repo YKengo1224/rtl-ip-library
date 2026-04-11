@@ -30,18 +30,33 @@
 | presetn        | Input | pclk         | APBリセット信号      |
 | srstn_sysclk | Input | sysclk       | システムリセット信号 |
 
-## APB関連信号
+## AXI4lite関連信号
 
-| 信号名       | I/O    | 同期クロック | 概要                       |
-|--------------|--------|--------------|----------------------------|
-| paddr[31:0]  | Input  | pclk         | APBアドレス信号            |
-| pwdata[31:0] | Input  | pclk         | APB Writeデータ信号        |
-| penable      | Input  | pclk         | APB イネーブル信号         |
-| psel         | Input  | pclk         | APB セレクト信号           |
-| pwrite       | Input  | pclk         | APB 書き込みイネーブル信号 |
-| prdata[31:0] | Output | pclk         | APB Readデータ信号         |
-| pready       | Output | pclk         | APB ready 信号             |
-| pslverr      | Output | pclk         | APB slave error 信号       |
+| 信号名                    | I/O    | 同期クロック | 概要                          |
+|---------------------------|--------|--------------|-------------------------------|
+| awvalid                   | Input  | aclk         | AXI Writeアドレス Valid信号   |
+| awready                   | Output | aclk         | AXI Writeアドレス Ready信号   |
+| awid[ACTUAL_ID_WIDTH-1:0] | Input  | aclk         | AXI Writeアドレス ID信号      |
+| awaddr[ADDRESS_WIDTH-1:0] | Input  | aclk         | AXI Writeアドレス信号         |
+| awprot[2:0]               | Input  | aclk         | AXI Writeプロテクション信号   |
+| wvalid                    | Input  | aclk         | AXI Writeデータ Valid信号     |
+| wready                    | Output | aclk         | AXI Writeデータ Ready信号     |
+| wdata[BUS_WIDTH-1:0]      | Input  | aclk         | AXI Writeデータ信号           |
+| wstrb[BUS_WIDTH/8-1:0]    | Input  | aclk         | AXI Writeストローブ信号       |
+| bvalid                    | Output | aclk         | AXI Writeレスポンス Valid信号 |
+| bready                    | Input  | aclk         | AXI Writeレスポンス Ready信号 |
+| bid[ACTUAL_ID_WIDTH-1:0]  | Output | aclk         | AXI Writeレスポンス ID信号    |
+| bresp[1:0]                | Output | aclk         | AXI Writeレスポンス信号       |
+| arvalid                   | Input  | aclk         | AXI Readアドレス Valid信号    |
+| arready                   | Output | aclk         | AXI Readアドレス Ready信号    |
+| araddr[ADDRESS_WIDTH-1:0] | Input  | aclk         | AXI Readアドレス信号          |
+| arid[ACTUAL_ID_WIDTH-1:0] | Input  | aclk         | AXI Readアドレス ID信号       |
+| arprot[2:0]               | Input  | aclk         | AXI Readプロテクション信号    |
+| rvalid                    | Output | aclk         | AXI Readデータ Valid信号      |
+| rready                    | Input  | aclk         | AXI Readデータ Ready信号      |
+| rid[ACTUAL_ID_WIDTH-1:0]  | Output | aclk         | AXI Readデータ ID信号         |
+| rresp[1:0]                | Output | aclk         | AXI Readレスポンス信号        |
+| rdata[BUS_WIDTH-1:0]      | Output | aclk         | AXI Readデータ信号            |
 
 ## QSPI関連信号
 
@@ -65,9 +80,9 @@
 
 ## 割り込み関連信号
 
-| 信号名                | I/O    | 同期クロック | 概要             |
-|-----------------------|--------|--------------|------------------|
-| qspi_instr_sysclk_o_r | Output | sysclk       | 割り込み出力信号 |
+| 信号名              | I/O    | 同期クロック | 概要             |
+|---------------------|--------|--------------|------------------|
+| qspi_instr_aclk_o_r | Output | sysclk       | 割り込み出力信号 |
 
 
 
@@ -131,7 +146,7 @@
 | Bit     | Field名      | Read/Write | 初期値 | 概要                                                |
 |---------|--------------|------------|--------|-----------------------------------------------------|
 | [31:11] | Reserved     | -          | -      | 書き込みは無視されます。読み込みは0が読み出されます |
-| [8]     | cs_manual    | R/W        | 4'b1   | CS自動制御時の信号値を設定します                    |
+| [8]     | cs_manual    | R/W        | 1'b1   | CS自動制御時の信号値を設定します                    |
 | [7:5]   | Reserved     | -          | -      | 書き込みは無視されます。読み込みは0が読み出されます |
 | [4]     | cs_manual_en | R/W        | 1'b0   | 0:CSを自動で制御します,1:CSを手動で制御します       |
 | [3:2]   | Reserved     | -          | -      | 書き込みは無視されます。読み込みは0が読み出されます |
@@ -172,7 +187,7 @@
 | [15:13] | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。                                                                                                       |
 | [12]    | rx_fifo_threshold | R/W        | 1'b0   | RX_FIFOに一定数データが溜まったとき、割り込みが発生します。トリガーレベルはQSPI_THESHOLD_LEVELレジスタで設定します<br>1'b0:割り込み無効<br>1'b1割り込み有効 |
 | [11:9]  | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。                                                                                                       |
-| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データが溜まったとき、割り込みが発生します。トリガーレベルはQSPI_THESHOLD_LEVELレジスタで設定します<br>1'b0:割り込み無効<br>1'b1割り込み有効 |
+| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データがなくなったとき、割り込みが発生します。トリガーレベルはQSPI_THESHOLD_LEVELレジスタで設定します<br>1'b0:割り込み無効<br>1'b1割り込み有効 |
 | [7:5]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。                                                                                                      |
 | [4]     | rx_fifo_not_empty | R/W        | 1'b0   | RX_FIFOにデータがある時、割り込みが発生します。<br>1'b0:割り込み無効<br>1'b1割り込み有効                                                                    |
 | [3:1]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。                                                                                                       |
@@ -219,7 +234,7 @@
 | [15:13] | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
 | [12]    | rx_fifo_threshold | R/W        | 1'b0   | RX_FIFOに一定数データが溜まったとき、割り込みが発生します。 |
 | [11:9]  | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
-| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データが溜まったとき、割り込みが発生します。 |
+| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データがなくなったとき、割り込みが発生します。 |
 | [7:5]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
 | [4]     | rx_fifo_not_empty | R/W        | 1'b0   | RX_FIFOにデータがある時、割り込みが発生します。             |
 | [3:1]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
@@ -242,7 +257,7 @@
 | [15:13] | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
 | [12]    | rx_fifo_threshold | R/W        | 1'b0   | RX_FIFOに一定数データが溜まったとき、割り込みが発生します。 |
 | [11:9]  | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
-| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データが溜まったとき、割り込みが発生します。 |
+| [8]     | tx_fifo_threshold | R/W        | 1'b0   | TX_FIFOに一定数データがなくなったとき、割り込みが発生します。 |
 | [7:5]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
 | [4]     | rx_fifo_not_empty | R/W        | 1'b0   | RX_FIFOにデータがある時、割り込みが発生します。             |
 | [3:1]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。       |
@@ -280,7 +295,7 @@ Single転送は、バス幅が１ビットの転送モードです。
 下記に示します。
 ![](./figure/out/spi_mode0.svg)
 
-
+転送ワード幅はレジスタ設定から変更可能です。
 
 ### Double
 Double転送は、バス幅が2ビットの転送モードです。
@@ -295,6 +310,7 @@ Quad転送は半二重転送です。
 ![](./figure/out/spi_quad.svg)
 
 Double,Quad転送の場合、
+転送ワード幅は8ビットに固定です
 spi_output_en_sysclk_o_r[3:0]はtrans_dirに応じて適切に自動で変更されます。
 ダミーサイクルの場合、spi_output_en_sysclk_o_r[3:0]はlowになります
 

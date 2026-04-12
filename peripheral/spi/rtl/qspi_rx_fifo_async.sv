@@ -29,14 +29,14 @@ module qspi_rx_fifo_async #(
     // output logic                almost_full_rclkr,
     // output logic                almost_empty_rclkr,
     // output logic [BITWIDTH-1:0] fifo_available_rclkr
-    output logic [BITWIDTH-1:0] fifo_num_rclk
+    output logic [$clog2(FIFO_SIZE):0] fifo_num_rclk
 );
 
     logic [BITWIDTH-1:0] fifo_available_rclkr;
 
     assign fifo_num_rclk = FIFO_SIZE - fifo_available_rclkr;
 
-    synchronizer #(
+    qspi_synchronizer #(
         .FF_DEPTH(SYNC_FF_DEPTH)
     ) w_en_synchronizer (
         .CLK(rclk),

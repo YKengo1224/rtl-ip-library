@@ -5,7 +5,7 @@
 // File          : qspi_sync_pclk2sysclk.sv
 // Author        : kengo yanagihara  <kengo@sirotan>
 // Created       : 04.04.2026
-// Last modified : 2026/04/11
+// Last modified : 2026/04/12
 //-----------------------------------------------------------------------------
 // Description :
 // QSPI syncronizer 
@@ -119,11 +119,11 @@ module qspi_sync_pclk2sysclk #(
     genvar gi;
     generate
         for (gi = 0; gi < 47; gi++) begin : gen_sync
-            synchronizer #(
+            qspi_synchronizer #(
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) aclk2sysclk_synchronizer (
-                .CLK(wclk),
-                .RST_N(rst_n_wclk),
+                .CLK(sysclk),
+                .RST_N(srstn_sysclk),
                 .DATA_IN(data_aclk),
                 .DATA_OUT(data_sysclk)
             );

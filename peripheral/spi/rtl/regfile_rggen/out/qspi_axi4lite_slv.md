@@ -2,6 +2,8 @@
 
 * byte_size
     * 256
+* bus_width
+    * 32
 
 |name|offset_address|
 |:--|:--|
@@ -11,7 +13,7 @@
 |[qspi_master_clk](#qspi_axi4lite_slv-qspi_master_clk)|0x0c|
 |[qspi_data](#qspi_axi4lite_slv-qspi_data)|0x10|
 |[qspi_int](#qspi_axi4lite_slv-qspi_int)|0x14|
-|[qspi_theshold_level](#qspi_axi4lite_slv-qspi_theshold_level)|0x18|
+|[qspi_threshold_level](#qspi_axi4lite_slv-qspi_threshold_level)|0x18|
 |[qspi_status](#qspi_axi4lite_slv-qspi_status)|0x1c|
 |[qspi_int_rs](#qspi_axi4lite_slv-qspi_int_rs)|0x20|
 |[qspi_int_ms](#qspi_axi4lite_slv-qspi_int_ms)|0x24|
@@ -117,7 +119,7 @@
 |reserve_1|[3:1]|reserved||||*1|
 |tx_fifo_empty|[0]|rw|default: 0x0||||
 
-### <div id="qspi_axi4lite_slv-qspi_theshold_level"></div>qspi_theshold_level
+### <div id="qspi_axi4lite_slv-qspi_threshold_level"></div>qspi_threshold_level
 
 * offset_address
     * 0x18
@@ -127,9 +129,9 @@
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
 |reserve_1|[31:13]|reserved||||*1|
-|rx_theshold_level|[12:8]|rw|default: 0x00||||
+|rx_threshold_level|[12:8]|rw|default: 0x00||||
 |reserve_0|[6:5]|reserved||||*1|
-|tx_theshold_level|[4:0]|rw|default: 0x00||||
+|tx_threshold_level|[4:0]|rw|default: 0x00||||
 
 ### <div id="qspi_axi4lite_slv-qspi_status"></div>qspi_status
 

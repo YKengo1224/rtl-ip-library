@@ -1,11 +1,13 @@
 `ifndef rggen_connect_bit_field_if
   `define rggen_connect_bit_field_if(RIF, FIF, LSB, WIDTH) \
-  assign  FIF.valid                 = RIF.valid; \
-  assign  FIF.read_mask             = RIF.read_mask[LSB+:WIDTH]; \
-  assign  FIF.write_mask            = RIF.write_mask[LSB+:WIDTH]; \
-  assign  FIF.write_data            = RIF.write_data[LSB+:WIDTH]; \
-  assign  RIF.read_data[LSB+:WIDTH] = FIF.read_data; \
-  assign  RIF.value[LSB+:WIDTH]     = FIF.value;
+  always_comb begin \
+    FIF.write_valid           = RIF.write_valid; \
+    FIF.read_valid            = RIF.read_valid; \
+    FIF.mask                  = RIF.mask[LSB+:WIDTH]; \
+    FIF.write_data            = RIF.write_data[LSB+:WIDTH]; \
+    RIF.read_data[LSB+:WIDTH] = FIF.read_data; \
+    RIF.value[LSB+:WIDTH]     = FIF.value; \
+  end
 `endif
 `ifndef rggen_tie_off_unused_signals
   `define rggen_tie_off_unused_signals(WIDTH, VALID_BITS, RIF) \
@@ -13,8 +15,10 @@
     genvar  __i; \
     for (__i = 0;__i < WIDTH;++__i) begin : g \
       if ((((VALID_BITS) >> __i) % 2) == 0) begin : g \
-        assign  RIF.read_data[__i]  = 1'b0; \
-        assign  RIF.value[__i]      = 1'b0; \
+        always_comb begin \
+          RIF.read_data[__i]  = '0; \
+          RIF.value[__i]      = '0; \
+        end \
       end \
     end \
   end
@@ -53,8 +57,8 @@ module qspi_axi4lite_slv
   parameter bit QSPI_INT_TX_FIFO_THRESHOLD_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_INT_RX_FIFO_NOT_EMPTY_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_INT_TX_FIFO_EMPTY_INITIAL_VALUE = 1'h0,
-  parameter bit [4:0] QSPI_THESHOLD_LEVEL_RX_THESHOLD_LEVEL_INITIAL_VALUE = 5'h00,
-  parameter bit [4:0] QSPI_THESHOLD_LEVEL_TX_THESHOLD_LEVEL_INITIAL_VALUE = 5'h00,
+  parameter bit [4:0] QSPI_THRESHOLD_LEVEL_RX_THRESHOLD_LEVEL_INITIAL_VALUE = 5'h00,
+  parameter bit [4:0] QSPI_THRESHOLD_LEVEL_TX_THRESHOLD_LEVEL_INITIAL_VALUE = 5'h00,
   parameter bit QSPI_STATUS_SPI_BUSY_INITIAL_VALUE = 1'h0,
   parameter bit [4:0] QSPI_STATUS_RX_FIFO_NUM_INITIAL_VALUE = 5'h00,
   parameter bit QSPI_STATUS_RX_FIFO_FULL_INITIAL_VALUE = 1'h0,
@@ -106,8 +110,8 @@ module qspi_axi4lite_slv
   output logic o_qspi_int_tx_fifo_threshold,
   output logic o_qspi_int_rx_fifo_not_empty,
   output logic o_qspi_int_tx_fifo_empty,
-  output logic [4:0] o_qspi_theshold_level_rx_theshold_level,
-  output logic [4:0] o_qspi_theshold_level_tx_theshold_level,
+  output logic [4:0] o_qspi_threshold_level_rx_threshold_level,
+  output logic [4:0] o_qspi_threshold_level_tx_threshold_level,
   input logic i_qspi_status_spi_busy,
   input logic [4:0] i_qspi_status_rx_fifo_num,
   input logic i_qspi_status_rx_fifo_full,
@@ -839,7 +843,7 @@ module qspi_axi4lite_slv
       );
     end
   end endgenerate
-  generate if (1) begin : g_qspi_theshold_level
+  generate if (1) begin : g_qspi_threshold_level
     rggen_bit_field_if #(32) bit_field_if();
     `rggen_tie_off_unused_signals(32, 32'h00001f1f, bit_field_if)
     rggen_default_register #(
@@ -856,12 +860,12 @@ module qspi_axi4lite_slv
       .register_if  (register_if[6]),
       .bit_field_if (bit_field_if)
     );
-    if (1) begin : g_rx_theshold_level
+    if (1) begin : g_rx_threshold_level
       rggen_bit_field_if #(5) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 8, 5)
       rggen_bit_field #(
         .WIDTH          (5),
-        .INITIAL_VALUE  (QSPI_THESHOLD_LEVEL_RX_THESHOLD_LEVEL_INITIAL_VALUE),
+        .INITIAL_VALUE  (QSPI_THRESHOLD_LEVEL_RX_THRESHOLD_LEVEL_INITIAL_VALUE),
         .SW_WRITE_ONCE  (0),
         .TRIGGER        (0)
       ) u_bit_field (
@@ -877,16 +881,16 @@ module qspi_axi4lite_slv
         .i_hw_clear         ('0),
         .i_value            ('0),
         .i_mask             ('1),
-        .o_value            (o_qspi_theshold_level_rx_theshold_level),
+        .o_value            (o_qspi_threshold_level_rx_threshold_level),
         .o_value_unmasked   ()
       );
     end
-    if (1) begin : g_tx_theshold_level
+    if (1) begin : g_tx_threshold_level
       rggen_bit_field_if #(5) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 0, 5)
       rggen_bit_field #(
         .WIDTH          (5),
-        .INITIAL_VALUE  (QSPI_THESHOLD_LEVEL_TX_THESHOLD_LEVEL_INITIAL_VALUE),
+        .INITIAL_VALUE  (QSPI_THRESHOLD_LEVEL_TX_THRESHOLD_LEVEL_INITIAL_VALUE),
         .SW_WRITE_ONCE  (0),
         .TRIGGER        (0)
       ) u_bit_field (
@@ -902,7 +906,7 @@ module qspi_axi4lite_slv
         .i_hw_clear         ('0),
         .i_value            ('0),
         .i_mask             ('1),
-        .o_value            (o_qspi_theshold_level_tx_theshold_level),
+        .o_value            (o_qspi_threshold_level_tx_threshold_level),
         .o_value_unmasked   ()
       );
     end
@@ -1292,7 +1296,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_OVERFLOW_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),
@@ -1317,7 +1323,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_OVERFLOW_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),
@@ -1342,7 +1350,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_THRESHOLD_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),
@@ -1367,7 +1377,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_THRESHOLD_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),
@@ -1392,7 +1404,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_NOT_EMPTY_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),
@@ -1417,7 +1431,9 @@ module qspi_axi4lite_slv
         .WIDTH            (1),
         .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_EMPTY_INITIAL_VALUE),
         .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR)
+        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
+        .HW_ACCESS        (3'b010),
+        .EXTERNAL_MASK    (1)
       ) u_bit_field (
         .i_clk              (i_clk),
         .i_rst_n            (i_rst_n),

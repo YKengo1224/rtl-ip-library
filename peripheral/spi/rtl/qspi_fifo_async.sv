@@ -6,28 +6,28 @@ module qspi_fifo_async #(
     parameter int ALMOST_FULL_SIZE = 5,
     parameter int ALMOST_EMPTY_SIZE = 2
 ) (
-    input  wire                 wclk,
-    input  wire                 rclk,
-    input  wire                 rst_n_wclk,
-    input  wire                 rst_n_rclk,
+    input  wire                        wclk,
+    input  wire                        rclk,
+    input  wire                        rst_n_wclk,
+    input  wire                        rst_n_rclk,
     //data 
-    input  wire                 w_en_wclk,
-    input  wire  [BITWIDTH-1:0] data_in_wclk,
-    input  wire                 r_en_rclk,
-    output logic [BITWIDTH-1:0] data_out_rclkr,
-    output logic                data_out_valid_rclkr,
+    input  wire                        w_en_wclk,
+    input  wire  [       BITWIDTH-1:0] data_in_wclk,
+    input  wire                        r_en_rclk,
+    output logic [       BITWIDTH-1:0] data_out_rclkr,
+    output logic                       data_out_valid_rclkr,
     //fifo status
-    output logic                empty_wclkr,
-    output logic                full_wclkr,
-    output logic                almost_full_wclkr,
-    output logic                almost_empty_wclkr,
-    output logic [BITWIDTH-1:0] fifo_available_wclkr,
+    output logic                       empty_wclkr,
+    output logic                       full_wclkr,
+    output logic                       almost_full_wclkr,
+    output logic                       almost_empty_wclkr,
+    output logic [$clog2(FIFO_SIZE):0] fifo_available_wclkr,
 
-    output logic                empty_rclkr,
-    output logic                full_rclkr,
-    output logic                almost_full_rclkr,
-    output logic                almost_empty_rclkr,
-    output logic [BITWIDTH-1:0] fifo_available_rclkr
+    output logic                       empty_rclkr,
+    output logic                       full_rclkr,
+    output logic                       almost_full_rclkr,
+    output logic                       almost_empty_rclkr,
+    output logic [$clog2(FIFO_SIZE):0] fifo_available_rclkr
 );
 
     //########################################
@@ -153,7 +153,7 @@ module qspi_fifo_async #(
     genvar gi;
     generate
         for (gi = 0; gi <= ADDR_BITWIDTH; gi++) begin
-            synchronizer #(
+            qspi_synchronizer #(                                
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) wr2rd_synchronizer (
                 .CLK(rclk),
@@ -161,7 +161,7 @@ module qspi_fifo_async #(
                 .DATA_IN(w_ptr_wclk[gi]),
                 .DATA_OUT(w_ptr_rclk[gi])
             );
-            synchronizer #(
+            qspi_synchronizer #(
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) rd2wd_synchronizer (
                 .CLK(wclk),
@@ -189,8 +189,8 @@ module qspi_fifo_async #(
         end else begin
             empty_wclkr <= (w_ptr_next == r_ptr_wclk);
             full_wclkr <= (fifo_cnt_wclk >= FIFO_SIZE);
-            almost_full_wclkr <= (fifo_cnt_wclk >= almost_full_SIZE);
-            almost_empty_wclkr <= (fifo_cnt_wclk < almost_empty_SIZE);
+            almost_full_wclkr <= (fifo_cnt_wclk >= ALMOST_FULL_SIZE);
+            almost_empty_wclkr <= (fifo_cnt_wclk < ALMOST_EMPTY_SIZE);
             fifo_available_wclkr <= fifo_cnt_wclk;
         end
     end
@@ -205,8 +205,8 @@ module qspi_fifo_async #(
         end else begin
             empty_rclkr <= (w_ptr_rclk == r_ptr_next);
             full_rclkr <= (fifo_cnt_rclk >= FIFO_SIZE);
-            almost_full_rclkr <= (fifo_cnt_rclk >= almost_full_SIZE);
-            almost_empty_rclkr <= (fifo_cnt_rclk < almost_empty_SIZE);
+            almost_full_rclkr <= (fifo_cnt_rclk >= ALMOST_FULL_SIZE);
+            almost_empty_rclkr <= (fifo_cnt_rclk < ALMOST_EMPTY_SIZE);
             fifo_available_rclkr <= fifo_cnt_rclk;
         end
     end

@@ -7,24 +7,24 @@ module qspi_tx_fifo_async #(
     parameter int ALMOST_FULL_SIZE = 5,
     parameter int ALMOST_EMPTY_SIZE = 2
 ) (
-    input  wire                 wclk,
-    input  wire                 rclk,
-    input  wire                 rst_n_wclk,
-    input  wire                 rst_n_rclk,
+    input  wire                        wclk,
+    input  wire                        rclk,
+    input  wire                        rst_n_wclk,
+    input  wire                        rst_n_rclk,
     //data 
-    input  wire                 w_en_wclk,
-    input  wire  [BITWIDTH-1:0] data_in_wclk,
-    input  wire                 r_en_rclk,
-    output logic [BITWIDTH-1:0] data_out_rclkr,
-    output logic                data_out_valid_rclkr,
+    input  wire                        w_en_wclk,
+    input  wire  [       BITWIDTH-1:0] data_in_wclk,
+    input  wire                        r_en_rclk,
+    output logic [       BITWIDTH-1:0] data_out_rclkr,
+    output logic                       data_out_valid_rclkr,
     //fifo status
-    output logic                empty_wclkr,
-    output logic                full_wclkr,
+    output logic                       empty_wclkr,
+    output logic                       full_wclkr,
     // output logic                almost_full_wclkr,
     // output logic                almost_empty_wclkr,
-    output logic [BITWIDTH-1:0] fifo_available_wclkr,
-    output logic                empty_rclkr,
-    output logic                full_rclkr
+    output logic [$clog2(FIFO_SIZE):0] available_wclkr,
+    output logic                       empty_rclkr,
+    output logic                       full_rclkr
     // output logic                almost_full_rclkr,
     // output logic                almost_empty_rclkr,
     // output logic [BITWIDTH-1:0] fifo_available_rclkr
@@ -50,12 +50,12 @@ module qspi_tx_fifo_async #(
         .full_wclkr(full_wclkr),
         .almost_full_wclkr(),
         .almost_empty_wclkr(),
-        .fifo_available_wclkr(fifo_available_wclkr),
+        .fifo_available_wclkr(available_wclkr),
         .empty_rclkr(empty_rclkr),
         .full_rclkr(full_rclkr),
         .almost_full_rclkr(),
         .almost_empty_rclkr(),
-        .fifo_available_rclkr(fifo_available_rclkr)
+        .fifo_available_rclkr()
     );
 
 

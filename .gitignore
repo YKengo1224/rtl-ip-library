@@ -1,1 +1,3 @@
 **/sim_dir/
+.ccls-cache
+__pycache__

@@ -754,6 +754,17 @@
             <mxPoint x="320" y="930" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="LX61dNwT4pQGaP-TR-x3-83" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;startArrow=oval;startFill=1;" target="LX61dNwT4pQGaP-TR-x3-55" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="740" />
+              <mxPoint x="470" y="740" />
+              <mxPoint x="470" y="1290" />
+            </Array>
+            <mxPoint x="390" y="680" as="sourcePoint" />
+            <mxPoint x="600" y="960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="LX61dNwT4pQGaP-TR-x3-84" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;edgeStyle=elbowEdgeStyle;startArrow=oval;startFill=1;" target="LX61dNwT4pQGaP-TR-x3-55" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <Array as="points">
@@ -798,19 +809,6 @@
             <mxPoint x="240" y="346" as="sourcePoint" />
             <mxPoint x="310" y="300" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="0nejH60rdJ0jgLqbd64T-2" edge="1" parent="1" source="0nejH60rdJ0jgLqbd64T-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="LX61dNwT4pQGaP-TR-x3-32">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="401" y="1045" />
-              <mxPoint x="401" y="1000" />
-              <mxPoint x="580" y="1000" />
-              <mxPoint x="580" y="970" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="0nejH60rdJ0jgLqbd64T-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="qspi_x_fifo_data_out_sysclk_i" vertex="1">
-          <mxGeometry height="30" width="170" x="-7" y="1030" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

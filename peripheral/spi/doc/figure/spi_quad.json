@@ -1,0 +1,8 @@
+{ signal: [
+  { name: "spi_sclk_o_r",          wave: "l.hlhl." },
+  { name: "spi_csn_o_r",           wave: "10....1"},
+  { name: "D0(bidirectional)",     wave: "x2.2.x.","data":["D0", "D4"] },
+  { name: "D1(bidirectional)",     wave: "x2.2.x.","data":["D1", "D5"] },
+  { name: "D2(bidirectional)",     wave: "x2.2.x.","data":["D2", "D6"] },
+  { name: "D3(bidirectional)",     wave: "x2.2.x.","data":["D3", "D7"] },
+]}

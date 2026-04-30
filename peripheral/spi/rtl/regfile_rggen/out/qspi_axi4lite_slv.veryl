@@ -12,7 +12,7 @@ pub module qspi_axi4lite_slv #(
   param QSPI_CTRL_QSPI_ENABLE_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_TRANS_DIR_INITIAL_VALUE: bit<2> = 2'h0,
   param QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE: bit<2> = 2'h0,
-  param QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: bit<4> = 4'h0,
+  param QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: bit<4> = 4'h1,
   param QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_CPOL_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_CPHA_INITIAL_VALUE: bit = 1'h0,

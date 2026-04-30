@@ -16,7 +16,7 @@ entity qspi_axi4lite_slv is
     QSPI_CTRL_QSPI_ENABLE_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_TRANS_DIR_INITIAL_VALUE: unsigned(1 downto 0) := repeat(x"0", 2, 1);
     QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE: unsigned(1 downto 0) := repeat(x"0", 2, 1);
-    QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: unsigned(3 downto 0) := repeat(x"0", 4, 1);
+    QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: unsigned(3 downto 0) := repeat(x"1", 4, 1);
     QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_CPOL_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_CPHA_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);

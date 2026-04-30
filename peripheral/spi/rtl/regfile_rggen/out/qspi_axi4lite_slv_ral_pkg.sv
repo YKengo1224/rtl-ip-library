@@ -20,7 +20,7 @@ package qspi_axi4lite_slv_ral_pkg;
       `rggen_ral_create_field(qspi_enable, 0, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(trans_dir, 4, 2, "RW", 0, 2'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(protocol_sel, 8, 2, "RW", 0, 2'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(word_width, 12, 4, "RW", 0, 4'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(word_width, 12, 4, "RW", 0, 4'h1, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(spi_slave_en, 16, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(cpol, 20, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(cpha, 21, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")

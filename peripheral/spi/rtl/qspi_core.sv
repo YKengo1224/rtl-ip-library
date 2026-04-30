@@ -350,6 +350,7 @@ module qspi_core (
     //-----------------------------------
     // tx data pararel to serial
     //-----------------------------------
+
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
             qspi_data_out_sysclk_o_r <= '0;
@@ -361,15 +362,21 @@ module qspi_core (
                     qspi_data_out_en_sysclk_o_r   <= 4'b0001;
                     if (slave_detect && !tx_data_valid_sysclk_r) begin
                         qspi_data_out_sysclk_o_r[0] <= '0;
-                    end else begin
+                    end else if (qspi_ctrl_order_sysclk_i) begin
                         qspi_data_out_sysclk_o_r[0] <= tx_data_sysclk_r[trans_bit_counter_sysclk_r];
+                    end else begin
+                        qspi_data_out_sysclk_o_r[0] <= tx_data_sysclk_r[(qspi_ctrl_word_width_sysclk_i - 1) - trans_bit_counter_sysclk_r];
                     end
                 end
                 DUAL_SPI_MODE: begin
                     qspi_data_out_sysclk_o_r[3:2] <= '0;
                     if (qspi_ctrl_trans_dir_sysclk_i) begin
-                        qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[(trans_bit_counter_sysclk_r<<2)+:2];
                         qspi_data_out_en_sysclk_o_r <= 4'b0011;
+                        if (qspi_ctrl_order_sysclk_i) begin
+                            qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[(trans_bit_counter_sysclk_r << 1) +: 2];
+                        end else begin
+                            qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[(8 - 2) - (trans_bit_counter_sysclk_r << 1) +: 2];
+                        end
                     end else begin
                         qspi_data_out_sysclk_o_r[1:0] <= '0;
                         qspi_data_out_en_sysclk_o_r   <= '0;
@@ -377,7 +384,11 @@ module qspi_core (
                 end
                 QUAD_SPI_MODE: begin
                     if (qspi_ctrl_trans_dir_sysclk_i) begin
-                        qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[(trans_bit_counter_sysclk_r<<2)+:4];
+                        if (qspi_ctrl_order_sysclk_i) begin
+                            qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[(trans_bit_counter_sysclk_r << 2) +: 4];
+                        end else begin
+                            qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[(8 - 4) - (trans_bit_counter_sysclk_r << 2) +: 4];
+                        end
                         qspi_data_out_en_sysclk_o_r <= '1;
                     end else begin
                         qspi_data_out_sysclk_o_r[3:0] <= '0;
@@ -387,6 +398,7 @@ module qspi_core (
             endcase
         end else begin
             qspi_data_out_sysclk_o_r <= '0;
+            qspi_data_out_en_sysclk_o_r <= '0;
         end
     end
 

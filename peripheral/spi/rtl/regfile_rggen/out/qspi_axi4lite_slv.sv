@@ -37,7 +37,7 @@ module qspi_axi4lite_slv
   parameter bit QSPI_CTRL_QSPI_ENABLE_INITIAL_VALUE = 1'h0,
   parameter bit [1:0] QSPI_CTRL_TRANS_DIR_INITIAL_VALUE = 2'h0,
   parameter bit [1:0] QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE = 2'h0,
-  parameter bit [3:0] QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE = 4'h0,
+  parameter bit [3:0] QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE = 4'h1,
   parameter bit QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_CTRL_CPOL_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_CTRL_CPHA_INITIAL_VALUE = 1'h0,

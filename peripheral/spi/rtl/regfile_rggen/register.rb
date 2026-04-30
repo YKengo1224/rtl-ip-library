@@ -38,7 +38,7 @@ register_block{
 
     
     bit_field {
-       name 'word_width'; bit_assignment lsb: 12, width: 4;type  :rw; initial_value default: 0
+       name 'word_width'; bit_assignment lsb: 12, width: 4;type  :rw; initial_value default: 1
     }
 
     

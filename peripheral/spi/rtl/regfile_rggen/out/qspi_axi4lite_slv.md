@@ -33,7 +33,7 @@
 |reserved_1|[7:6]|reserved||||*1|
 |protocol_sel|[9:8]|rw|default: 0x0||||
 |reserved_2|[11:10]|reserved||||*1|
-|word_width|[15:12]|rw|default: 0x0||||
+|word_width|[15:12]|rw|default: 0x1||||
 |spi_slave_en|[16]|rw|default: 0x0||||
 |reserved_3|[19:17]|reserved||||*1|
 |cpol|[20]|rw|default: 0x0||||

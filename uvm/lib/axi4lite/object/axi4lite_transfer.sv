@@ -2,11 +2,14 @@
 `define _H_AXI4LITE_TRANSFER_SV
 
 
-class axi4lite_master_seq_item extends uvm_sequence_item;
+class axi4lite_transfer extends uvm_sequence_item;
 
 
-    `uvm_object_utils(axi4lite_seq_item#(ADDRESS_WIDTH, BUS_WIDTH, ID_WIDTH))
+    `uvm_object_utils(axi4lite_transfer)
 
+    function new(string name="axi4lite_transfer");
+        super.new(name);
+    endfunction
 
     AXI4LITE_CMD_t        cmd;
     rand bit       [15:0] id;

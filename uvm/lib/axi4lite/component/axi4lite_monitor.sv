@@ -1,7 +1,7 @@
 `ifndef _H_AXI4LITE_MASTER_MONITOR_SV
 `define _H_AXI4LITE_MASTER_MONITOR_SV
 
-class axi4lite_master_monitor #(
+class axi4lite_monitor #(
     type t_if = axi4lite_default_interface,
     type t_trans = axi4lite_default_transfer
 ) extends uvm_monitor;
@@ -10,7 +10,7 @@ class axi4lite_master_monitor #(
 
     uvm_analysis_port #(t_trans) item_collected_port;
 
-    `uvm_component_param_utils(axi4lite_master_monitor#(t_if, t_trans))
+    `uvm_component_param_utils(axi4lite_monitor#(t_if, t_trans))
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -47,7 +47,7 @@ class axi4lite_master_monitor #(
 
 
         forever begin
-            @(posedge vif.clk);
+            @(posedge vif.aclk);
             //--------------------------
             // WRITE
             //--------------------------

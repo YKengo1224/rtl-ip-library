@@ -16,7 +16,7 @@ class axi4lite_master_driver #(
         super.new(name, parent);
     endfunction
 
-    function build_phase(uvm_phase phase);
+    function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         if (!uvm_config_db#(t_if)::get(this, "", "vif", vif))
             `uvm_fatal("AXI4LITE_DRV", "vif not found")
@@ -26,7 +26,7 @@ class axi4lite_master_driver #(
 
     virtual task run_phase(uvm_phase phase);
         forever begin
-            if (!vif.areset_n) begin
+            if (!vif.aresetn) begin
                 reset_sig();
             end else begin
                 get_and_drive();
@@ -79,7 +79,7 @@ class axi4lite_master_driver #(
         vif.awprot = trans.prot;
         do begin
             @(posedge vif.aclk);
-            if (!vif.areset_n) return;
+            if (!vif.aresetn) return;
         end while (!vif.awready);
 
         vif.awvalid = 1'b0;
@@ -95,7 +95,7 @@ class axi4lite_master_driver #(
         vif.wstrb  = trans.wstrb;
         do begin
             @(posedge vif.aclk);
-            if (!vif.areset_n) return;
+            if (!vif.aresetn) return;
         end while (!vif.wready);
         vif.wvalid = 1'b0;
         vif.wdata  = '0;
@@ -107,7 +107,7 @@ class axi4lite_master_driver #(
         vif.bready = 1'b1;
         do begin
             @(posedge vif.aclk);
-            if (!vif.reset_n) return;
+            if (!vif.aresetn) return;
         end while (!vif.bvalid);
 
         vif.bready = 1'b0;
@@ -121,7 +121,7 @@ class axi4lite_master_driver #(
         vif.arprot = trans.prot;
         do begin
             @(posedge vif.aclk);
-            if (!vif.areset_n) return;
+            if (!vif.aresetn) return;
         end while (!vif.arready);
 
         vif.arvalid = 1'b0;
@@ -135,7 +135,7 @@ class axi4lite_master_driver #(
         vif.rready = 1'b1;
         do begin
             @(posedge vif.aclk);
-            if (!vif.areset_n) return;
+            if (!vif.aresetn) return;
         end while (!vif.rvalid);
 
         vif.rready = 1'b0;

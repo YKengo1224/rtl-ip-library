@@ -1,6 +1,6 @@
 interface axi4lite_if (
     input wire aclk,
-    input wire areset_n
+    input wire aresetn
 );
     logic        awvalid = '0;
     logic        awready = '0;

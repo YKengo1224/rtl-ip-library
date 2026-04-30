@@ -1,7 +1,7 @@
 `ifndef _H_AXI4LITE_MASTER_AGENT_SV
 `define _H_AXI4LITE_MASTER_AGENT_SV
 
-class axi4lite_agent #(
+class axi4lite_master_agent #(
     type t_if = axi4lite_default_interface,
     type t_trans = axi4lite_default_transfer
 ) extends uvm_agent;
@@ -11,7 +11,7 @@ class axi4lite_agent #(
     uvm_sequencer #(t_trans) seqr;
 
 
-    `uvm_component_param_utils(axi4lite_agent#(t_if, t_trans))
+    `uvm_component_param_utils(axi4lite_master_agent#(t_if, t_trans))
 
     function new(string name, uvm_component parent);
         super.new(name, parent);

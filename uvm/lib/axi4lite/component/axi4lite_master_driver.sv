@@ -78,7 +78,6 @@ class axi4lite_master_driver #(
 
         forever begin
             seq_item_port.get_next_item(trans);
-            `uvm_info("DRV", $sformatf("trans:%0d", trans.cmd), UVM_LOW)
             case (trans.cmd)
                 DRV_AW: begin
                     aw_req_fifo.put(trans);
@@ -90,7 +89,6 @@ class axi4lite_master_driver #(
                 end
                 DRV_AR: begin
                     ar_req_fifo.put(trans);
-                    `uvm_info("DRV", "piyo", UVM_LOW)
                     seq_item_port.item_done();
                 end
 
@@ -203,7 +201,6 @@ class axi4lite_master_driver #(
                 if (!vif.aresetn) break;
                 if (vif.arready) break;
             end
-            `uvm_info("DRV", "hogehoge", UVM_LOW)
             vif.arvalid <= 1'b0;
             vif.arid <= '0;
             vif.araddr <= '0;

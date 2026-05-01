@@ -127,7 +127,10 @@ class Runsim:
                     self.run_cmd.append("-R")
                     
                 if not self.args.no_uvm:
-                    self.run_cmd.extend(['--testplusarg', f'UVM_TESTNAME={self.args.testname}'])
+                    self.run_cmd.extend(['--testplusarg', 'UVM_TESTNAME=tb_test_base'])
+                    self.run_cmd.extend(['--testplusarg', f'TEST_CASE={self.args.testname}'])
+
+                    
 
             case _:
                 raise NotImplementedError(f"Simulator {self.simulator.name} is not implemented yet.")

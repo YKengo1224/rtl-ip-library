@@ -13,7 +13,7 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_aw(bit [15:0] id, bit [63:0] addr, bit [2:0] prot);
         `uvm_create(req)
-        req.command = DRV_AW;
+        req.cmd = DRV_AW;
         req.id = id;
         req.addr = addr;
         req.prot = prot;
@@ -22,7 +22,7 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_w(bit [63:0] data, bit [7:0] wstrb);
         `uvm_create(req)
-        req.command = DRV_W;
+        req.cmd = DRV_W;
         req.data = data;
         req.wstrb = wstrb;
         `uvm_send(req)
@@ -30,14 +30,14 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_b();
         `uvm_create(req)
-        req.command = DRV_B;
+        req.cmd = DRV_B;
         `uvm_send(req)
         get_response(rsp);
     endtask
 
     virtual task drive_ar(bit [15:0] id, bit [63:0] addr, bit [2:0] prot);
         `uvm_create(req)
-        req.command = DRV_AR;
+        req.cmd = DRV_AR;
         req.id = id;
         req.addr = addr;
         req.prot = prot;
@@ -46,7 +46,7 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_r();
         `uvm_create(req)
-        req.command = DRV_r;
+        req.cmd = DRV_R;
         `uvm_send(req)
         get_response(rsp);
     endtask
@@ -72,7 +72,7 @@ class axi4lite_write_seq #(
         super.new(name);
     endfunction
 
-    function post_randomize();
+    function void post_randomize();
         bit [7:0] base_strb = (1 << xfer_bytes) - 1;
 
         wstrb = base_strb << (addr % 8);

@@ -1,0 +1,6 @@
+log_wave -recursive /
+open_vcd
+log_vcd  *
+run all
+close_vcd
+exit

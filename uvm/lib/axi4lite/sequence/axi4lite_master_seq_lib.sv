@@ -13,8 +13,8 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_aw(bit [15:0] id, bit [63:0] addr, bit [2:0] prot);
         `uvm_create(req)
-        req.cmd = DRV_AW;
-        req.id = id;
+        req.cmd  = DRV_AW;
+        req.id   = id;
         req.addr = addr;
         req.prot = prot;
         `uvm_send(req)
@@ -22,8 +22,8 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_w(bit [63:0] data, bit [7:0] wstrb);
         `uvm_create(req)
-        req.cmd = DRV_W;
-        req.data = data;
+        req.cmd   = DRV_W;
+        req.data  = data;
         req.wstrb = wstrb;
         `uvm_send(req)
     endtask
@@ -37,8 +37,8 @@ class axi4lite_master_seq_base #(
 
     virtual task drive_ar(bit [15:0] id, bit [63:0] addr, bit [2:0] prot);
         `uvm_create(req)
-        req.cmd = DRV_AR;
-        req.id = id;
+        req.cmd  = DRV_AR;
+        req.id   = id;
         req.addr = addr;
         req.prot = prot;
         `uvm_send(req)
@@ -64,7 +64,7 @@ class axi4lite_write_seq #(
     rand bit [ 2:0] prot  = 0;
     rand bit [63:0] data;
     bit [ 7:0] wstrb;
-    rand bit    xfer_bytes;
+    rand int    xfer_bytes;
 
     constraint c_bytes {xfer_bytes inside {1, 2, 4, 8};}
 

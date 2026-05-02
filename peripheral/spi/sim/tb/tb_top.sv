@@ -161,7 +161,7 @@ module tb_top ();
 
 
     initial begin
-        repeat (100) @(posedge aclk);
+        repeat (100000) @(posedge aclk);
         $finish;
     end
 

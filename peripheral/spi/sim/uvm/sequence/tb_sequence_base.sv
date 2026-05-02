@@ -21,13 +21,15 @@ class tb_seq_base extends uvm_sequence;
     endfunction  // new
 
 
-    virtual task write_reg(bit [63:0] addr, bit [15:0] id = 0, bit [2:0] prot = 0, bit [63:0] data);
+    virtual task write_reg(bit [63:0] addr, bit [15:0] id = 0, bit [2:0] prot = 0, int xfer_bytes,
+                           bit [63:0] data);
         `uvm_do_on_with(reg_write, p_sequencer.axi4lite_m_sqr,
                         {
         addr==local::addr;
         id==local::id;
         prot==local::prot;
         data==local::data;
+        xfer_bytes==local::xfer_bytes;
         })
     endtask
 

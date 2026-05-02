@@ -11,7 +11,9 @@ class axi4lite_master_driver #(
 
     mailbox #(t_trans) aw_req_fifo;
     mailbox #(t_trans) w_req_fifo;
+    mailbox #(t_trans) b_req_fifo;
     mailbox #(t_trans) ar_req_fifo;
+    mailbox #(t_trans) r_req_fifo;
 
     mailbox #(t_trans) b_rsp_fifo;
     mailbox #(t_trans) r_rsp_fifo;
@@ -22,7 +24,9 @@ class axi4lite_master_driver #(
         super.new(name, parent);
         aw_req_fifo = new();
         w_req_fifo  = new();
+        b_req_fifo  = new();
         ar_req_fifo = new();
+        r_req_fifo  = new();
         b_rsp_fifo  = new();
         r_rsp_fifo  = new();
     endfunction
@@ -78,7 +82,6 @@ class axi4lite_master_driver #(
 
         forever begin
             seq_item_port.get_next_item(trans);
-            `uvm_info("DRV", $sformatf("trans:%0d", trans.cmd), UVM_LOW)
             case (trans.cmd)
                 DRV_AW: begin
                     aw_req_fifo.put(trans);
@@ -90,11 +93,11 @@ class axi4lite_master_driver #(
                 end
                 DRV_AR: begin
                     ar_req_fifo.put(trans);
-                    `uvm_info("DRV", "piyo", UVM_LOW)
                     seq_item_port.item_done();
                 end
 
                 DRV_B: begin
+                    b_req_fifo.put(trans);
                     b_rsp_fifo.get(rsp);
                     rsp.set_id_info(trans);
                     seq_item_port.item_done(rsp);
@@ -105,6 +108,7 @@ class axi4lite_master_driver #(
                     seq_item_port.item_done(rsp);
                 end
                 READ: begin
+                    r_req_fifo.put(trans);
                     ar_req_fifo.put(trans);
                     r_rsp_fifo.get(rsp);
                     rsp.set_id_info(trans);
@@ -163,29 +167,27 @@ class axi4lite_master_driver #(
     endtask
 
     virtual protected task drive_b();
+        t_trans trans;
         t_trans rsp;
         forever begin
+            b_req_fifo.get(trans);
             @(posedge vif.aclk);
-            if (!vif.aresetn) begin
-                vif.bready <= 1'b0;
-                break;
-            end else begin
-                vif.bready <= 1'b1;
-                forever begin
-                    @(posedge vif.aclk);
-                    if (!vif.aresetn) begin
-                        vif.bready <= 1'b0;
-                        break;
-                    end
-                    if (vif.bvalid) break;
+            vif.bready <= 1'b1;
+            forever begin
+                @(posedge vif.aclk);
+                if (!vif.aresetn) begin
+                    vif.bready <= 1'b0;
+                    break;
                 end
+                if (vif.bvalid) break;
+            end
 
-                if (vif.aresetn) begin
-                    rsp = t_trans::type_id::create("rsp");
-                    rsp.resp = vif.bresp;
-                    rsp.id = vif.bid;
-                    b_rsp_fifo.put(rsp);
-                end
+            vif.bvalid <= 1'b0;
+            if (vif.aresetn) begin
+                rsp = t_trans::type_id::create("rsp");
+                rsp.resp = vif.bresp;
+                rsp.id = vif.bid;
+                b_rsp_fifo.put(rsp);
             end
         end
     endtask
@@ -203,7 +205,6 @@ class axi4lite_master_driver #(
                 if (!vif.aresetn) break;
                 if (vif.arready) break;
             end
-            `uvm_info("DRV", "hogehoge", UVM_LOW)
             vif.arvalid <= 1'b0;
             vif.arid <= '0;
             vif.araddr <= '0;
@@ -211,28 +212,28 @@ class axi4lite_master_driver #(
         end
     endtask
     virtual protected task drive_r();
+        t_trans trans;
         t_trans rsp;
         forever begin
+            r_req_fifo.get(trans);
             @(posedge vif.aclk);
-            if (!vif.aresetn) begin
-                vif.rready <= 1'b0;
-            end else begin
-                vif.rready <= 1'b1;
-                forever begin
-                    @(posedge vif.aclk);
-                    if (!vif.aresetn) begin
-                        vif.rready <= 1'b0;
-                        break;
-                    end
-                    if (vif.rvalid) break;
+            vif.rready <= 1'b1;
+            forever begin
+                @(posedge vif.aclk);
+                if (!vif.aresetn) begin
+                    vif.rready <= 1'b0;
+                    break;
                 end
-                if (vif.aresetn) begin
-                    rsp = t_trans::type_id::create("rsp");
-                    rsp.data = vif.rdata;
-                    rsp.resp = vif.rresp;
-                    rsp.id = vif.rid;
-                    r_rsp_fifo.put(rsp);
-                end
+                if (vif.rvalid) break;
+            end
+
+            vif.rready <= 1'b0;
+            if (vif.aresetn) begin
+                rsp = t_trans::type_id::create("rsp");
+                rsp.data = vif.rdata;
+                rsp.resp = vif.rresp;
+                rsp.id = vif.rid;
+                r_rsp_fifo.put(rsp);
             end
         end
     endtask

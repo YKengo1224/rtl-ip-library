@@ -1,6 +1,8 @@
 `default_nettype none
 
-module qspi_core (
+module qspi_core #(
+    parameter int SYNC_FF_DEPTH = 2
+) (
     input wire sysclk,
     input wire srstn_sysclk,
 
@@ -434,35 +436,71 @@ module qspi_core (
     //-----------------------------------
     // rx data serial to pararel
     //-----------------------------------
-    logic [3:0] latch_delay_count_r;
-    logic [3:0] latch_delay_count_next;
-    logic       rx_data_latch_en;
+    logic [4:0] latch_delay_count_r;
+    logic [4:0] latch_delay_count_next;
+    logic [4:0] latch_delay_count_max;
+    logic [4:0] finish_trans_delay_count_r;
+    logic [4:0] finish_trans_delay_count_next;
 
-    assign rx_data_latch_en = (latch_delay_count_r == qspi_ctrl_rx_latch_delay_sysclk_i);
+    logic       rx_data_latch_en;
+    logic       finish_latch_sysclk;
+    wire        single_spi_rx_bit_sysclk;
+
+    assign latch_delay_count_max = qspi_ctrl_rx_latch_delay_sysclk_i + SYNC_FF_DEPTH[4:0];
+
+    always_comb begin
+        if (latch_delay_count_max == 5'd0) begin
+            rx_data_latch_en = sample_edge_sysclk;
+            finish_latch_sysclk = finish_trans_sysclk;
+        end else begin
+            rx_data_latch_en = (latch_delay_count_r == latch_delay_count_max);
+            finish_latch_sysclk = (finish_trans_delay_count_r == latch_delay_count_max);
+        end
+    end
 
 
     always_comb begin
-        if (sample_edge_sysclk && (qspi_ctrl_rx_latch_delay_sysclk_i != 4'd0)) begin
-            latch_delay_count_next = 4'd1;
-        end else if (latch_delay_count_r != 4'd0) begin
+        if (sample_edge_sysclk && (latch_delay_count_max != 5'd0)) begin
+            latch_delay_count_next = 5'd1;
+        end else if (latch_delay_count_r != 5'd0) begin
             if (rx_data_latch_en) begin
-                latch_delay_count_next = 4'd0;
+                latch_delay_count_next = 5'd0;
             end else begin
-                latch_delay_count_next = latch_delay_count_r + 4'd1;
+                latch_delay_count_next = latch_delay_count_r + 5'd1;
             end
         end else begin
-            latch_delay_count_next = 4'd0;
+            latch_delay_count_next = 5'd0;
         end
 
     end
 
+    always_comb begin
+        if (finish_trans_sysclk && (latch_delay_count_max != 5'd0)) begin
+            finish_trans_delay_count_next = 5'd1;
+        end else if (finish_trans_delay_count_r != 5'd0) begin
+            if (finish_latch_sysclk) begin
+                finish_trans_delay_count_next = 5'd0;
+            end else begin
+                finish_trans_delay_count_next = finish_trans_delay_count_r + 4'd1;
+            end
+        end else begin
+            finish_trans_delay_count_next = 5'd0;
+        end
+    end
+
+   
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
-            latch_delay_count_r <= 4'd0;
+            latch_delay_count_r <= 5'd0;
+            finish_trans_delay_count_r <= 5'd0;
         end else begin
             latch_delay_count_r <= latch_delay_count_next;
+            finish_trans_delay_count_r <= finish_trans_delay_count_next;
         end
     end
+
+
+    assign single_spi_rx_bit_sysclk = (qspi_ctrl_spi_slave_en_sysclk_i)? qspi_data_in_sysclk_i[0] : qspi_data_in_sysclk_i[1];
 
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
@@ -476,11 +514,11 @@ module qspi_core (
                         SINGLE_SPI_MODE: begin
                             if (qspi_ctrl_order_sysclk_i) begin
                                 rx_data_sysclk_r <= {
-                                    qspi_data_in_sysclk_i[1], rx_data_sysclk_r[15:1]
+                                    single_spi_rx_bit_sysclk, rx_data_sysclk_r[15:1]
                                 };
                             end else begin
                                 rx_data_sysclk_r <= {
-                                    rx_data_sysclk_r[14:0], qspi_data_in_sysclk_i[1]
+                                    rx_data_sysclk_r[14:0], single_spi_rx_bit_sysclk
                                 };
                             end
                         end
@@ -529,17 +567,17 @@ module qspi_core (
         if (!srstn_sysclk) begin
             qspi_rx_fifo_data_in_sysclk_o_r <= 16'd0;
             qspi_rx_fifo_w_en_sysclk_o_r <= 1'b0;
-        end else if (finish_trans_sysclk) begin
+        end else if (finish_latch_sysclk) begin
             case (qspi_ctrl_protocol_sel_sysclk_i)
                 SINGLE_SPI_MODE: begin
                     qspi_rx_fifo_w_en_sysclk_o_r <= 1'b1;
                     if (qspi_ctrl_order_sysclk_i) begin
                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-                            qspi_data_in_sysclk_i[1], rx_data_sysclk_r[15:1]
+                            single_spi_rx_bit_sysclk, rx_data_sysclk_r[15:1]
                         } >> (16 - qspi_ctrl_word_width_sysclk_i);
                     end else begin
                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-                            rx_data_sysclk_r[15:1], qspi_data_in_sysclk_i[1]
+                            rx_data_sysclk_r[15:1], single_spi_rx_bit_sysclk
                         };
 
                     end
@@ -625,7 +663,7 @@ module qspi_core (
             if (qspi_cs_ctrl_cs_manual_en_sysclk_i) begin
                 qspi_csn_out_sysclk_o_r <= set_csn(qspi_cs_ctrl_cs_manual_sysclk_i);
             end else begin
-                qspi_csn_out_sysclk_o_r <= set_csn(state_next != S_IDLE);
+                qspi_csn_out_sysclk_o_r <= set_csn(state_next === S_IDLE);
             end
         end else begin
             qspi_csn_out_sysclk_o_r <= '1;
@@ -635,9 +673,9 @@ module qspi_core (
 
     function [3:0] set_csn(input data_in);
         case (qspi_cs_ctrl_cs_sel_sysclk_i)
-            2'd0: set_csn = {3'b0, data_in};
-            2'd1: set_csn = {2'b0, data_in, 1'b0};
-            2'd2: set_csn = {1'b0, data_in, 2'b0};
+            2'd0: set_csn = {3'b111, data_in};
+            2'd1: set_csn = {2'b11, data_in, 1'b1};
+            2'd2: set_csn = {1'b1, data_in, 2'b11};
             2'd3: set_csn = {data_in, 3'b0};
         endcase
     endfunction

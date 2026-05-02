@@ -5,7 +5,7 @@
 // File          : qspi_sync_pclk2sysclk.sv
 // Author        : kengo yanagihara  <kengo@sirotan>
 // Created       : 04.04.2026
-// Last modified : 2026/04/12
+// Last modified : 2026/05/01
 //-----------------------------------------------------------------------------
 // Description :
 // QSPI syncronizer 
@@ -124,8 +124,8 @@ module qspi_sync_pclk2sysclk #(
             ) aclk2sysclk_synchronizer (
                 .CLK(sysclk),
                 .RST_N(srstn_sysclk),
-                .DATA_IN(data_aclk),
-                .DATA_OUT(data_sysclk)
+                .DATA_IN(data_aclk[gi]),
+                .DATA_OUT(data_sysclk[gi])
             );
         end
     endgenerate

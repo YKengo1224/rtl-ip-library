@@ -31,12 +31,12 @@ module qspi_tx_fifo_async #(
 );
 
     qspi_fifo_async #(
-        .BITWIDTH(15),
+        .BITWIDTH(BITWIDTH),
         .FIFO_SIZE(FIFO_SIZE),  //only 2**n
-        .SYNC_FF_DEPTH(2),
-        .ALMOST_FULL_SIZE(FIFO_SIZE - 4),
-        .ALMOST_EMPTY_SIZE(4)
-    ) qspi_rx_fifo (
+        .SYNC_FF_DEPTH(SYNC_FF_DEPTH),
+        .ALMOST_FULL_SIZE(ALMOST_FULL_SIZE),
+        .ALMOST_EMPTY_SIZE(ALMOST_EMPTY_SIZE)
+    ) qspi_tx_fifo (
         .wclk(wclk),
         .rclk(rclk),
         .rst_n_wclk(rst_n_wclk),

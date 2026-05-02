@@ -87,21 +87,6 @@ class axi4lite_write_seq #(
 
 endclass
 
-class axi4lite_write64_seq #(
-    type t_trans = axi4lite_default_transfer
-) extends axi4lite_write_seq #(t_trans);
-
-    `uvm_object_param_utils(axi4lite_write64_seq#(t_trans));
-
-    constraint c_wstrb {wstrb == 8'hFF;}
-
-    function new(string name = "axi4lite_write64_seq");
-        super.new(name);
-    endfunction
-
-
-endclass
-
 
 class axi4lite_read_seq #(
     type t_trans = axi4lite_default_transfer

@@ -103,6 +103,7 @@ class axi4lite_master_driver #(
                     seq_item_port.item_done(rsp);
                 end
                 DRV_R: begin
+                    r_req_fifo.put(trans);
                     r_rsp_fifo.get(rsp);
                     rsp.set_id_info(trans);
                     seq_item_port.item_done(rsp);
@@ -117,6 +118,7 @@ class axi4lite_master_driver #(
                 WRITE: begin
                     aw_req_fifo.put(trans);
                     w_req_fifo.put(trans);
+                    b_req_fifo.put(trans);
                     b_rsp_fifo.get(rsp);
                     rsp.set_id_info(trans);
                     seq_item_port.item_done(rsp);

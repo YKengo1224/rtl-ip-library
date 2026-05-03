@@ -8,11 +8,15 @@ class qspi_bfm_driver #(
 
     t_if vif;
 
-    bit  master;
-    bit  order;
-    bit  clk_pha;
-    bit  clk_pol;
-    int  clk_period_ps;
+    uvm_analysis_port #(t_trans) drv_rsv_ap;
+    uvm_analysis_port #(t_trans) drv_send_ap;
+
+
+    bit master;
+    bit order;
+    bit clk_pha;
+    bit clk_pol;
+    int clk_period_ps;
 
 
 
@@ -24,6 +28,9 @@ class qspi_bfm_driver #(
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
+        drv_rsv_ap  = new("drv_rsv_ap", this);
+        drv_send_ap = new("drv_send_ap", this);
+
         if (!uvm_config_db#(t_if)::get(this, "", "vif", vif))
             `uvm_fatal("QSPI_DRV", "vif not found")
     endfunction
@@ -79,18 +86,26 @@ class qspi_bfm_driver #(
         t_trans rsp;
         $cast(rsp, trans);
         rsp.set_id_info(trans);
+
         case (trans.bus_width)
             1: begin
+                drv_send_ap.write(trans);
                 if (this.master) vif.data_oe = 4'b0001;
                 else vif.data_oe = 4'b0010;
             end
             2: begin
                 if (trans.trans_dir) vif.data_oe = 4'b0000;
-                else vif.data_oe = 4'b0011;
+                else begin
+                    vif.data_oe = 4'b0011;
+                    drv_send_ap.write(trans);
+                end
             end
             4: begin
                 if (trans.trans_dir) vif.data_oe = 4'b0000;
-                else vif.data_oe = 4'b1111;
+                else begin
+                    vif.data_oe = 4'b1111;
+                    drv_send_ap.write(trans);
+                end
             end
         endcase
 
@@ -120,6 +135,11 @@ class qspi_bfm_driver #(
         end
 
         seq_item_port.item_done(rsp);
+
+        if ((trans.bus_width != 1) && (!trans.trans_dir)) begin
+            return;
+        end
+        drv_rsv_ap.write(rsp);
     endtask
 
     virtual task wait_next_edge(t_trans trans);

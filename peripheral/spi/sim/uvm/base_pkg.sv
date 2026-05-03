@@ -16,6 +16,7 @@ package base_pkg;
     typedef virtual monitor_if monitor_vif;
 
     `include "tb_sequencer.sv"
+    `include "tb_scoreboard.sv"
     `include "tb_env.sv"
     `include "tb_sequence_base.sv"
     `include "tb_test_base.sv"

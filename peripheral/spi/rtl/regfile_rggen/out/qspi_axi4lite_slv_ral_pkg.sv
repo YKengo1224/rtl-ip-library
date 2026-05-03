@@ -9,8 +9,8 @@ package qspi_axi4lite_slv_ral_pkg;
     rand rggen_ral_field protocol_sel;
     rand rggen_ral_field word_width;
     rand rggen_ral_field spi_slave_en;
-    rand rggen_ral_field cpol;
     rand rggen_ral_field cpha;
+    rand rggen_ral_field cpol;
     rand rggen_ral_field order;
     rand rggen_ral_field rx_latch_delay;
     function new(string name);
@@ -22,8 +22,8 @@ package qspi_axi4lite_slv_ral_pkg;
       `rggen_ral_create_field(protocol_sel, 8, 2, "RW", 0, 2'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(word_width, 12, 4, "RW", 0, 4'h1, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(spi_slave_en, 16, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(cpol, 20, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(cpha, 21, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(cpha, 20, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(cpol, 21, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(order, 24, 1, "RW", 0, 1'h0, '{}, 1, 0, 0, "")
       `rggen_ral_create_field(rx_latch_delay, 28, 4, "RW", 0, 4'h0, '{}, 1, 0, 0, "")
     endfunction

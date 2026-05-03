@@ -14,8 +14,8 @@ pub module qspi_axi4lite_slv #(
   param QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE: bit<2> = 2'h0,
   param QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: bit<4> = 4'h1,
   param QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE: bit = 1'h0,
-  param QSPI_CTRL_CPOL_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_CPHA_INITIAL_VALUE: bit = 1'h0,
+  param QSPI_CTRL_CPOL_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_ORDER_INITIAL_VALUE: bit = 1'h0,
   param QSPI_CTRL_RX_LATCH_DELAY_INITIAL_VALUE: bit<4> = 4'h0,
   param QSPI_SW_RESET_SW_RST_N_INITIAL_VALUE: bit = 1'h0,
@@ -62,8 +62,8 @@ pub module qspi_axi4lite_slv #(
   o_qspi_ctrl_protocol_sel: output logic<2>,
   o_qspi_ctrl_word_width: output logic<4>,
   o_qspi_ctrl_spi_slave_en: output logic,
-  o_qspi_ctrl_cpol: output logic,
   o_qspi_ctrl_cpha: output logic,
+  o_qspi_ctrl_cpol: output logic,
   o_qspi_ctrl_order: output logic,
   o_qspi_ctrl_rx_latch_delay: output logic<4>,
   o_qspi_sw_reset_sw_rst_n: output logic,
@@ -271,7 +271,7 @@ pub module qspi_axi4lite_slv #(
         o_value:          o_qspi_ctrl_spi_slave_en
       );
     }
-    :g_cpol {
+    :g_cpha {
       inst bit_field_sub_if: rggen::rggen_bit_field_if#(WIDTH: 1);
       always_comb {
         bit_field_sub_if.read_valid = bit_field_if.read_valid;
@@ -280,30 +280,6 @@ pub module qspi_axi4lite_slv #(
         bit_field_sub_if.write_data = bit_field_if.write_data[20+:1];
         bit_field_if.read_data[20+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[20+:1] = bit_field_sub_if.value;
-      }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:          1,
-        INITIAL_VALUE:  QSPI_CTRL_CPOL_INITIAL_VALUE,
-        SW_WRITE_ONCE:  false,
-        TRIGGER:        false
-      )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        o_write_trigger:  _,
-        o_read_trigger:   _,
-        o_value:          o_qspi_ctrl_cpol
-      );
-    }
-    :g_cpha {
-      inst bit_field_sub_if: rggen::rggen_bit_field_if#(WIDTH: 1);
-      always_comb {
-        bit_field_sub_if.read_valid = bit_field_if.read_valid;
-        bit_field_sub_if.write_valid = bit_field_if.write_valid;
-        bit_field_sub_if.mask = bit_field_if.mask[21+:1];
-        bit_field_sub_if.write_data = bit_field_if.write_data[21+:1];
-        bit_field_if.read_data[21+:1] = bit_field_sub_if.read_data;
-        bit_field_if.value[21+:1] = bit_field_sub_if.value;
       }
       inst u_bit_field: rggen::rggen_bit_field #(
         WIDTH:          1,
@@ -317,6 +293,30 @@ pub module qspi_axi4lite_slv #(
         o_write_trigger:  _,
         o_read_trigger:   _,
         o_value:          o_qspi_ctrl_cpha
+      );
+    }
+    :g_cpol {
+      inst bit_field_sub_if: rggen::rggen_bit_field_if#(WIDTH: 1);
+      always_comb {
+        bit_field_sub_if.read_valid = bit_field_if.read_valid;
+        bit_field_sub_if.write_valid = bit_field_if.write_valid;
+        bit_field_sub_if.mask = bit_field_if.mask[21+:1];
+        bit_field_sub_if.write_data = bit_field_if.write_data[21+:1];
+        bit_field_if.read_data[21+:1] = bit_field_sub_if.read_data;
+        bit_field_if.value[21+:1] = bit_field_sub_if.value;
+      }
+      inst u_bit_field: rggen::rggen_bit_field #(
+        WIDTH:          1,
+        INITIAL_VALUE:  QSPI_CTRL_CPOL_INITIAL_VALUE,
+        SW_WRITE_ONCE:  false,
+        TRIGGER:        false
+      )(
+        i_clk:            i_clk,
+        i_rst:            i_rst,
+        bit_field_if:     bit_field_sub_if,
+        o_write_trigger:  _,
+        o_read_trigger:   _,
+        o_value:          o_qspi_ctrl_cpol
       );
     }
     :g_order {

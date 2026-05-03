@@ -36,8 +36,8 @@
 |word_width|[15:12]|rw|default: 0x1||||
 |spi_slave_en|[16]|rw|default: 0x0||||
 |reserved_3|[19:17]|reserved||||*1|
-|cpol|[20]|rw|default: 0x0||||
-|cpha|[21]|rw|default: 0x0||||
+|cpha|[20]|rw|default: 0x0||||
+|cpol|[21]|rw|default: 0x0||||
 |reserved_4|[23:22]|reserved||||*1|
 |order|[24]|rw|default: 0x0||||
 |reserve_5|[27:25]|reserved||||*1|

@@ -13,8 +13,8 @@ module qspi_axi4lite_slv #(
   parameter [1:0] QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE = 2'h0,
   parameter [3:0] QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE = 4'h1,
   parameter QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE = 1'h0,
-  parameter QSPI_CTRL_CPOL_INITIAL_VALUE = 1'h0,
   parameter QSPI_CTRL_CPHA_INITIAL_VALUE = 1'h0,
+  parameter QSPI_CTRL_CPOL_INITIAL_VALUE = 1'h0,
   parameter QSPI_CTRL_ORDER_INITIAL_VALUE = 1'h0,
   parameter [3:0] QSPI_CTRL_RX_LATCH_DELAY_INITIAL_VALUE = 4'h0,
   parameter QSPI_SW_RESET_SW_RST_N_INITIAL_VALUE = 1'h0,
@@ -83,8 +83,8 @@ module qspi_axi4lite_slv #(
   output [1:0] o_qspi_ctrl_protocol_sel,
   output [3:0] o_qspi_ctrl_word_width,
   output o_qspi_ctrl_spi_slave_en,
-  output o_qspi_ctrl_cpol,
   output o_qspi_ctrl_cpha,
+  output o_qspi_ctrl_cpol,
   output o_qspi_ctrl_order,
   output [3:0] o_qspi_ctrl_rx_latch_delay,
   output o_qspi_sw_reset_sw_rst_n,
@@ -368,10 +368,10 @@ module qspi_axi4lite_slv #(
         .o_value_unmasked   ()
       );
     end
-    if (1) begin : g_cpol
+    if (1) begin : g_cpha
       rggen_bit_field #(
         .WIDTH          (1),
-        .INITIAL_VALUE  (QSPI_CTRL_CPOL_INITIAL_VALUE),
+        .INITIAL_VALUE  (QSPI_CTRL_CPHA_INITIAL_VALUE),
         .SW_WRITE_ONCE  (0),
         .TRIGGER        (0)
       ) u_bit_field (
@@ -392,14 +392,14 @@ module qspi_axi4lite_slv #(
         .i_hw_clear         ({1{1'b0}}),
         .i_value            ({1{1'b0}}),
         .i_mask             ({1{1'b1}}),
-        .o_value            (o_qspi_ctrl_cpol),
+        .o_value            (o_qspi_ctrl_cpha),
         .o_value_unmasked   ()
       );
     end
-    if (1) begin : g_cpha
+    if (1) begin : g_cpol
       rggen_bit_field #(
         .WIDTH          (1),
-        .INITIAL_VALUE  (QSPI_CTRL_CPHA_INITIAL_VALUE),
+        .INITIAL_VALUE  (QSPI_CTRL_CPOL_INITIAL_VALUE),
         .SW_WRITE_ONCE  (0),
         .TRIGGER        (0)
       ) u_bit_field (
@@ -420,7 +420,7 @@ module qspi_axi4lite_slv #(
         .i_hw_clear         ({1{1'b0}}),
         .i_value            ({1{1'b0}}),
         .i_mask             ({1{1'b1}}),
-        .o_value            (o_qspi_ctrl_cpha),
+        .o_value            (o_qspi_ctrl_cpol),
         .o_value_unmasked   ()
       );
     end

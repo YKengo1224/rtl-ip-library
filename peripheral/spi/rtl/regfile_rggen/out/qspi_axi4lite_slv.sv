@@ -39,8 +39,8 @@ module qspi_axi4lite_slv
   parameter bit [1:0] QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE = 2'h0,
   parameter bit [3:0] QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE = 4'h1,
   parameter bit QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE = 1'h0,
-  parameter bit QSPI_CTRL_CPOL_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_CTRL_CPHA_INITIAL_VALUE = 1'h0,
+  parameter bit QSPI_CTRL_CPOL_INITIAL_VALUE = 1'h0,
   parameter bit QSPI_CTRL_ORDER_INITIAL_VALUE = 1'h0,
   parameter bit [3:0] QSPI_CTRL_RX_LATCH_DELAY_INITIAL_VALUE = 4'h0,
   parameter bit QSPI_SW_RESET_SW_RST_N_INITIAL_VALUE = 1'h0,
@@ -87,8 +87,8 @@ module qspi_axi4lite_slv
   output logic [1:0] o_qspi_ctrl_protocol_sel,
   output logic [3:0] o_qspi_ctrl_word_width,
   output logic o_qspi_ctrl_spi_slave_en,
-  output logic o_qspi_ctrl_cpol,
   output logic o_qspi_ctrl_cpha,
+  output logic o_qspi_ctrl_cpol,
   output logic o_qspi_ctrl_order,
   output logic [3:0] o_qspi_ctrl_rx_latch_delay,
   output logic o_qspi_sw_reset_sw_rst_n,
@@ -300,34 +300,9 @@ module qspi_axi4lite_slv
         .o_value_unmasked   ()
       );
     end
-    if (1) begin : g_cpol
-      rggen_bit_field_if #(1) bit_field_sub_if();
-      `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 20, 1)
-      rggen_bit_field #(
-        .WIDTH          (1),
-        .INITIAL_VALUE  (QSPI_CTRL_CPOL_INITIAL_VALUE),
-        .SW_WRITE_ONCE  (0),
-        .TRIGGER        (0)
-      ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           ('0),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             ('1),
-        .o_value            (o_qspi_ctrl_cpol),
-        .o_value_unmasked   ()
-      );
-    end
     if (1) begin : g_cpha
       rggen_bit_field_if #(1) bit_field_sub_if();
-      `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 21, 1)
+      `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 20, 1)
       rggen_bit_field #(
         .WIDTH          (1),
         .INITIAL_VALUE  (QSPI_CTRL_CPHA_INITIAL_VALUE),
@@ -347,6 +322,31 @@ module qspi_axi4lite_slv
         .i_value            ('0),
         .i_mask             ('1),
         .o_value            (o_qspi_ctrl_cpha),
+        .o_value_unmasked   ()
+      );
+    end
+    if (1) begin : g_cpol
+      rggen_bit_field_if #(1) bit_field_sub_if();
+      `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 21, 1)
+      rggen_bit_field #(
+        .WIDTH          (1),
+        .INITIAL_VALUE  (QSPI_CTRL_CPOL_INITIAL_VALUE),
+        .SW_WRITE_ONCE  (0),
+        .TRIGGER        (0)
+      ) u_bit_field (
+        .i_clk              (i_clk),
+        .i_rst_n            (i_rst_n),
+        .bit_field_if       (bit_field_sub_if),
+        .o_write_trigger    (),
+        .o_read_trigger     (),
+        .i_sw_write_enable  ('1),
+        .i_hw_write_enable  ('0),
+        .i_hw_write_data    ('0),
+        .i_hw_set           ('0),
+        .i_hw_clear         ('0),
+        .i_value            ('0),
+        .i_mask             ('1),
+        .o_value            (o_qspi_ctrl_cpol),
         .o_value_unmasked   ()
       );
     end

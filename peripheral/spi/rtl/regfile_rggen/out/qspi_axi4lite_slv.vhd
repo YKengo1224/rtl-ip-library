@@ -18,8 +18,8 @@ entity qspi_axi4lite_slv is
     QSPI_CTRL_PROTOCOL_SEL_INITIAL_VALUE: unsigned(1 downto 0) := repeat(x"0", 2, 1);
     QSPI_CTRL_WORD_WIDTH_INITIAL_VALUE: unsigned(3 downto 0) := repeat(x"1", 4, 1);
     QSPI_CTRL_SPI_SLAVE_EN_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
-    QSPI_CTRL_CPOL_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_CPHA_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
+    QSPI_CTRL_CPOL_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_ORDER_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_CTRL_RX_LATCH_DELAY_INITIAL_VALUE: unsigned(3 downto 0) := repeat(x"0", 4, 1);
     QSPI_SW_RESET_SW_RST_N_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
@@ -89,8 +89,8 @@ entity qspi_axi4lite_slv is
     o_qspi_ctrl_protocol_sel: out std_logic_vector(1 downto 0);
     o_qspi_ctrl_word_width: out std_logic_vector(3 downto 0);
     o_qspi_ctrl_spi_slave_en: out std_logic_vector(0 downto 0);
-    o_qspi_ctrl_cpol: out std_logic_vector(0 downto 0);
     o_qspi_ctrl_cpha: out std_logic_vector(0 downto 0);
+    o_qspi_ctrl_cpol: out std_logic_vector(0 downto 0);
     o_qspi_ctrl_order: out std_logic_vector(0 downto 0);
     o_qspi_ctrl_rx_latch_delay: out std_logic_vector(3 downto 0);
     o_qspi_sw_reset_sw_rst_n: out std_logic_vector(0 downto 0);
@@ -402,12 +402,12 @@ begin
           o_value_unmasked  => open
         );
     end block;
-    g_cpol: block
+    g_cpha: block
     begin
       u_bit_field: entity work.rggen_bit_field
         generic map (
           WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_CTRL_CPOL_INITIAL_VALUE, 1, 0),
+          INITIAL_VALUE   => slice(QSPI_CTRL_CPHA_INITIAL_VALUE, 1, 0),
           SW_WRITE_ONCE   => false,
           TRIGGER         => false
         )
@@ -429,16 +429,16 @@ begin
           i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
           i_mask            => (others => '1'),
-          o_value           => o_qspi_ctrl_cpol,
+          o_value           => o_qspi_ctrl_cpha,
           o_value_unmasked  => open
         );
     end block;
-    g_cpha: block
+    g_cpol: block
     begin
       u_bit_field: entity work.rggen_bit_field
         generic map (
           WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_CTRL_CPHA_INITIAL_VALUE, 1, 0),
+          INITIAL_VALUE   => slice(QSPI_CTRL_CPOL_INITIAL_VALUE, 1, 0),
           SW_WRITE_ONCE   => false,
           TRIGGER         => false
         )
@@ -460,7 +460,7 @@ begin
           i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
           i_mask            => (others => '1'),
-          o_value           => o_qspi_ctrl_cpha,
+          o_value           => o_qspi_ctrl_cpol,
           o_value_unmasked  => open
         );
     end block;

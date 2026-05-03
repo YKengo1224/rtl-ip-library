@@ -49,13 +49,13 @@ register_block{
       name 'reserved_3'; bit_assignment lsb: 17,width: 3; type  :reserved; comment '*1'
     }
 
-    
+
     bit_field {
-      name 'cpol'; bit_assignment lsb: 20, width: 1; type  :rw; initial_value default: 0
-     }
-    bit_field {
-       name 'cpha'; bit_assignment lsb: 21, width: 1; type  :rw; initial_value default: 0
+       name 'cpha'; bit_assignment lsb: 20, width: 1; type  :rw; initial_value default: 0
     }
+    bit_field {
+      name 'cpol'; bit_assignment lsb: 21, width: 1; type  :rw; initial_value default: 0
+     }
     bit_field {
       name 'reserved_4'; bit_assignment lsb: 22,width: 2; type  :reserved; comment '*1'
     }

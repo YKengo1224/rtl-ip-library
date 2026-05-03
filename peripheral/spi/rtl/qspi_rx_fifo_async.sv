@@ -32,7 +32,7 @@ module qspi_rx_fifo_async #(
     output logic [$clog2(FIFO_SIZE):0] fifo_num_rclk
 );
 
-    logic [BITWIDTH-1:0] fifo_available_rclkr;
+    logic [$clog2(FIFO_SIZE):0] fifo_available_rclkr;
 
     assign fifo_num_rclk = FIFO_SIZE - fifo_available_rclkr;
 

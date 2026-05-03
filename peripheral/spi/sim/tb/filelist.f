@@ -1,5 +1,6 @@
 
 -f ${RTL_PATH}/filelist.f
+-f ${LIB_COMMON_PATH}/filelist.f
 -f ${LIB_AXI4LITE_PATH}/filelist.f
 -f ${LIB_QSPI_BFM_PATH}/filelist.f      
 +incdir+${SIM_HOME_PATH}/uvm/component

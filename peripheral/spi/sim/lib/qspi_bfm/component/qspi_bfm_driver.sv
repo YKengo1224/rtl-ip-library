@@ -79,7 +79,6 @@ class qspi_bfm_driver #(
         t_trans rsp;
         $cast(rsp, trans);
         rsp.set_id_info(trans);
-
         case (trans.bus_width)
             1: begin
                 if (this.master) vif.data_oe = 4'b0001;
@@ -99,7 +98,6 @@ class qspi_bfm_driver #(
         if (this.master || (!this.master && (vif.csn_in == 1'b1))) begin
             control_csn(1);
         end
-
 
         if (this.clk_pha == 0) begin
             drive_bits(trans, 0);
@@ -140,18 +138,26 @@ class qspi_bfm_driver #(
             vif.csn_oe  = 1'b1;
             vif.csn_out = ~active;
         end else begin
-            if (active) @(negedge vif.csn_in);
-            else @(posedge vif.csn_in);
+            if (active) wait (!vif.csn_in);
+            else wait (vif.csn_in);
         end
     endtask
 
     virtual task drive_bits(t_trans trans, int idx);
         case (trans.bus_width)
             1: begin  // Single
-                if (!this.order) begin
-                    vif.data_out[0] = trans.data[trans.data_len-1-idx];
+                if (this.master) begin
+                    if (!this.order) begin
+                        vif.data_out[0] = trans.data[trans.data_len-1-idx];
+                    end else begin
+                        vif.data_out[0] = trans.data[idx];
+                    end
                 end else begin
-                    vif.data_out[0] = trans.data[idx];
+                    if (!this.order) begin
+                        vif.data_out[1] = trans.data[trans.data_len-1-idx];
+                    end else begin
+                        vif.data_out[1] = trans.data[idx];
+                    end
                 end
             end
             2: begin

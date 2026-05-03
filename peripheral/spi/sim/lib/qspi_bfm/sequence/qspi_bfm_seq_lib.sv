@@ -76,6 +76,7 @@ class qspi_bfm_trans_seq #(
         req.cs_end = cs_end;
         req.data = data;
         `uvm_send(req)
+        get_response(rsp);
     endtask
 
 endclass

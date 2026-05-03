@@ -5,5 +5,6 @@ package case_pkg;
     // `include
 
     `include "sample_seq.sv"
+    `include "test_master_standard_seq.sv"
 endpackage
 

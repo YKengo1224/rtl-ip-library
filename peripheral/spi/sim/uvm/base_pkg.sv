@@ -3,6 +3,7 @@ package base_pkg;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
+    import common_pkg::*;
     import axi4lite_pkg::*;
     import qspi_bfm_pkg::*;
 

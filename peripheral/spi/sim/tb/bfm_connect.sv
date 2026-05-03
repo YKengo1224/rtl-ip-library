@@ -22,6 +22,16 @@ module bfm_connect #(
     wire [3:0] csn_pad;
     wire [3:0] data_pad;
 
+    pulldown (sclk_pad);
+    pullup (csn_pad[0]);
+    pullup (csn_pad[1]);
+    pullup (csn_pad[2]);
+    pullup (csn_pad[3]);
+    pullup (data_pad[0]);
+    pullup (data_pad[1]);
+    pullup (data_pad[2]);
+    pullup (data_pad[3]);
+
     //dut io buffer
     io io_dut_sclk (
         .data_out(qspi_sclk_out_sysclk_o_r),

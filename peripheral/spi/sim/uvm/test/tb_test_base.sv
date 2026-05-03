@@ -10,7 +10,14 @@ class tb_test_base extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
+        my_report_server custom_server;
+
         super.build_phase(phase);
+
+        custom_server = new("custom_server");
+        uvm_report_server::set_server(custom_server);
+
+
         env = tb_env::type_id::create("env", this);
 
         uvm_config_db#(axi4lite_master_vif)::get(this, "", "axi4lite_m_vif", axi4lite_m_vif);

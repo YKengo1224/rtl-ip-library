@@ -59,7 +59,8 @@ class tb_seq_base extends uvm_sequence;
 
 
     virtual task trans_qspi(int bfm_sel, bit [3:0] bus_width = 1, bit trans_dir = 0,
-                            bit data_len = 8, bit cs_end, bit [15:0] data = 0);
+                            bit [3:0] data_len = 8, bit cs_end, bit [15:0] data = 0,
+                            ref bit [15:0] rdata);
         `uvm_do_on_with(qspi_trans, p_sequencer.qspi_sqr[bfm_sel],
                         {
         bus_width == local:: bus_width;
@@ -68,6 +69,7 @@ class tb_seq_base extends uvm_sequence;
         cs_end==local::cs_end;
         data==local::data;
         })
+        rdata = qspi_trans.rsp.data;
     endtask
 endclass
 `endif

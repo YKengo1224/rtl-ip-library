@@ -19,7 +19,7 @@ module qspi_core #(
     input  wire         qspi_cs_ctrl_cs_manual_sysclk_i,
     input  wire         qspi_cs_ctrl_cs_manual_en_sysclk_i,
     input  wire  [ 1:0] qspi_cs_ctrl_cs_sel_sysclk_i,
-    input  wire  [15:0] qspi_master_clk_clk_divisor_sysclk_i,
+    input  wire  [ 4:0] qspi_master_clk_clk_divisor_sysclk_i,
     output logic        qspi_status_spi_busy_sysclk_o_r,
     //tx fifo
     input  wire         qspi_status_tx_fifo_full_sysclk_i,
@@ -313,7 +313,7 @@ module qspi_core #(
                 trans_bit_counter_next_sysclk = 5'b1;
             end else if (shift_edge_sysclk) begin
                 if (trans_bit_counter_sysclk_r == (max_trans_bit_counter_sysclk_r)) begin
-                        trans_bit_counter_next_sysclk = 5'b1;
+                    trans_bit_counter_next_sysclk = 5'b1;
                 end else begin
                     trans_bit_counter_next_sysclk = trans_bit_counter_sysclk_r + 5'b1;
                 end

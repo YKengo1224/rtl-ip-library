@@ -5,7 +5,7 @@
 // File          : qspi_sync_pclk2sysclk.sv
 // Author        : kengo yanagihara  <kengo@sirotan>
 // Created       : 04.04.2026
-// Last modified : 2026/05/01
+// Last modified : 2026/05/04
 //-----------------------------------------------------------------------------
 // Description :
 // QSPI syncronizer 
@@ -35,20 +35,20 @@ module qspi_sync_pclk2sysclk #(
     input wire [3:0] qspi_csn_in_i,
     input wire [3:0] qspi_data_in_i,
 
-    input wire        qspi_ctrl_qspi_enable_aclk_i,
-    input wire [ 1:0] qspi_ctrl_trans_dir_aclk_i,
-    input wire [ 1:0] qspi_ctrl_protocol_sel_aclk_i,
-    input wire [ 3:0] qspi_ctrl_word_width_aclk_i,
-    input wire        qspi_ctrl_spi_slave_en_aclk_i,
-    input wire        qspi_ctrl_cpol_aclk_i,
-    input wire        qspi_ctrl_cpha_aclk_i,
-    input wire        qspi_ctrl_order_aclk_i,
-    input wire [ 3:0] qspi_ctrl_rx_latch_delay_aclk_i,
-    input wire        qspi_sw_reset_sw_rst_n_aclk_i,
-    input wire        qspi_cs_ctrl_cs_manual_aclk_i,
-    input wire        qspi_cs_ctrl_cs_manual_en_aclk_i,
-    input wire [ 1:0] qspi_cs_ctrl_cs_sel_aclk_i,
-    input wire [15:0] qspi_master_clk_clk_divisor_aclk_i,
+    input wire       qspi_ctrl_qspi_enable_aclk_i,
+    input wire [1:0] qspi_ctrl_trans_dir_aclk_i,
+    input wire [1:0] qspi_ctrl_protocol_sel_aclk_i,
+    input wire [3:0] qspi_ctrl_word_width_aclk_i,
+    input wire       qspi_ctrl_spi_slave_en_aclk_i,
+    input wire       qspi_ctrl_cpol_aclk_i,
+    input wire       qspi_ctrl_cpha_aclk_i,
+    input wire       qspi_ctrl_order_aclk_i,
+    input wire [3:0] qspi_ctrl_rx_latch_delay_aclk_i,
+    input wire       qspi_sw_reset_sw_rst_n_aclk_i,
+    input wire       qspi_cs_ctrl_cs_manual_aclk_i,
+    input wire       qspi_cs_ctrl_cs_manual_en_aclk_i,
+    input wire [1:0] qspi_cs_ctrl_cs_sel_aclk_i,
+    input wire [4:0] qspi_master_clk_clk_divisor_aclk_i,
 
     output wire       qspi_sclk_in_sysclk_o,
     output wire [3:0] qspi_csn_in_sysclk_o,
@@ -67,11 +67,11 @@ module qspi_sync_pclk2sysclk #(
     output logic        qspi_cs_ctrl_cs_manual_sysclk_o,
     output logic        qspi_cs_ctrl_cs_manual_en_sysclk_o,
     output logic [ 1:0] qspi_cs_ctrl_cs_sel_sysclk_o,
-    output logic [15:0] qspi_master_clk_clk_divisor_sysclk_o
+    output logic [4:0] qspi_master_clk_clk_divisor_sysclk_o
 );
 
-    wire [46:0] data_aclk;
-    wire [46:0] data_sysclk;
+    wire [35:0] data_aclk;
+    wire [35:0] data_sysclk;
 
 
     assign data_aclk = {
@@ -88,7 +88,7 @@ module qspi_sync_pclk2sysclk #(
         qspi_ctrl_order_aclk_i,
         qspi_ctrl_rx_latch_delay_aclk_i,
         qspi_sw_reset_sw_rst_n_aclk_i,
-        qspi_cs_ctrl_cs_manual_aclk_i,
+    qspi_cs_ctrl_cs_manual_aclk_i,
         qspi_cs_ctrl_cs_manual_en_aclk_i,
         qspi_cs_ctrl_cs_sel_aclk_i,
         qspi_master_clk_clk_divisor_aclk_i
@@ -118,7 +118,7 @@ module qspi_sync_pclk2sysclk #(
 
     genvar gi;
     generate
-        for (gi = 0; gi < 47; gi++) begin : gen_sync
+        for (gi = 0; gi < 36; gi++) begin : gen_sync
             qspi_synchronizer #(
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) aclk2sysclk_synchronizer (

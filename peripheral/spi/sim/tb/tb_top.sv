@@ -69,10 +69,10 @@ module tb_top ();
         .aresetn(aresetn)
     );
 
-    qspi_bfm_if bfm0_if ();
-    qspi_bfm_if bfm1_if ();
-    qspi_bfm_if bfm2_if ();
-    qspi_bfm_if bfm3_if ();
+    qspi_bfm_if bfm0_if (.rst_n(srstn_sysclk));
+    qspi_bfm_if bfm1_if (.rst_n(srstn_sysclk));
+    qspi_bfm_if bfm2_if (.rst_n(srstn_sysclk));
+    qspi_bfm_if bfm3_if (.rst_n(srstn_sysclk));
 
     qspi_top #(
         .SYNC_FF_DEPTH(2),

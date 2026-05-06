@@ -1,4 +1,6 @@
-interface qspi_bfm_if;
+interface qspi_bfm_if(
+    input wire rst_n
+);
     logic       clk_out;
     logic       clk_oe;
     logic       csn_out;

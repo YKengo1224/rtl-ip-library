@@ -6,18 +6,25 @@ class qspi_bfm_driver #(
     type t_trans = qspi_bfm_default_transfer
 ) extends uvm_driver #(t_trans);
 
-    t_if vif;
+    t_if                                vif;
 
-    uvm_analysis_port #(t_trans) drv_rsv_ap;
-    uvm_analysis_port #(t_trans) drv_send_ap;
+    uvm_analysis_port #(t_trans)        drv_rsv_ap;
+    uvm_analysis_port #(t_trans)        drv_send_ap;
 
 
-    bit master;
-    bit order;
-    bit clk_pha;
-    bit clk_pol;
-    int clk_period_ps;
+    bit                                 master;
+    bit                                 order;
+    bit                                 clk_pha;
+    bit                                 clk_pol;
+    int                                 clk_period_ps;
 
+
+    bit                          [ 3:0] bus_width;
+    bit                                 trans_dir;
+    bit                          [ 3:0] data_len;
+    // bit       [15:0] data;
+
+    bit                          [15:0] send_data_queue[$];
 
 
     `uvm_component_param_utils(qspi_bfm_driver#(t_if, t_trans))
@@ -37,9 +44,17 @@ class qspi_bfm_driver #(
 
     virtual task run_phase(uvm_phase phase);
         reset_sig();
-        forever begin
-            get_and_drive();
-        end
+        fork
+            begin
+                slave_trans_bg();
+            end
+            begin
+                forever begin
+                    get_and_drive();
+                end
+            end
+        join
+
     endtask
 
 
@@ -56,8 +71,12 @@ class qspi_bfm_driver #(
         t_trans trans;
         seq_item_port.get_next_item(trans);
         case (trans.cmd)
-            DRV_CFG:   drive_config(trans);
-            DRV_TRANS: drive_transfer(trans);
+            DRV_CFG: drive_config(trans);
+            DRV_DATA_PUSH: begin
+                send_data_queue.push_back(trans.data);
+                seq_item_port.item_done();
+            end
+            // DRV_TRANS: drive_transfer(trans);
         endcase
     endtask
 
@@ -68,7 +87,11 @@ class qspi_bfm_driver #(
         this.clk_pol = trans.clk_pol;
         this.clk_period_ps = trans.clk_period_ps;
 
+        this.bus_width = trans.bus_width;
+        this.trans_dir = trans.trans_dir;
+        this.data_len = trans.data_len;
 
+        //set csn and clk output enable
         if (this.master) begin
             vif.csn_oe = 1;
             vif.clk_oe = 1;
@@ -77,19 +100,9 @@ class qspi_bfm_driver #(
             vif.clk_oe = 0;
         end
 
-        vif.clk_out = this.clk_pol;
-
-        seq_item_port.item_done();
-    endtask
-
-    virtual task drive_transfer(t_trans trans);
-        t_trans rsp;
-        $cast(rsp, trans);
-        rsp.set_id_info(trans);
-
+        //set data output enable
         case (trans.bus_width)
             1: begin
-                drv_send_ap.write(trans);
                 if (this.master) vif.data_oe = 4'b0001;
                 else vif.data_oe = 4'b0010;
             end
@@ -97,149 +110,175 @@ class qspi_bfm_driver #(
                 if (trans.trans_dir) vif.data_oe = 4'b0000;
                 else begin
                     vif.data_oe = 4'b0011;
-                    drv_send_ap.write(trans);
                 end
             end
             4: begin
                 if (trans.trans_dir) vif.data_oe = 4'b0000;
                 else begin
                     vif.data_oe = 4'b1111;
-                    drv_send_ap.write(trans);
                 end
             end
         endcase
 
 
-        if (this.master || (!this.master && (vif.csn_in == 1'b1))) begin
-            control_csn(1);
-        end
+        vif.clk_out = this.clk_pol;
 
-        if (this.clk_pha == 0) begin
-            drive_bits(trans, 0);
-        end
+        seq_item_port.item_done();
+    endtask
 
-        for (int i = 0; i < (trans.data_len / trans.bus_width); i++) begin
-            wait_next_edge(trans);
-            if (this.clk_pha == 1) drive_bits(trans, i);
-            else sample_bits(trans, rsp, i);
+    virtual task slave_trans_bg();
+        t_trans        trans;
+        t_trans        rsp;
+        bit     [15:0] sdata;
+        int            csn_error = 0;
 
-            wait_next_edge(trans);
-            if (this.clk_pha == 1) sample_bits(trans, rsp, i);
-            else begin
-                if (i < (trans.data_len / trans.bus_width) - 1) drive_bits(trans, i + 1);
+
+        forever begin
+            rsp = t_trans::type_id::create("rsp");
+            trans = t_trans::type_id::create("trans");
+            trans.data = 0;
+            rsp.data = 0;
+            csn_error = 0;
+
+            wait (vif.rst_n);
+
+            wait (!this.master);
+
+            if (vif.csn_in) wait (!vif.csn_in);
+
+            sdata = (send_data_queue.size() != 0) ? send_data_queue.pop_front() : '0;
+
+            if (this.clk_pha == 0) begin
+                drive_bits(sdata, 0);
+            end
+            for (int i = 0; i < (this.data_len / this.bus_width); i++) begin
+                slave_wait_edge();
+                if (vif.csn_in) begin
+                    if (i != 0) begin
+                        `uvm_error("DRV", $sformatf("error csn(first edge), loop:%d", i))
+                    end
+                    csn_error = 1;
+                    break;
+                end
+
+                if (this.clk_pha == 1) drive_bits(sdata, i);
+                else sample_bits(rsp, i);
+
+
+
+                slave_wait_edge();
+                if (vif.csn_in) begin
+                    if (i != 0) begin
+                        `uvm_error("DRV", $sformatf("error csn(second edge), loop:%d", i))
+                    end
+                    csn_error = 1;
+                    break;
+                end
+
+                if (this.clk_pha == 1) sample_bits(rsp, i);
+                else begin
+                    if (i < (this.data_len / this.bus_width) - 1) drive_bits(sdata, i + 1);
+                end
+            end
+
+            if ((!csn_error) && !((this.bus_width != 1) && (this.trans_dir))) begin
+                trans.data = sdata;
+                drv_send_ap.write(trans);
+            end
+
+            if ((!csn_error) && !((this.bus_width != 1) && (!this.trans_dir))) begin
+                drv_rsv_ap.write(rsp);
             end
         end
-
-        if (trans.cs_end) begin
-            control_csn(0);
-        end
-
-        seq_item_port.item_done(rsp);
-
-        if ((trans.bus_width != 1) && (!trans.trans_dir)) begin
-            return;
-        end
-        drv_rsv_ap.write(rsp);
     endtask
 
-    virtual task wait_next_edge(t_trans trans);
-        if (this.master) begin
-            #(this.clk_period_ps / 2);
-            vif.clk_out = ~vif.clk_out;
-        end else begin
-            // Slaveなら、相手(Master)が叩いた信号のエッジを待つ
-            @(posedge vif.clk_in or negedge vif.clk_in);
-        end
+    virtual task slave_wait_edge();
+        fork
+            begin
+                @(posedge vif.clk_in or negedge vif.clk_in);
+            end
+            begin
+                wait (vif.csn_in);
+            end
+        join_any
+        disable fork;
     endtask
 
-
-    virtual task control_csn(bit active);
-        if (this.master) begin
-            vif.csn_oe  = 1'b1;
-            vif.csn_out = ~active;
-        end else begin
-            if (active) wait (!vif.csn_in);
-            else wait (vif.csn_in);
-        end
-    endtask
-
-    virtual task drive_bits(t_trans trans, int idx);
-        case (trans.bus_width)
+    virtual task drive_bits(bit [15:0] sdata, int idx);
+        case (this.bus_width)
             1: begin  // Single
                 if (this.master) begin
                     if (!this.order) begin
-                        vif.data_out[0] = trans.data[trans.data_len-1-idx];
+                        vif.data_out[0] = sdata[this.data_len-1-idx];
                     end else begin
-                        vif.data_out[0] = trans.data[idx];
+                        vif.data_out[0] = sdata[idx];
                     end
                 end else begin
                     if (!this.order) begin
-                        vif.data_out[1] = trans.data[trans.data_len-1-idx];
+                        vif.data_out[1] = sdata[this.data_len-1-idx];
                     end else begin
-                        vif.data_out[1] = trans.data[idx];
+                        vif.data_out[1] = sdata[idx];
                     end
                 end
             end
             2: begin
-                if (trans.trans_dir) begin
+                if (this.trans_dir) begin
                     return;
                 end
                 if (!this.order) begin  // Dual
-                    vif.data_out[1:0] = {trans.data[8-1-(idx*2)], trans.data[8-2-(idx*2)]};
+                    vif.data_out[1:0] = {sdata[8-1-(idx*2)], sdata[8-2-(idx*2)]};
                 end else begin
-                    vif.data_out[1:0] = {trans.data[(idx*2)+1], trans.data[(idx*2)]};
+                    vif.data_out[1:0] = {sdata[(idx*2)+1], sdata[(idx*2)]};
                 end
             end
             4: begin
-                if (trans.trans_dir) begin
+                if (this.trans_dir) begin
                     return;
                 end
                 if (!this.order) begin  // Quad
                     vif.data_out[3:0] = {
-                        trans.data[8-1-(idx*4)],
-                        trans.data[8-2-(idx*4)],
-                        trans.data[8-3-(idx*4)],
-                        trans.data[8-4-(idx*4)]
+                        sdata[8-1-(idx*4)],
+                        sdata[8-2-(idx*4)],
+                        sdata[8-3-(idx*4)],
+                        sdata[8-4-(idx*4)]
                     };
                 end else begin
                     vif.data_out[3:0] = {
-                        trans.data[(idx*4)+3],
-                        trans.data[(idx*4)+2],
-                        trans.data[(idx*4)+1],
-                        trans.data[(idx*4)]
+                        sdata[(idx*4)+3], sdata[(idx*4)+2], sdata[(idx*4)+1], sdata[(idx*4)]
                     };
                 end
             end
         endcase
     endtask
 
-    virtual task sample_bits(t_trans trans, t_trans rsp, int idx);
-        case (trans.bus_width)
+
+    virtual task sample_bits(t_trans rsp, int idx);
+        case (this.bus_width)
             1: begin
                 if (this.master) begin
-                    if (!this.order) rsp.data[trans.data_len-1-idx] = vif.data_in[1];
+                    if (!this.order) rsp.data[this.data_len-1-idx] = vif.data_in[1];
                     else rsp.data[idx] = vif.data_in[1];
                 end else begin
-                    if (!this.order) rsp.data[trans.data_len-1-idx] = vif.data_in[0];
+                    if (!this.order) rsp.data[this.data_len-1-idx] = vif.data_in[0];
                     else rsp.data[idx] = vif.data_in[0];
                 end
             end
             2: begin
-                if (!trans.trans_dir) begin
+                if (!this.trans_dir) begin
                     return;
                 end
                 if (!this.order) begin  // Dual
-                    rsp.data[trans.data_len-1-(idx*2)-:2] = vif.data_in[1:0];
+                    rsp.data[this.data_len-1-(idx*2)-:2] = vif.data_in[1:0];
                 end else begin
                     rsp.data[(idx*2)+:2] = vif.data_in[1:0];
                 end
             end
             4: begin
-                if (!trans.trans_dir) begin
+                if (!this.trans_dir) begin
                     return;
                 end
                 if (!this.order) begin  // Dual
-                    rsp.data[trans.data_len-1-(idx*4)-:4] = vif.data_in[3:0];
+                    rsp.data[this.data_len-1-(idx*4)-:4] = vif.data_in[3:0];
                 end else begin
                     rsp.data[(idx*4)+:4] = vif.data_in[3:0];
                 end

@@ -6,5 +6,6 @@ package case_pkg;
 
     `include "sample_seq.sv"
     `include "test_master_standard_seq.sv"
+    `include "test_master_random_seq.sv"
 endpackage
 

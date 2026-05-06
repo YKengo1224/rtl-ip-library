@@ -4,7 +4,8 @@
 package qspi_bfm_pkg;
     typedef enum {
         DRV_CFG,
-        DRV_TRANS
+        DRV_TRANS,
+        DRV_DATA_PUSH
     } QSPI_BFM_CMD_t;
 
     import uvm_pkg::*;

@@ -16,132 +16,215 @@ class test_master_standard_seq extends tb_seq_base;
         $display("MODE 0 TEST");
         $display("===============================================");
         std_seq(2'b00);
+        // $display("===============================================");
+        // $display("MODE 1 TEST");
+        // $display("===============================================");
+        // std_seq(2'b01);
 
-        $display("===============================================");
-        $display("MODE 1 TEST");
-        $display("===============================================");
-        std_seq(2'b01);
 
+        // $display("===============================================");
+        // $display("MODE 2 TEST");
+        // $display("===============================================");
+        // std_seq(2'b10);
 
-        $display("===============================================");
-        $display("MODE 2 TEST");
-        $display("===============================================");
-        std_seq(2'b10);
+        // $display("===============================================");
+        // $display("MODE 3 TEST");
+        // $display("===============================================");
+        // std_seq(2'b11);
 
-        $display("===============================================");
-        $display("MODE 3 TEST");
-        $display("===============================================");
-        std_seq(2'b11);
-        
     endtask
 
     virtual task std_seq(bit [1:0] mode);
         bit [63:0] rdata;
         bit [15:0] spi_rdata;
         bit [31:0] write_data;
-        
+
+        //Single
+        conf(.mode(mode), .protocol_sel(1), .trans_dir(0), .word_width(8), .spi_slave_en(0),
+             .order(0), .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
+
+        for (int i = 0; i < 4; i++) begin
+            bfm_push_data(0, 16'hAA + i);
+        end
+        for (int i = 0; i < 4; i++) begin
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hBB + i));
+        end
+
+        for (int i = 0; i < 4; i++) begin
+            do begin
+                read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+            end while (!rdata[0]);
+            read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        end
+
+        // Dual
+
+        //receive
+        conf(.mode(mode), .protocol_sel(2), .trans_dir(0), .word_width(8), .spi_slave_en(0),
+             .order(0), .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
+
+        for (int i = 0; i < 4; i++) begin
+            bfm_push_data(0, 16'hCC + i);
+        end
+        for (int i = 0; i < 4; i++) begin
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0));
+        end
+
+        for (int i = 0; i < 4; i++) begin
+            do begin
+                read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+            end while (!rdata[0]);
+            read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        end
+
+        //send
+        conf(.mode(mode), .protocol_sel(2), .trans_dir(1), .word_width(8), .spi_slave_en(0),
+             .order(0), .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
+
+
+        for (int i = 0; i < 4; i++) begin
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hDD + i));
+        end
+
+
+        do begin
+            read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+        end while (rdata[24]);
+
+
+        //Quad
+
+        //receive
+        conf(.mode(mode), .protocol_sel(4), .trans_dir(0), .word_width(8), .spi_slave_en(0),
+             .order(0), .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
+
+        for (int i = 0; i < 4; i++) begin
+            bfm_push_data(0, 16'hCC + i);
+        end
+        for (int i = 0; i < 4; i++) begin
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0));
+        end
+
+        for (int i = 0; i < 4; i++) begin
+            do begin
+                read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+            end while (!rdata[0]);
+            read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        end
+
+        //send
+        conf(.mode(mode), .protocol_sel(4), .trans_dir(1), .word_width(8), .spi_slave_en(0),
+             .order(0), .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
+
+
+        for (int i = 0; i < 4; i++) begin
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hDD + i));
+        end
+
+
+        do begin
+            read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+        end while (rdata[24]);
+
+
+        // //single SPI
+        // `uvm_info("SEQ", "Start Single SPI Test", UVM_LOW)
+        // write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8001};
+
+        // write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+        // config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
+        //             .clock_period_ps(2500));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_005A));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_00AA));
+        // trans_qspi(.bfm_sel(0), .bus_width(1), .trans_dir(1), .data_len(8), .cs_end(0), .data('hBB),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+        // trans_qspi(.bfm_sel(0), .bus_width(1), .trans_dir(1), .data_len(8), .cs_end(0), .data('hAA),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+
+
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+        // repeat (2) @(posedge moni_vif.aclk);
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+
+
+        // //Dual SPI
+        // `uvm_info("SEQ", "Start Dual SPI Send Test", UVM_LOW)
+
+        // write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8211};
+        // write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+        // config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
+        //             .clock_period_ps(2500));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0011));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0012));
+        // trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+        // trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+
+
+        // `uvm_info("SEQ", "Start Dual SPI Reseive Test", UVM_LOW)
+
+        // write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8201};
+        // write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
+        // trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(0), .data_len(8), .cs_end(0), .data('hCC),
+        //            .rdata(spi_rdata));
+        // trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(0), .data_len(8), .cs_end(0), .data('hDD),
+        //            .rdata(spi_rdata));
 
 
 
-
-        //single SPI
-        `uvm_info("SEQ", "Start Single SPI Test", UVM_LOW)
-        write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8001};
-
-        write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
-        config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
-                    .clock_period_ps(2500));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_005A));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_00AA));
-        trans_qspi(.bfm_sel(0), .bus_width(1), .trans_dir(1), .data_len(8), .cs_end(0), .data('hBB),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
-        trans_qspi(.bfm_sel(0), .bus_width(1), .trans_dir(1), .data_len(8), .cs_end(0), .data('hAA),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
-
-
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
-        repeat (2) @(posedge moni_vif.aclk);
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
-
-
-        //Dual SPI
-        `uvm_info("SEQ", "Start Dual SPI Send Test", UVM_LOW)
-
-        write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8211};
-        write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
-        config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
-                    .clock_period_ps(2500));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0011));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0012));
-        trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
-        trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
-
-
-        `uvm_info("SEQ", "Start Dual SPI Reseive Test", UVM_LOW)
-
-        write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8201};
-        write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
-        trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(0), .data_len(8), .cs_end(0), .data('hCC),
-                   .rdata(spi_rdata));
-        trans_qspi(.bfm_sel(0), .bus_width(2), .trans_dir(0), .data_len(8), .cs_end(0), .data('hDD),
-                   .rdata(spi_rdata));
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+        // repeat (2) @(posedge moni_vif.aclk);
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
 
 
 
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
-        repeat (2) @(posedge moni_vif.aclk);
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+        // //Quad SPI
+        // `uvm_info("SEQ", "Start Quad SPI Send Test", UVM_LOW)
+
+        // write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8311};
+        // write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+        // config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
+        //             .clock_period_ps(2500));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0013));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0014));
+        // trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+        // trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
+        //            .rdata(spi_rdata));
+        // `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
 
 
 
-        //Quad SPI
-        `uvm_info("SEQ", "Start Quad SPI Send Test", UVM_LOW)
+        // `uvm_info("SEQ", "Start Dual SPI reseive Test", UVM_LOW)
 
-        write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8311};
-        write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
-        config_qspi(.bfm_sel(0), .is_master(0), .is_lsb(0), .pha(mode[0]), .pol(mode[1]),
-                    .clock_period_ps(2500));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0013));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0014));
-        trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
-        trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(1), .data_len(8), .cs_end(0), .data('h00),
-                   .rdata(spi_rdata));
-        `uvm_info("SEQ", $sformatf("rdata:%h", spi_rdata), UVM_LOW)
+        // write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8301};
+        // write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
+        // write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
+        // trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(0), .data_len(8), .cs_end(0), .data('hEE),
+        //            .rdata(spi_rdata));
+        // trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(0), .data_len(8), .cs_end(0), .data('hFF),
+        //            .rdata(spi_rdata));
 
 
-
-        `uvm_info("SEQ", "Start Dual SPI reseive Test", UVM_LOW)
-
-        write_data = {8'h0, 2'h0, mode, 4'h0, 16'h8301};
-        write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_0000));
-        trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(0), .data_len(8), .cs_end(0), .data('hEE),
-                   .rdata(spi_rdata));
-        trans_qspi(.bfm_sel(0), .bus_width(4), .trans_dir(0), .data_len(8), .cs_end(0), .data('hFF),
-                   .rdata(spi_rdata));
-
-
-        repeat (2) @(posedge moni_vif.aclk);
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
-        repeat (2) @(posedge moni_vif.aclk);
-        read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
-        `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+        // repeat (2) @(posedge moni_vif.aclk);
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
+        // repeat (2) @(posedge moni_vif.aclk);
+        // read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+        // `uvm_info("SEQ", $sformatf("reg rdata:%x:", rdata), UVM_LOW)
 
 
     endtask

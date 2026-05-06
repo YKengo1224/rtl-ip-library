@@ -5,7 +5,7 @@
 // File          : qspi_top.sv
 // Author        : kengo yanagihara
 // Created       : 28.03.2026
-// Last modified : 2026/05/04
+// Last modified : 2026/05/06
 //-----------------------------------------------------------------------------
 // Description :
 // QSPI
@@ -145,7 +145,6 @@ module qspi_top #(
     wire                qspi_sclk_in_sysclk;    // From qspi_sync_pclk2sysclk of qspi_sync_pclk2sysclk.v
     logic               qspi_status_rx_fifo_empty_aclk;// From rx_fifo of qspi_rx_fifo_async.v
     logic               qspi_status_rx_fifo_empty_sysclk;// From rx_fifo of qspi_rx_fifo_async.v
-    logic [$clog2(FIFO_SIZE):0] qspi_status_rx_fifo_fifo_num_aclk;// From rx_fifo of qspi_rx_fifo_async.v
     logic               qspi_status_rx_fifo_full_aclk;// From rx_fifo of qspi_rx_fifo_async.v
     logic               qspi_status_rx_fifo_full_sysclk;// From rx_fifo of qspi_rx_fifo_async.v
     logic               qspi_status_spi_busy_aclk;// From busy_sync of qspi_synchronizer.v
@@ -359,6 +358,7 @@ module qspi_top #(
         .data_out_rclkr (qspi_data_rx_data_aclk[15:0]),
         .w_en_wclk (qspi_rx_fifo_w_en_sysclk),
         .w_en_rclkr(qspi_data_rx_data_write_trigger_aclk),
+        .fifo_num_rclk   (qspi_status_rx_fifo_num_aclk[$clog2(FIFO_SIZE):0]),
      
         .\(.*\)_wclk (qspi_status_rx_fifo_\1_sysclk[][]), 
         .\(.*\)_rclk (qspi_status_rx_fifo_\1_aclk[][]),       
@@ -382,7 +382,7 @@ module qspi_top #(
                .w_en_rclkr      (qspi_data_rx_data_write_trigger_aclk), // Templated
                .empty_rclkr     (qspi_status_rx_fifo_empty_aclk), // Templated
                .full_rclkr      (qspi_status_rx_fifo_full_aclk), // Templated
-               .fifo_num_rclk   (qspi_status_rx_fifo_fifo_num_aclk[$clog2(FIFO_SIZE):0]), // Templated
+               .fifo_num_rclk   (qspi_status_rx_fifo_num_aclk[$clog2(FIFO_SIZE):0]), // Templated
                // Inputs
                .wclk            (sysclk),                // Templated
                .rclk            (aclk),                  // Templated

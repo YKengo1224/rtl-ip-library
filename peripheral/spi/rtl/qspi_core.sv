@@ -124,8 +124,8 @@ module qspi_core #(
                     end
                 end
                 S_SEND: begin
-                    if((trans_bit_counter_sysclk_r+2) >= max_trans_bit_counter_sysclk_r 
-                        && !qspi_status_tx_fifo_empty_sysclk_i) begin
+                    if(((trans_bit_counter_sysclk_r+2) >= max_trans_bit_counter_sysclk_r) 
+                        && !qspi_status_tx_fifo_empty_sysclk_i && !tx_data_next_valid_sysclk_r) begin
                         state_next = S_SEND_FETCH;
                     end else if(master_detect && finish_trans_sysclk && !tx_data_next_valid_sysclk_r) begin
                         state_next = S_IDLE;
@@ -384,8 +384,6 @@ module qspi_core #(
     //-----------------------------------
     // tx data pararel to serial
     //-----------------------------------
-    logic [31:0] zzz;
-    assign zzz = (qspi_ctrl_word_width_sysclk_i - 1) - (trans_bit_counter_next_sysclk - 1);
 
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
@@ -411,11 +409,11 @@ module qspi_core #(
                     if (qspi_ctrl_trans_dir_sysclk_i) begin
                         qspi_data_out_en_sysclk_o_r <= 4'b0011;
                         if (trans_bit_counter_next_sysclk == 0) begin
-                            qspi_data_out_sysclk_o_r[0] <= '0;
+                            qspi_data_out_sysclk_o_r[1:0] <= '0;
                         end else if (qspi_ctrl_order_sysclk_i) begin
                             qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[((trans_bit_counter_next_sysclk-1) << 1) +: 2];
                         end else begin
-                            qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[(8 - 2) - ((trans_bit_counter_next_sysclk-1) << 1) +: 2];
+                            qspi_data_out_sysclk_o_r[1:0] <= tx_data_sysclk_r[8 - ((trans_bit_counter_next_sysclk-1) << 1) -1  -: 2];
                         end
                     end else begin
                         qspi_data_out_sysclk_o_r[1:0] <= '0;
@@ -425,11 +423,11 @@ module qspi_core #(
                 QUAD_SPI_MODE: begin
                     if (qspi_ctrl_trans_dir_sysclk_i) begin
                         if (trans_bit_counter_next_sysclk == 0) begin
-                            qspi_data_out_sysclk_o_r[0] <= '0;
+                            qspi_data_out_sysclk_o_r[3:0] <= '0;
                         end else if (qspi_ctrl_order_sysclk_i) begin
                             qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[((trans_bit_counter_next_sysclk-1) << 2) +: 4];
                         end else begin
-                            qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[(8 - 4) - ((trans_bit_counter_next_sysclk-1) << 2) +: 4];
+                            qspi_data_out_sysclk_o_r[3:0] <= tx_data_sysclk_r[8 - ((trans_bit_counter_next_sysclk-1) << 2) -1  -: 4];
                         end
                         qspi_data_out_en_sysclk_o_r <= '1;
                     end else begin
@@ -702,7 +700,7 @@ module qspi_core #(
             if (qspi_cs_ctrl_cs_manual_en_sysclk_i) begin
                 qspi_csn_out_sysclk_o_r <= set_csn(qspi_cs_ctrl_cs_manual_sysclk_i);
             end else begin
-                qspi_csn_out_sysclk_o_r <= set_csn(state_next === S_IDLE);
+                qspi_csn_out_sysclk_o_r <= set_csn(state === S_IDLE);
             end
         end else begin
             qspi_csn_out_sysclk_o_r <= '1;
@@ -711,12 +709,18 @@ module qspi_core #(
     end
 
     function [3:0] set_csn(input data_in);
-        case (qspi_cs_ctrl_cs_sel_sysclk_i)
-            2'd0: set_csn = {3'b111, data_in};
-            2'd1: set_csn = {2'b11, data_in, 1'b1};
-            2'd2: set_csn = {1'b1, data_in, 2'b11};
-            2'd3: set_csn = {data_in, 3'b0};
-        endcase
+
+        if (!data_in) begin
+            case (qspi_cs_ctrl_cs_sel_sysclk_i)
+                2'd0: set_csn = 4'b1110;
+                2'd1: set_csn = 4'b1101;
+                2'd2: set_csn = 4'b1011;
+                2'd3: set_csn = 4'b0111;
+            endcase  // case (qspi_cs_ctrl_cs_sel_sysclk_i)
+        end else begin
+            set_csn = 4'b1111;
+        end
+
     endfunction
 
 

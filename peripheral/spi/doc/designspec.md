@@ -97,18 +97,19 @@
 
 # レジスタ
 
-| Offset | レジスタ名      | 初期値 | 概要                                  |   |
-|--------|-----------------|--------|---------------------------------------|---|
-|        |                 |        |                                       |   |
-| 0x00   | QSPI_CTRL       | 0x00   | QSPIコントロールレジスタ              |   |
-| 0x04   | QSPI_SW_RESET   | 0x00   | QSPIソフトウェアリセットレジスタ      |   |
-| 0x08   | QSPI_CS_CTRL    | 0x0F   | QSPIチップセレクトレジスタ            |   |
-| 0x0C   | QSPI_MASTER_CLK | 0x00   | QSPIクロックレジスタ                  |   |
-| 0x10   | QSPI_DATA       | 0x00   | QSPIデータレジスタ                    |   |
-| 0x14   | QSPI_INT        | 0x00   | QSPI割り込みコントロールレジスタ      |   |
-| 0x18   | QSPI_STATUS     | 0x00   | QSPI FIFOステータスレジスタ           |   |
-| 0x1C   | QSPI_INTR_RS    | 0x00   | QSPI 割り込み生ステータスレジスタ     |   |
-| 0x20   | QSPI_INTR_MS    | 0x00   | QSPI 割り込みマスクステータスレジスタ |   |
+| Offset | レジスタ名          | 初期値 | 概要                                  |   |
+|--------|---------------------|--------|---------------------------------------|---|
+|        |                     |        |                                       |   |
+| 0x00   | QSPI_CTRL           | 0x00   | QSPIコントロールレジスタ              |   |
+| 0x04   | QSPI_SW_RESET       | 0x00   | QSPIソフトウェアリセットレジスタ      |   |
+| 0x08   | QSPI_CS_CTRL        | 0x0F   | QSPIチップセレクトレジスタ            |   |
+| 0x0C   | QSPI_MASTER_CLK     | 0x00   | QSPIクロックレジスタ                  |   |
+| 0x10   | QSPI_DATA           | 0x00   | QSPIデータレジスタ                    |   |
+| 0x14   | QSPI_INT            | 0x00   | QSPI割り込みコントロールレジスタ      |   |
+| 0x18   | QSPI_THESHOLD_LEVEL | 0x00   | QSPIスレッショルドレベルレジスタ      |   |
+| 0x1C   | QSPI_STATUS         | 0x00   | QSPI FIFOステータスレジスタ           |   |
+| 0x20   | QSPI_INTR_RS        | 0x00   | QSPI 割り込み生ステータスレジスタ     |   |
+| 0x24   | QSPI_INTR_MS        | 0x00   | QSPI 割り込みマスクステータスレジスタ |   |
     
 
 ## QSPI_CTRL

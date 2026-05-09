@@ -23,8 +23,8 @@ class test_master_random_seq extends tb_seq_base;
         bfm_push_data(0, 16'h00DD);
 
 
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_005A));
-        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h_0000_00AA));
+        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0000_005A));
+        write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0000_00AA));
 
 
         repeat (1000) @(posedge moni_vif.sysclk);

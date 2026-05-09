@@ -131,7 +131,32 @@ class Runsim:
                     self.run_cmd.extend(['--testplusarg', f'TEST_CASE={self.args.testname}'])
 
                     
+            case Simulator.DSIM:
+                # self.build_cmd.appned("dvlcom")
+                # self.build_cmd.extend(['-f', str(self.args.filelist)])                
+                # self.build_cmd.extend(['-timescale', self.args.timescale])
+                # self.build_cmd.extend(['-uvm', '1.2')
+                                      
+                self.run_cmd.append("dsim")
+                self.run_cmd.extend(['-f', str(self.args.filelist)])
+                self.run_cmd.extend(['-top', self.args.top])
+                self.run_cmd.extend(['-j', str(os.cpu_count()-1)])
+                self.run_cmd.append("+acc+wrcb")
+                self.run_cmd.extend(['-timescale', self.args.timescale])
+                self.run_cmd.extend(['-uvm', '1.2'])
+                self.run_cmd.extend(['-work', str(self.work_dir)])
+                self.run_cmd.extend(['-sv_seed', self.args.seed])
 
+                                    
+                if self.args.cov:
+                    self.run_cmd.extend(['-code-cov', 'a'])
+
+                if self.args.wave:
+                    self.run_cmd.extend(['-waves', str(self.work_dir/ 'wave.mxd')])                                    
+                if not self.args.no_uvm:
+                    self.run_cmd.append(f'+UVM_TESTNAME=tb_test_base')
+                    self.run_cmd.append(f'+TEST_CASE={self.args.testname}')
+                                      
             case _:
                 raise NotImplementedError(f"Simulator {self.simulator.name} is not implemented yet.")
 

@@ -79,64 +79,92 @@ class tb_scoreboard extends uvm_scoreboard;
     endfunction
 
 
-    function void check_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase);
+        fork
+            begin
+                bit [15:0] sdata;
+                bit [15:0] rdata;
+                forever begin
+                    wait (bfm_rdata_queue.size() != 0);
 
-        int dut_sdata_size;
-        int dut_rdata_size;
+                    if (dut_sdata_queue.size() == 0) begin
+                        `uvm_error("SCB", $sformatf(
+                                   "mismatch queue size!! dut send num:%d, bfm receive num:%d",
+                                   dut_sdata_queue.size(),
+                                   bfm_rdata_queue.size()
+                                   ));
+                    end
 
-        bit [15:0] sdata;
-        bit [15:0] rdata;
+                    sdata = dut_sdata_queue.pop_front();
+                    rdata = bfm_rdata_queue.pop_front();
 
-        super.check_phase(phase);
+                    if (sdata != rdata) begin
+                        `uvm_error(
+                            "SCB", $sformatf(
+                            "mismatch data!! dut send data:%h, bfm receive_data:%h", sdata, rdata));
+                    end else begin
+                        `uvm_info("SCB", $sformatf(
+                                  "OK!! dut send data:%h, bfm receive_data:%h", sdata, rdata),
+                                  UVM_LOW);
+                    end
 
-        if (dut_sdata_queue.size() != bfm_rdata_queue.size()) begin
-            `uvm_error("SCB", $sformatf(
-                       "mismatch queue size!! dut send num:%d, bfm receive num:%d",
-                       dut_sdata_queue.size(),
-                       bfm_rdata_queue.size()
-                       ));
-            return;
-        end
-        if (dut_rdata_queue.size() != bfm_sdata_queue.size()) begin
-            `uvm_error("SCB", $sformatf(
-                       "mismatch queue size!! bfm send num:%d, dut receive num:%x",
-                       bfm_sdata_queue.size(),
-                       dut_rdata_queue.size()
-                       ));
-
-            return;
-        end
-
-        dut_sdata_size = dut_sdata_queue.size();
-        dut_rdata_size = dut_rdata_queue.size();
-        for (int i = 0; i < dut_sdata_size; i++) begin
-            sdata = dut_sdata_queue.pop_front();
-            rdata = bfm_rdata_queue.pop_front();
-
-            if (sdata != rdata) begin
-                `uvm_error("SCB", $sformatf(
-                           "mismatch data!! dut send data:%h, bfm receive_data:%h", sdata, rdata));
-            end else begin
-                `uvm_info("SCB", $sformatf(
-                          "OK!! dut send data:%h, bfm receive_data:%h", sdata, rdata), UVM_LOW);
+                end
             end
-        end
 
+            begin
+                bit [15:0] sdata;
+                bit [15:0] rdata;
+                forever begin
+                    wait (dut_rdata_queue.size() != 0);
 
-        for (int i = 0; i < dut_rdata_size; i++) begin
-            sdata = bfm_sdata_queue.pop_front();
-            rdata = dut_rdata_queue.pop_front();
+                    if (bfm_sdata_queue.size() == 0) begin
+                        `uvm_error("SCB", $sformatf(
+                                   "mismatch queue size!! bfm send num:%d, dut receive num:%x",
+                                   bfm_sdata_queue.size(),
+                                   dut_rdata_queue.size()
+                                   ));
+                    end
 
-            if (sdata != rdata) begin
-                `uvm_error("SCB", $sformatf(
-                           "mismatch data!! bfm send data:%h, dut receive_data:%h", sdata, rdata));
-            end else begin
-                `uvm_info("SCB", $sformatf(
-                          "OK!! bfm send data:%h, dut receive_data:%h", sdata, rdata), UVM_LOW);
+                    sdata = bfm_sdata_queue.pop_front();
+                    rdata = dut_rdata_queue.pop_front();
+
+                    if (sdata != rdata) begin
+                        `uvm_error(
+                            "SCB", $sformatf(
+                            "mismatch data!! bfm send data:%h, dut receive_data:%h", sdata, rdata));
+                    end else begin
+                        `uvm_info("SCB", $sformatf(
+                                  "OK!! bfm send data:%h, dut receive_data:%h", sdata, rdata),
+                                  UVM_LOW);
+                    end
+                end
             end
-        end
+        join
+    endtask
 
-    endfunction
+    // function void check_phase(uvm_phase phase);
+
+    //     int dut_rdata_size;
+
+
+
+    //     super.check_phase(phase);
+
+
+
+
+
+    //     dut_rdata_size = dut_rdata_queue.size();
+
+
+
+    //     for (int i = 0; i < dut_rdata_size; i++) begin
+
+
+
+    //     end
+
+    // endfunction
 
 endclass
 `endif

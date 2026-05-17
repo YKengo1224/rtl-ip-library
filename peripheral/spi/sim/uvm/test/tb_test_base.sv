@@ -14,7 +14,7 @@ class tb_test_base extends uvm_test;
 
         super.build_phase(phase);
 
-        custom_server = new("custom_server");
+        custom_server = new();
         uvm_report_server::set_server(custom_server);
 
 

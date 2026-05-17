@@ -152,7 +152,7 @@ class Runsim:
                     self.run_cmd.extend(['-code-cov', 'a'])
 
                 if self.args.wave:
-                    self.run_cmd.extend(['-waves', str(self.work_dir/ 'wave.mxd')])                                    
+                    self.run_cmd.extend(['-waves', str(self.work_dir/ 'wave.vcd')])                                    
                 if not self.args.no_uvm:
                     self.run_cmd.append(f'+UVM_TESTNAME=tb_test_base')
                     self.run_cmd.append(f'+TEST_CASE={self.args.testname}')

@@ -121,24 +121,18 @@ entity qspi_axi4lite_slv is
     i_qspi_status_tx_fifo_available: in std_logic_vector(4 downto 0);
     i_qspi_status_tx_fifo_full: in std_logic_vector(0 downto 0);
     i_qspi_status_tx_fifo_empty: in std_logic_vector(0 downto 0);
-    i_qspi_int_ms_rx_fifo_overflow_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_overflow: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_overflow_unmasked: out std_logic_vector(0 downto 0);
-    i_qspi_int_ms_tx_fifo_overflow_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_overflow: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_overflow_unmasked: out std_logic_vector(0 downto 0);
-    i_qspi_int_ms_rx_fifo_threshold_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_threshold: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_threshold_unmasked: out std_logic_vector(0 downto 0);
-    i_qspi_int_ms_tx_fifo_threshold_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_threshold: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_threshold_unmasked: out std_logic_vector(0 downto 0);
-    i_qspi_int_ms_rx_fifo_not_empty_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_not_empty: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_rx_fifo_not_empty_unmasked: out std_logic_vector(0 downto 0);
-    i_qspi_int_ms_tx_fifo_empty_set: in std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_empty: out std_logic_vector(0 downto 0);
-    o_qspi_int_ms_tx_fifo_empty_unmasked: out std_logic_vector(0 downto 0)
+    i_qspi_int_rs_rx_fifo_overflow: in std_logic_vector(0 downto 0);
+    i_qspi_int_rs_tx_fifo_overflow: in std_logic_vector(0 downto 0);
+    i_qspi_int_rs_rx_fifo_threshold: in std_logic_vector(0 downto 0);
+    i_qspi_int_rs_tx_fifo_threshold: in std_logic_vector(0 downto 0);
+    i_qspi_int_rs_rx_fifo_not_empty: in std_logic_vector(0 downto 0);
+    i_qspi_int_rs_tx_fifo_empty: in std_logic_vector(0 downto 0);
+    o_qspi_int_ms_rx_fifo_overflow_trigger: out std_logic_vector(0 downto 0);
+    o_qspi_int_ms_tx_fifo_overflow_trigger: out std_logic_vector(0 downto 0);
+    o_qspi_int_ms_rx_fifo_threshold_trigger: out std_logic_vector(0 downto 0);
+    o_qspi_int_ms_tx_fifo_threshold_trigger: out std_logic_vector(0 downto 0);
+    o_qspi_int_ms_rx_fifo_not_empty_trigger: out std_logic_vector(0 downto 0);
+    o_qspi_int_ms_tx_fifo_empty_trigger: out std_logic_vector(0 downto 0)
   );
 end qspi_axi4lite_slv;
 
@@ -1618,7 +1612,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(308 downto 308),
+          i_value           => i_qspi_int_rs_rx_fifo_overflow,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1649,7 +1643,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(304 downto 304),
+          i_value           => i_qspi_int_rs_tx_fifo_overflow,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1680,7 +1674,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(300 downto 300),
+          i_value           => i_qspi_int_rs_rx_fifo_threshold,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1711,7 +1705,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(296 downto 296),
+          i_value           => i_qspi_int_rs_tx_fifo_threshold,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1742,7 +1736,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(292 downto 292),
+          i_value           => i_qspi_int_rs_rx_fifo_not_empty,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1773,7 +1767,7 @@ begin
           i_hw_write_data   => (others => '0'),
           i_hw_set          => (others => '0'),
           i_hw_clear        => (others => '0'),
-          i_value           => register_value(288 downto 288),
+          i_value           => i_qspi_int_rs_tx_fifo_empty,
           i_mask            => (others => '1'),
           o_value           => open,
           o_value_unmasked  => open
@@ -1796,7 +1790,7 @@ begin
     end generate;
     u_register: entity work.rggen_default_register
       generic map (
-        READABLE        => true,
+        READABLE        => false,
         WRITABLE        => true,
         ADDRESS_WIDTH   => 8,
         OFFSET_ADDRESS  => x"24",
@@ -1825,15 +1819,10 @@ begin
       );
     g_rx_fifo_overflow: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_RX_FIFO_OVERFLOW_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -1845,29 +1834,16 @@ begin
           i_sw_write_data   => bit_field_write_data(20 downto 20),
           o_sw_read_data    => bit_field_read_data(20 downto 20),
           o_sw_value        => bit_field_value(20 downto 20),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_rx_fifo_overflow_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(180 downto 180),
-          o_value           => o_qspi_int_ms_rx_fifo_overflow,
-          o_value_unmasked  => o_qspi_int_ms_rx_fifo_overflow_unmasked
+          o_trigger         => o_qspi_int_ms_rx_fifo_overflow_trigger
         );
     end block;
     g_tx_fifo_overflow: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_TX_FIFO_OVERFLOW_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -1879,29 +1855,16 @@ begin
           i_sw_write_data   => bit_field_write_data(16 downto 16),
           o_sw_read_data    => bit_field_read_data(16 downto 16),
           o_sw_value        => bit_field_value(16 downto 16),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_tx_fifo_overflow_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(176 downto 176),
-          o_value           => o_qspi_int_ms_tx_fifo_overflow,
-          o_value_unmasked  => o_qspi_int_ms_tx_fifo_overflow_unmasked
+          o_trigger         => o_qspi_int_ms_tx_fifo_overflow_trigger
         );
     end block;
     g_rx_fifo_threshold: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_RX_FIFO_THRESHOLD_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -1913,29 +1876,16 @@ begin
           i_sw_write_data   => bit_field_write_data(12 downto 12),
           o_sw_read_data    => bit_field_read_data(12 downto 12),
           o_sw_value        => bit_field_value(12 downto 12),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_rx_fifo_threshold_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(172 downto 172),
-          o_value           => o_qspi_int_ms_rx_fifo_threshold,
-          o_value_unmasked  => o_qspi_int_ms_rx_fifo_threshold_unmasked
+          o_trigger         => o_qspi_int_ms_rx_fifo_threshold_trigger
         );
     end block;
     g_tx_fifo_threshold: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_TX_FIFO_THRESHOLD_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -1947,29 +1897,16 @@ begin
           i_sw_write_data   => bit_field_write_data(8 downto 8),
           o_sw_read_data    => bit_field_read_data(8 downto 8),
           o_sw_value        => bit_field_value(8 downto 8),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_tx_fifo_threshold_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(168 downto 168),
-          o_value           => o_qspi_int_ms_tx_fifo_threshold,
-          o_value_unmasked  => o_qspi_int_ms_tx_fifo_threshold_unmasked
+          o_trigger         => o_qspi_int_ms_tx_fifo_threshold_trigger
         );
     end block;
     g_rx_fifo_not_empty: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_RX_FIFO_NOT_EMPTY_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -1981,29 +1918,16 @@ begin
           i_sw_write_data   => bit_field_write_data(4 downto 4),
           o_sw_read_data    => bit_field_read_data(4 downto 4),
           o_sw_value        => bit_field_value(4 downto 4),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_rx_fifo_not_empty_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(164 downto 164),
-          o_value           => o_qspi_int_ms_rx_fifo_not_empty,
-          o_value_unmasked  => o_qspi_int_ms_rx_fifo_not_empty_unmasked
+          o_trigger         => o_qspi_int_ms_rx_fifo_not_empty_trigger
         );
     end block;
     g_tx_fifo_empty: block
     begin
-      u_bit_field: entity work.rggen_bit_field
+      u_bit_field: entity work.rggen_bit_field_w01trg
         generic map (
-          WIDTH           => 1,
-          INITIAL_VALUE   => slice(QSPI_INT_MS_TX_FIFO_EMPTY_INITIAL_VALUE, 1, 0),
-          SW_READ_ACTION  => RGGEN_READ_DEFAULT,
-          SW_WRITE_ACTION => RGGEN_WRITE_1_CLEAR,
-          HW_SET          => true,
-          HW_SET_WIDTH    => 1,
-          EXTERNAL_MASK   => true
+          WRITE_ONE_TRIGGER => true,
+          WIDTH             => 1
         )
         port map (
           i_clk             => i_clk,
@@ -2015,16 +1939,8 @@ begin
           i_sw_write_data   => bit_field_write_data(0 downto 0),
           o_sw_read_data    => bit_field_read_data(0 downto 0),
           o_sw_value        => bit_field_value(0 downto 0),
-          o_write_trigger   => open,
-          o_read_trigger    => open,
-          i_hw_write_enable => "0",
-          i_hw_write_data   => (others => '0'),
-          i_hw_set          => i_qspi_int_ms_tx_fifo_empty_set,
-          i_hw_clear        => (others => '0'),
           i_value           => (others => '0'),
-          i_mask            => register_value(160 downto 160),
-          o_value           => o_qspi_int_ms_tx_fifo_empty,
-          o_value_unmasked  => o_qspi_int_ms_tx_fifo_empty_unmasked
+          o_trigger         => o_qspi_int_ms_tx_fifo_empty_trigger
         );
     end block;
   end block;

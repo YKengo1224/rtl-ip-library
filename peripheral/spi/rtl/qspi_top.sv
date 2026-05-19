@@ -5,7 +5,7 @@
 // File          : qspi_top.sv
 // Author        : kengo yanagihara
 // Created       : 28.03.2026
-// Last modified : 2026/05/06
+// Last modified : 2026/05/19
 //-----------------------------------------------------------------------------
 // Description :
 // QSPI
@@ -114,24 +114,24 @@ module qspi_top #(
     logic               qspi_data_tx_data_write_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_data_tx_fifo_clr_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_data_tx_fifo_clr_write_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_rx_fifo_not_empty_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_rx_fifo_not_empty_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_rx_fifo_not_empty_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_rx_fifo_overflow_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_rx_fifo_not_empty_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_rx_fifo_overflow_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_rx_fifo_overflow_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_rx_fifo_threshold_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_rx_fifo_overflow_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_rx_fifo_threshold_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_rx_fifo_threshold_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_tx_fifo_empty_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_rx_fifo_threshold_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_tx_fifo_empty_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_tx_fifo_empty_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_tx_fifo_overflow_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_tx_fifo_empty_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_tx_fifo_overflow_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_tx_fifo_overflow_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
-    logic               qspi_int_ms_tx_fifo_threshold_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_tx_fifo_overflow_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_ms_tx_fifo_threshold_set_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
-    logic               qspi_int_ms_tx_fifo_threshold_unmasked_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_ms_tx_fifo_threshold_trigger_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
+    logic               qspi_int_rs_rx_fifo_not_empty_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
+    logic               qspi_int_rs_rx_fifo_overflow_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
+    logic               qspi_int_rs_rx_fifo_threshold_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
+    logic               qspi_int_rs_tx_fifo_empty_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
+    logic               qspi_int_rs_tx_fifo_overflow_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
+    logic               qspi_int_rs_tx_fifo_threshold_aclk;// From qspi_instr_gen_inst of qspi_instr_gen.v
     logic               qspi_int_rx_fifo_not_empty_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_rx_fifo_overflow_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
     logic               qspi_int_rx_fifo_threshold_aclk;// From qspi_axi4lite_slv_inst of qspi_axi4lite_slv.v
@@ -243,18 +243,12 @@ module qspi_top #(
                                               .o_qspi_int_tx_fifo_empty(qspi_int_tx_fifo_empty_aclk), // Templated
                                               .o_qspi_threshold_level_rx_threshold_level(qspi_threshold_level_rx_threshold_level_aclk[4:0]), // Templated
                                               .o_qspi_threshold_level_tx_threshold_level(qspi_threshold_level_tx_threshold_level_aclk[4:0]), // Templated
-                                              .o_qspi_int_ms_rx_fifo_overflow(qspi_int_ms_rx_fifo_overflow_aclk), // Templated
-                                              .o_qspi_int_ms_rx_fifo_overflow_unmasked(qspi_int_ms_rx_fifo_overflow_unmasked_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_overflow(qspi_int_ms_tx_fifo_overflow_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_overflow_unmasked(qspi_int_ms_tx_fifo_overflow_unmasked_aclk), // Templated
-                                              .o_qspi_int_ms_rx_fifo_threshold(qspi_int_ms_rx_fifo_threshold_aclk), // Templated
-                                              .o_qspi_int_ms_rx_fifo_threshold_unmasked(qspi_int_ms_rx_fifo_threshold_unmasked_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_threshold(qspi_int_ms_tx_fifo_threshold_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_threshold_unmasked(qspi_int_ms_tx_fifo_threshold_unmasked_aclk), // Templated
-                                              .o_qspi_int_ms_rx_fifo_not_empty(qspi_int_ms_rx_fifo_not_empty_aclk), // Templated
-                                              .o_qspi_int_ms_rx_fifo_not_empty_unmasked(qspi_int_ms_rx_fifo_not_empty_unmasked_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_empty(qspi_int_ms_tx_fifo_empty_aclk), // Templated
-                                              .o_qspi_int_ms_tx_fifo_empty_unmasked(qspi_int_ms_tx_fifo_empty_unmasked_aclk), // Templated
+                                              .o_qspi_int_ms_rx_fifo_overflow_trigger(qspi_int_ms_rx_fifo_overflow_trigger_aclk), // Templated
+                                              .o_qspi_int_ms_tx_fifo_overflow_trigger(qspi_int_ms_tx_fifo_overflow_trigger_aclk), // Templated
+                                              .o_qspi_int_ms_rx_fifo_threshold_trigger(qspi_int_ms_rx_fifo_threshold_trigger_aclk), // Templated
+                                              .o_qspi_int_ms_tx_fifo_threshold_trigger(qspi_int_ms_tx_fifo_threshold_trigger_aclk), // Templated
+                                              .o_qspi_int_ms_rx_fifo_not_empty_trigger(qspi_int_ms_rx_fifo_not_empty_trigger_aclk), // Templated
+                                              .o_qspi_int_ms_tx_fifo_empty_trigger(qspi_int_ms_tx_fifo_empty_trigger_aclk), // Templated
                                               // Inputs
                                               .i_qspi_data_data (qspi_data_rx_data_aclk[15:0]), // Templated
                                               .i_qspi_status_spi_busy(qspi_status_spi_busy_aclk), // Templated
@@ -264,15 +258,17 @@ module qspi_top #(
                                               .i_qspi_status_tx_fifo_available(qspi_status_tx_fifo_available_aclk[4:0]), // Templated
                                               .i_qspi_status_tx_fifo_full(qspi_status_tx_fifo_full_aclk), // Templated
                                               .i_qspi_status_tx_fifo_empty(qspi_status_tx_fifo_empty_aclk), // Templated
-                                              .i_qspi_int_ms_rx_fifo_overflow_set(qspi_int_ms_rx_fifo_overflow_set_aclk), // Templated
-                                              .i_qspi_int_ms_tx_fifo_overflow_set(qspi_int_ms_tx_fifo_overflow_set_aclk), // Templated
-                                              .i_qspi_int_ms_rx_fifo_threshold_set(qspi_int_ms_rx_fifo_threshold_set_aclk), // Templated
-                                              .i_qspi_int_ms_tx_fifo_threshold_set(qspi_int_ms_tx_fifo_threshold_set_aclk), // Templated
-                                              .i_qspi_int_ms_rx_fifo_not_empty_set(qspi_int_ms_rx_fifo_not_empty_set_aclk), // Templated
-                                              .i_qspi_int_ms_tx_fifo_empty_set(qspi_int_ms_tx_fifo_empty_set_aclk)); // Templated
+                                              .i_qspi_int_rs_rx_fifo_overflow(qspi_int_rs_rx_fifo_overflow_aclk), // Templated
+                                              .i_qspi_int_rs_tx_fifo_overflow(qspi_int_rs_tx_fifo_overflow_aclk), // Templated
+                                              .i_qspi_int_rs_rx_fifo_threshold(qspi_int_rs_rx_fifo_threshold_aclk), // Templated
+                                              .i_qspi_int_rs_tx_fifo_threshold(qspi_int_rs_tx_fifo_threshold_aclk), // Templated
+                                              .i_qspi_int_rs_rx_fifo_not_empty(qspi_int_rs_rx_fifo_not_empty_aclk), // Templated
+                                              .i_qspi_int_rs_tx_fifo_empty(qspi_int_rs_tx_fifo_empty_aclk)); // Templated
 
 
     /* qspi_instr_gen AUTO_TEMPLATE "qspi_instr_gen_inst"(        
+        .\(.*\)_crear_trigger_aclk_i (\1_trigger_aclk[][]),
+        .qspi_int_ms_\(.*\)_aclk_o_r (qspi_int_ms_\1_set_aclk[][]),
         .qspi_instr_aclk_o_r(qspi_instr_aclk_o_r),
         .\(.*\)_i (\1[][]),
         .\(.*\)_o_r (\1[][]),
@@ -280,12 +276,18 @@ module qspi_top #(
     qspi_instr_gen qspi_instr_gen_inst (
         /*AUTOINST*/
                                         // Outputs
-                                        .qspi_int_ms_rx_fifo_overflow_set_aclk_o_r(qspi_int_ms_rx_fifo_overflow_set_aclk), // Templated
-                                        .qspi_int_ms_tx_fifo_overflow_set_aclk_o_r(qspi_int_ms_tx_fifo_overflow_set_aclk), // Templated
-                                        .qspi_int_ms_rx_fifo_threshold_set_aclk_o_r(qspi_int_ms_rx_fifo_threshold_set_aclk), // Templated
-                                        .qspi_int_ms_tx_fifo_threshold_set_aclk_o_r(qspi_int_ms_tx_fifo_threshold_set_aclk), // Templated
-                                        .qspi_int_ms_rx_fifo_not_empty_set_aclk_o_r(qspi_int_ms_rx_fifo_not_empty_set_aclk), // Templated
-                                        .qspi_int_ms_tx_fifo_empty_set_aclk_o_r(qspi_int_ms_tx_fifo_empty_set_aclk), // Templated
+                                        .qspi_int_rs_rx_fifo_overflow_aclk_o_r(qspi_int_rs_rx_fifo_overflow_aclk), // Templated
+                                        .qspi_int_rs_tx_fifo_overflow_aclk_o_r(qspi_int_rs_tx_fifo_overflow_aclk), // Templated
+                                        .qspi_int_rs_rx_fifo_threshold_aclk_o_r(qspi_int_rs_rx_fifo_threshold_aclk), // Templated
+                                        .qspi_int_rs_tx_fifo_threshold_aclk_o_r(qspi_int_rs_tx_fifo_threshold_aclk), // Templated
+                                        .qspi_int_rs_rx_fifo_not_empty_aclk_o_r(qspi_int_rs_rx_fifo_not_empty_aclk), // Templated
+                                        .qspi_int_rs_tx_fifo_empty_aclk_o_r(qspi_int_rs_tx_fifo_empty_aclk), // Templated
+                                        .qspi_int_ms_rx_fifo_overflow_aclk_o_r(qspi_int_ms_rx_fifo_overflow_set_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_overflow_aclk_o_r(qspi_int_ms_tx_fifo_overflow_set_aclk), // Templated
+                                        .qspi_int_ms_rx_fifo_threshold_aclk_o_r(qspi_int_ms_rx_fifo_threshold_set_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_threshold_aclk_o_r(qspi_int_ms_tx_fifo_threshold_set_aclk), // Templated
+                                        .qspi_int_ms_rx_fifo_not_empty_aclk_o_r(qspi_int_ms_rx_fifo_not_empty_set_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_empty_aclk_o_r(qspi_int_ms_tx_fifo_empty_set_aclk), // Templated
                                         .qspi_instr_aclk_o_r(qspi_instr_aclk_o_r), // Templated
                                         // Inputs
                                         .aclk           (aclk),
@@ -305,7 +307,13 @@ module qspi_top #(
                                         .qspi_int_rx_fifo_not_empty_aclk_i(qspi_int_rx_fifo_not_empty_aclk), // Templated
                                         .qspi_int_tx_fifo_empty_aclk_i(qspi_int_tx_fifo_empty_aclk), // Templated
                                         .qspi_threshold_level_rx_threshold_level_aclk_i(qspi_threshold_level_rx_threshold_level_aclk[4:0]), // Templated
-                                        .qspi_threshold_level_tx_threshold_level_aclk_i(qspi_threshold_level_tx_threshold_level_aclk[4:0])); // Templated
+                                        .qspi_threshold_level_tx_threshold_level_aclk_i(qspi_threshold_level_tx_threshold_level_aclk[4:0]), // Templated
+                                        .qspi_int_ms_rx_fifo_overflow_crear_trigger_aclk_i(qspi_int_ms_rx_fifo_overflow_trigger_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_overflow_crear_trigger_aclk_i(qspi_int_ms_tx_fifo_overflow_trigger_aclk), // Templated
+                                        .qspi_int_ms_rx_fifo_threshold_crear_trigger_aclk_i(qspi_int_ms_rx_fifo_threshold_trigger_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_threshold_crear_trigger_aclk_i(qspi_int_ms_tx_fifo_threshold_trigger_aclk), // Templated
+                                        .qspi_int_ms_rx_fifo_not_empty_crear_trigger_aclk_i(qspi_int_ms_rx_fifo_not_empty_trigger_aclk), // Templated
+                                        .qspi_int_ms_tx_fifo_empty_crear_trigger_aclk_i(qspi_int_ms_tx_fifo_empty_trigger_aclk)); // Templated
 
 
     /* qspi_tx_fifo_async AUTO_TEMPLATE "tx_fifo" (

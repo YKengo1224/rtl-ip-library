@@ -94,24 +94,18 @@ pub module qspi_axi4lite_slv #(
   i_qspi_status_tx_fifo_available: input logic<5>,
   i_qspi_status_tx_fifo_full: input logic,
   i_qspi_status_tx_fifo_empty: input logic,
-  i_qspi_int_ms_rx_fifo_overflow_set: input logic,
-  o_qspi_int_ms_rx_fifo_overflow: output logic,
-  o_qspi_int_ms_rx_fifo_overflow_unmasked: output logic,
-  i_qspi_int_ms_tx_fifo_overflow_set: input logic,
-  o_qspi_int_ms_tx_fifo_overflow: output logic,
-  o_qspi_int_ms_tx_fifo_overflow_unmasked: output logic,
-  i_qspi_int_ms_rx_fifo_threshold_set: input logic,
-  o_qspi_int_ms_rx_fifo_threshold: output logic,
-  o_qspi_int_ms_rx_fifo_threshold_unmasked: output logic,
-  i_qspi_int_ms_tx_fifo_threshold_set: input logic,
-  o_qspi_int_ms_tx_fifo_threshold: output logic,
-  o_qspi_int_ms_tx_fifo_threshold_unmasked: output logic,
-  i_qspi_int_ms_rx_fifo_not_empty_set: input logic,
-  o_qspi_int_ms_rx_fifo_not_empty: output logic,
-  o_qspi_int_ms_rx_fifo_not_empty_unmasked: output logic,
-  i_qspi_int_ms_tx_fifo_empty_set: input logic,
-  o_qspi_int_ms_tx_fifo_empty: output logic,
-  o_qspi_int_ms_tx_fifo_empty_unmasked: output logic
+  i_qspi_int_rs_rx_fifo_overflow: input logic,
+  i_qspi_int_rs_tx_fifo_overflow: input logic,
+  i_qspi_int_rs_rx_fifo_threshold: input logic,
+  i_qspi_int_rs_tx_fifo_threshold: input logic,
+  i_qspi_int_rs_rx_fifo_not_empty: input logic,
+  i_qspi_int_rs_tx_fifo_empty: input logic,
+  o_qspi_int_ms_rx_fifo_overflow_trigger: output logic,
+  o_qspi_int_ms_tx_fifo_overflow_trigger: output logic,
+  o_qspi_int_ms_rx_fifo_threshold_trigger: output logic,
+  o_qspi_int_ms_tx_fifo_threshold_trigger: output logic,
+  o_qspi_int_ms_rx_fifo_not_empty_trigger: output logic,
+  o_qspi_int_ms_tx_fifo_empty_trigger: output logic
 ){
   import rggen::rggen_rtl_pkg::*;
   inst register_if: rggen::rggen_register_if[10]#(ADDRESS_WIDTH: 8, BUS_WIDTH: 32, VALUE_WIDTH: 32);
@@ -1085,7 +1079,7 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[20+:1]
+        i_value:        i_qspi_int_rs_rx_fifo_overflow
       );
     }
     :g_tx_fifo_overflow {
@@ -1109,7 +1103,7 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[16+:1]
+        i_value:        i_qspi_int_rs_tx_fifo_overflow
       );
     }
     :g_rx_fifo_threshold {
@@ -1133,7 +1127,7 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[12+:1]
+        i_value:        i_qspi_int_rs_rx_fifo_threshold
       );
     }
     :g_tx_fifo_threshold {
@@ -1157,7 +1151,7 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[8+:1]
+        i_value:        i_qspi_int_rs_tx_fifo_threshold
       );
     }
     :g_rx_fifo_not_empty {
@@ -1181,7 +1175,7 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[4+:1]
+        i_value:        i_qspi_int_rs_rx_fifo_not_empty
       );
     }
     :g_tx_fifo_empty {
@@ -1205,14 +1199,14 @@ pub module qspi_axi4lite_slv #(
         i_rst:          i_rst,
         bit_field_if:   bit_field_sub_if,
         o_read_trigger: _,
-        i_value:        register_if[9].value[0+:1]
+        i_value:        i_qspi_int_rs_tx_fifo_empty
       );
     }
   }
   :g_qspi_int_ms {
     inst bit_field_if: rggen::rggen_bit_field_if#(WIDTH: 32);
     inst u_register: rggen::rggen_default_register #(
-      READABLE:       true,
+      READABLE:       false,
       WRITABLE:       true,
       ADDRESS_WIDTH:  8,
       OFFSET_ADDRESS: 8'h24,
@@ -1236,21 +1230,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[20+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[20+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_RX_FIFO_OVERFLOW_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_rx_fifo_overflow_set,
-        i_mask:           register_if[5].value[20+:1],
-        o_value:          o_qspi_int_ms_rx_fifo_overflow,
-        o_value_unmasked: o_qspi_int_ms_rx_fifo_overflow_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_rx_fifo_overflow_trigger
       );
     }
     :g_tx_fifo_overflow {
@@ -1263,21 +1250,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[16+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[16+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_TX_FIFO_OVERFLOW_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_tx_fifo_overflow_set,
-        i_mask:           register_if[5].value[16+:1],
-        o_value:          o_qspi_int_ms_tx_fifo_overflow,
-        o_value_unmasked: o_qspi_int_ms_tx_fifo_overflow_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_tx_fifo_overflow_trigger
       );
     }
     :g_rx_fifo_threshold {
@@ -1290,21 +1270,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[12+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[12+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_RX_FIFO_THRESHOLD_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_rx_fifo_threshold_set,
-        i_mask:           register_if[5].value[12+:1],
-        o_value:          o_qspi_int_ms_rx_fifo_threshold,
-        o_value_unmasked: o_qspi_int_ms_rx_fifo_threshold_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_rx_fifo_threshold_trigger
       );
     }
     :g_tx_fifo_threshold {
@@ -1317,21 +1290,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[8+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[8+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_TX_FIFO_THRESHOLD_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_tx_fifo_threshold_set,
-        i_mask:           register_if[5].value[8+:1],
-        o_value:          o_qspi_int_ms_tx_fifo_threshold,
-        o_value_unmasked: o_qspi_int_ms_tx_fifo_threshold_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_tx_fifo_threshold_trigger
       );
     }
     :g_rx_fifo_not_empty {
@@ -1344,21 +1310,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[4+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[4+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_RX_FIFO_NOT_EMPTY_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_rx_fifo_not_empty_set,
-        i_mask:           register_if[5].value[4+:1],
-        o_value:          o_qspi_int_ms_rx_fifo_not_empty,
-        o_value_unmasked: o_qspi_int_ms_rx_fifo_not_empty_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_rx_fifo_not_empty_trigger
       );
     }
     :g_tx_fifo_empty {
@@ -1371,21 +1330,14 @@ pub module qspi_axi4lite_slv #(
         bit_field_if.read_data[0+:1] = bit_field_sub_if.read_data;
         bit_field_if.value[0+:1] = bit_field_sub_if.value;
       }
-      inst u_bit_field: rggen::rggen_bit_field #(
-        WIDTH:            1,
-        INITIAL_VALUE:    QSPI_INT_MS_TX_FIFO_EMPTY_INITIAL_VALUE,
-        SW_READ_ACTION:   rggen_sw_action::READ_DEFAULT,
-        SW_WRITE_ACTION:  rggen_sw_action::WRITE_1_CLEAR,
-        HW_SET:           true,
-        EXTERNAL_MASK:    true
+      inst u_bit_field: rggen::rggen_bit_field_w01trg #(
+        TRIGGER_VALUE:  1'b1,
+        WIDTH:          1
       )(
-        i_clk:            i_clk,
-        i_rst:            i_rst,
-        bit_field_if:     bit_field_sub_if,
-        i_hw_set:         i_qspi_int_ms_tx_fifo_empty_set,
-        i_mask:           register_if[5].value[0+:1],
-        o_value:          o_qspi_int_ms_tx_fifo_empty,
-        o_value_unmasked: o_qspi_int_ms_tx_fifo_empty_unmasked
+        i_clk:        i_clk,
+        i_rst:        i_rst,
+        bit_field_if: bit_field_sub_if,
+        o_trigger:    o_qspi_int_ms_tx_fifo_empty_trigger
       );
     }
   }

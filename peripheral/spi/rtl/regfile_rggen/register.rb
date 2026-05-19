@@ -221,10 +221,11 @@ register_block{
   }
 
 
+  
 
   register{
     name 'qspi_status'
-    offset_address 0x1C
+    offset_address 0x1c
 
 
     bit_field {
@@ -280,28 +281,28 @@ register_block{
       name 'reserve_6'; bit_assignment lsb: 21,width: 11; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_overflow'; bit_assignment lsb: 20, width: 1; type :ro; reference 'qspi_int_ms.rx_fifo_overflow'; initial_value default: 0
+      name 'rx_fifo_overflow'; bit_assignment lsb: 20, width: 1; type :ro;  initial_value default: 0
     }
     
     bit_field {
       name 'reserve_5'; bit_assignment lsb:17 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_overflow'; bit_assignment lsb: 16, width: 1; type :ro; reference 'qspi_int_ms.tx_fifo_overflow'; initial_value default: 0
+      name 'tx_fifo_overflow'; bit_assignment lsb: 16, width: 1; type :ro;  initial_value default: 0
     }
 
     bit_field {
       name 'reserve_4'; bit_assignment lsb:13 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_threshold'; bit_assignment lsb: 12, width: 1; type :ro; reference 'qspi_int_ms.rx_fifo_threshold'; initial_value default: 0
+      name 'rx_fifo_threshold'; bit_assignment lsb: 12, width: 1; type :ro;  initial_value default: 0
     }
 
     bit_field {
       name 'reserve_3'; bit_assignment lsb:9 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_threshold'; bit_assignment lsb: 8, width: 1; type :ro; reference 'qspi_int_ms.tx_fifo_threshold'; initial_value default: 0
+      name 'tx_fifo_threshold'; bit_assignment lsb: 8, width: 1; type :ro;  initial_value default: 0
     }
 
     
@@ -309,7 +310,7 @@ register_block{
       name 'reserve_2'; bit_assignment lsb: 5,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_not_empty'; bit_assignment lsb: 4, width: 1; type :ro; reference 'qspi_int_ms.rx_fifo_not_empty'; initial_value default: 0
+      name 'rx_fifo_not_empty'; bit_assignment lsb: 4, width: 1; type :ro;  initial_value default: 0
     }
 
     
@@ -317,7 +318,7 @@ register_block{
       name 'reserve_1'; bit_assignment lsb:1 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_empty'; bit_assignment lsb: 0, width: 1; type :ro; reference 'qspi_int_ms.tx_fifo_empty';  initial_value default: 0
+      name 'tx_fifo_empty'; bit_assignment lsb: 0, width: 1; type :ro;   initial_value default: 0
     }
   }
 
@@ -332,28 +333,28 @@ register_block{
       name 'reserve_6'; bit_assignment lsb: 21,width: 11; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_overflow'; bit_assignment lsb: 20, width: 1; type :w1c; reference 'qspi_int.rx_fifo_overflow'; initial_value default: 0
+      name 'rx_fifo_overflow'; bit_assignment lsb: 20, width: 1; type :w1trg;  initial_value default: 0
     }
     
     bit_field {
       name 'reserve_5'; bit_assignment lsb:17 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_overflow'; bit_assignment lsb: 16, width: 1; type :w1c; reference 'qspi_int.tx_fifo_overflow'; initial_value default: 0
+      name 'tx_fifo_overflow'; bit_assignment lsb: 16, width: 1; type :w1trg;  initial_value default: 0
     }
 
     bit_field {
       name 'reserve_4'; bit_assignment lsb:13 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_threshold'; bit_assignment lsb: 12, width: 1; type :w1c; reference 'qspi_int.rx_fifo_threshold'; initial_value default: 0
+      name 'rx_fifo_threshold'; bit_assignment lsb: 12, width: 1; type :w1trg;  initial_value default: 0
     }
 
     bit_field {
       name 'reserve_3'; bit_assignment lsb:9 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_threshold'; bit_assignment lsb: 8, width: 1; type :w1c; reference 'qspi_int.tx_fifo_threshold'; initial_value default: 0
+      name 'tx_fifo_threshold'; bit_assignment lsb: 8, width: 1; type :w1trg;  initial_value default: 0
     }
 
     
@@ -361,7 +362,7 @@ register_block{
       name 'reserve_2'; bit_assignment lsb: 5,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'rx_fifo_not_empty'; bit_assignment lsb: 4, width: 1; type :w1c; reference 'qspi_int.rx_fifo_not_empty'; initial_value default: 0
+      name 'rx_fifo_not_empty'; bit_assignment lsb: 4, width: 1; type :w1trg;  initial_value default: 0
     }
 
     
@@ -369,7 +370,7 @@ register_block{
       name 'reserve_1'; bit_assignment lsb:1 ,width: 3; type  :reserved; comment '*1'
     }
     bit_field {      
-      name 'tx_fifo_empty'; bit_assignment lsb: 0, width: 1; type :w1c; reference 'qspi_int.tx_fifo_empty';  initial_value default: 0
+      name 'tx_fifo_empty'; bit_assignment lsb: 0, width: 1; type :w1trg;   initial_value default: 0
     }
   }
   

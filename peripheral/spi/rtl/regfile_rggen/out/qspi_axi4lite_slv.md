@@ -165,17 +165,17 @@
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
 |reserve_6|[31:21]|reserved||||*1|
-|rx_fifo_overflow|[20]|ro|default: 0x0|qspi_int_ms.rx_fifo_overflow|||
+|rx_fifo_overflow|[20]|ro|default: 0x0||||
 |reserve_5|[19:17]|reserved||||*1|
-|tx_fifo_overflow|[16]|ro|default: 0x0|qspi_int_ms.tx_fifo_overflow|||
+|tx_fifo_overflow|[16]|ro|default: 0x0||||
 |reserve_4|[15:13]|reserved||||*1|
-|rx_fifo_threshold|[12]|ro|default: 0x0|qspi_int_ms.rx_fifo_threshold|||
+|rx_fifo_threshold|[12]|ro|default: 0x0||||
 |reserve_3|[11:9]|reserved||||*1|
-|tx_fifo_threshold|[8]|ro|default: 0x0|qspi_int_ms.tx_fifo_threshold|||
+|tx_fifo_threshold|[8]|ro|default: 0x0||||
 |reserve_2|[7:5]|reserved||||*1|
-|rx_fifo_not_empty|[4]|ro|default: 0x0|qspi_int_ms.rx_fifo_not_empty|||
+|rx_fifo_not_empty|[4]|ro|default: 0x0||||
 |reserve_1|[3:1]|reserved||||*1|
-|tx_fifo_empty|[0]|ro|default: 0x0|qspi_int_ms.tx_fifo_empty|||
+|tx_fifo_empty|[0]|ro|default: 0x0||||
 
 ### <div id="qspi_axi4lite_slv-qspi_int_ms"></div>qspi_int_ms
 
@@ -187,14 +187,14 @@
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
 |reserve_6|[31:21]|reserved||||*1|
-|rx_fifo_overflow|[20]|w1c|default: 0x0|qspi_int.rx_fifo_overflow|||
+|rx_fifo_overflow|[20]|w1trg|default: 0x0||||
 |reserve_5|[19:17]|reserved||||*1|
-|tx_fifo_overflow|[16]|w1c|default: 0x0|qspi_int.tx_fifo_overflow|||
+|tx_fifo_overflow|[16]|w1trg|default: 0x0||||
 |reserve_4|[15:13]|reserved||||*1|
-|rx_fifo_threshold|[12]|w1c|default: 0x0|qspi_int.rx_fifo_threshold|||
+|rx_fifo_threshold|[12]|w1trg|default: 0x0||||
 |reserve_3|[11:9]|reserved||||*1|
-|tx_fifo_threshold|[8]|w1c|default: 0x0|qspi_int.tx_fifo_threshold|||
+|tx_fifo_threshold|[8]|w1trg|default: 0x0||||
 |reserve_2|[7:5]|reserved||||*1|
-|rx_fifo_not_empty|[4]|w1c|default: 0x0|qspi_int.rx_fifo_not_empty|||
+|rx_fifo_not_empty|[4]|w1trg|default: 0x0||||
 |reserve_1|[3:1]|reserved||||*1|
-|tx_fifo_empty|[0]|w1c|default: 0x0|qspi_int.tx_fifo_empty|||
+|tx_fifo_empty|[0]|w1trg|default: 0x0||||

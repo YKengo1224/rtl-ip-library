@@ -119,24 +119,18 @@ module qspi_axi4lite_slv
   input logic [4:0] i_qspi_status_tx_fifo_available,
   input logic i_qspi_status_tx_fifo_full,
   input logic i_qspi_status_tx_fifo_empty,
-  input logic i_qspi_int_ms_rx_fifo_overflow_set,
-  output logic o_qspi_int_ms_rx_fifo_overflow,
-  output logic o_qspi_int_ms_rx_fifo_overflow_unmasked,
-  input logic i_qspi_int_ms_tx_fifo_overflow_set,
-  output logic o_qspi_int_ms_tx_fifo_overflow,
-  output logic o_qspi_int_ms_tx_fifo_overflow_unmasked,
-  input logic i_qspi_int_ms_rx_fifo_threshold_set,
-  output logic o_qspi_int_ms_rx_fifo_threshold,
-  output logic o_qspi_int_ms_rx_fifo_threshold_unmasked,
-  input logic i_qspi_int_ms_tx_fifo_threshold_set,
-  output logic o_qspi_int_ms_tx_fifo_threshold,
-  output logic o_qspi_int_ms_tx_fifo_threshold_unmasked,
-  input logic i_qspi_int_ms_rx_fifo_not_empty_set,
-  output logic o_qspi_int_ms_rx_fifo_not_empty,
-  output logic o_qspi_int_ms_rx_fifo_not_empty_unmasked,
-  input logic i_qspi_int_ms_tx_fifo_empty_set,
-  output logic o_qspi_int_ms_tx_fifo_empty,
-  output logic o_qspi_int_ms_tx_fifo_empty_unmasked
+  input logic i_qspi_int_rs_rx_fifo_overflow,
+  input logic i_qspi_int_rs_tx_fifo_overflow,
+  input logic i_qspi_int_rs_rx_fifo_threshold,
+  input logic i_qspi_int_rs_tx_fifo_threshold,
+  input logic i_qspi_int_rs_rx_fifo_not_empty,
+  input logic i_qspi_int_rs_tx_fifo_empty,
+  output logic o_qspi_int_ms_rx_fifo_overflow_trigger,
+  output logic o_qspi_int_ms_tx_fifo_overflow_trigger,
+  output logic o_qspi_int_ms_rx_fifo_threshold_trigger,
+  output logic o_qspi_int_ms_tx_fifo_threshold_trigger,
+  output logic o_qspi_int_ms_rx_fifo_not_empty_trigger,
+  output logic o_qspi_int_ms_tx_fifo_empty_trigger
 );
   rggen_register_if #(8, 32, 32) register_if[10]();
   rggen_axi4lite_adapter #(
@@ -1140,7 +1134,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[20+:1]),
+        .i_value            (i_qspi_int_rs_rx_fifo_overflow),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1165,7 +1159,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[16+:1]),
+        .i_value            (i_qspi_int_rs_tx_fifo_overflow),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1190,7 +1184,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[12+:1]),
+        .i_value            (i_qspi_int_rs_rx_fifo_threshold),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1215,7 +1209,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[8+:1]),
+        .i_value            (i_qspi_int_rs_tx_fifo_threshold),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1240,7 +1234,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[4+:1]),
+        .i_value            (i_qspi_int_rs_rx_fifo_not_empty),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1265,7 +1259,7 @@ module qspi_axi4lite_slv
         .i_hw_write_data    ('0),
         .i_hw_set           ('0),
         .i_hw_clear         ('0),
-        .i_value            (register_if[9].value[0+:1]),
+        .i_value            (i_qspi_int_rs_tx_fifo_empty),
         .i_mask             ('1),
         .o_value            (),
         .o_value_unmasked   ()
@@ -1276,7 +1270,7 @@ module qspi_axi4lite_slv
     rggen_bit_field_if #(32) bit_field_if();
     `rggen_tie_off_unused_signals(32, 32'h00111111, bit_field_if)
     rggen_default_register #(
-      .READABLE       (1),
+      .READABLE       (0),
       .WRITABLE       (1),
       .ADDRESS_WIDTH  (8),
       .OFFSET_ADDRESS (8'h24),
@@ -1292,163 +1286,85 @@ module qspi_axi4lite_slv
     if (1) begin : g_rx_fifo_overflow
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 20, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_OVERFLOW_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_rx_fifo_overflow_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[20+:1]),
-        .o_value            (o_qspi_int_ms_rx_fifo_overflow),
-        .o_value_unmasked   (o_qspi_int_ms_rx_fifo_overflow_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_rx_fifo_overflow_trigger)
       );
     end
     if (1) begin : g_tx_fifo_overflow
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 16, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_OVERFLOW_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_tx_fifo_overflow_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[16+:1]),
-        .o_value            (o_qspi_int_ms_tx_fifo_overflow),
-        .o_value_unmasked   (o_qspi_int_ms_tx_fifo_overflow_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_tx_fifo_overflow_trigger)
       );
     end
     if (1) begin : g_rx_fifo_threshold
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 12, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_THRESHOLD_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_rx_fifo_threshold_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[12+:1]),
-        .o_value            (o_qspi_int_ms_rx_fifo_threshold),
-        .o_value_unmasked   (o_qspi_int_ms_rx_fifo_threshold_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_rx_fifo_threshold_trigger)
       );
     end
     if (1) begin : g_tx_fifo_threshold
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 8, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_THRESHOLD_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_tx_fifo_threshold_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[8+:1]),
-        .o_value            (o_qspi_int_ms_tx_fifo_threshold),
-        .o_value_unmasked   (o_qspi_int_ms_tx_fifo_threshold_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_tx_fifo_threshold_trigger)
       );
     end
     if (1) begin : g_rx_fifo_not_empty
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 4, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_RX_FIFO_NOT_EMPTY_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_rx_fifo_not_empty_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[4+:1]),
-        .o_value            (o_qspi_int_ms_rx_fifo_not_empty),
-        .o_value_unmasked   (o_qspi_int_ms_rx_fifo_not_empty_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_rx_fifo_not_empty_trigger)
       );
     end
     if (1) begin : g_tx_fifo_empty
       rggen_bit_field_if #(1) bit_field_sub_if();
       `rggen_connect_bit_field_if(bit_field_if, bit_field_sub_if, 0, 1)
-      rggen_bit_field #(
-        .WIDTH            (1),
-        .INITIAL_VALUE    (QSPI_INT_MS_TX_FIFO_EMPTY_INITIAL_VALUE),
-        .SW_READ_ACTION   (RGGEN_READ_DEFAULT),
-        .SW_WRITE_ACTION  (RGGEN_WRITE_1_CLEAR),
-        .HW_ACCESS        (3'b010),
-        .EXTERNAL_MASK    (1)
+      rggen_bit_field_w01trg #(
+        .TRIGGER_VALUE  (1'b1),
+        .WIDTH          (1)
       ) u_bit_field (
-        .i_clk              (i_clk),
-        .i_rst_n            (i_rst_n),
-        .bit_field_if       (bit_field_sub_if),
-        .o_write_trigger    (),
-        .o_read_trigger     (),
-        .i_sw_write_enable  ('1),
-        .i_hw_write_enable  ('0),
-        .i_hw_write_data    ('0),
-        .i_hw_set           (i_qspi_int_ms_tx_fifo_empty_set),
-        .i_hw_clear         ('0),
-        .i_value            ('0),
-        .i_mask             (register_if[5].value[0+:1]),
-        .o_value            (o_qspi_int_ms_tx_fifo_empty),
-        .o_value_unmasked   (o_qspi_int_ms_tx_fifo_empty_unmasked)
+        .i_clk        (i_clk),
+        .i_rst_n      (i_rst_n),
+        .bit_field_if (bit_field_sub_if),
+        .i_value      ('0),
+        .o_trigger    (o_qspi_int_ms_tx_fifo_empty_trigger)
       );
     end
   end endgenerate

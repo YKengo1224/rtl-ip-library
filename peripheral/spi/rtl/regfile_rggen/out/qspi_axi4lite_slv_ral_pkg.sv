@@ -143,22 +143,22 @@ package qspi_axi4lite_slv_ral_pkg;
     endfunction
   endclass
   class qspi_int_ms_reg_model extends rggen_ral_reg;
-    rand rggen_ral_w1trg_field rx_fifo_overflow;
-    rand rggen_ral_w1trg_field tx_fifo_overflow;
-    rand rggen_ral_w1trg_field rx_fifo_threshold;
-    rand rggen_ral_w1trg_field tx_fifo_threshold;
-    rand rggen_ral_w1trg_field rx_fifo_not_empty;
-    rand rggen_ral_w1trg_field tx_fifo_empty;
+    rand rggen_ral_row1trg_field rx_fifo_overflow;
+    rand rggen_ral_row1trg_field tx_fifo_overflow;
+    rand rggen_ral_row1trg_field rx_fifo_threshold;
+    rand rggen_ral_row1trg_field tx_fifo_threshold;
+    rand rggen_ral_row1trg_field rx_fifo_not_empty;
+    rand rggen_ral_row1trg_field tx_fifo_empty;
     function new(string name);
       super.new(name, 32, 0);
     endfunction
     function void build();
-      `rggen_ral_create_field(rx_fifo_overflow, 20, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(tx_fifo_overflow, 16, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(rx_fifo_threshold, 12, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(tx_fifo_threshold, 8, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(rx_fifo_not_empty, 4, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(tx_fifo_empty, 0, 1, "W1TRG", 0, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(rx_fifo_overflow, 20, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(tx_fifo_overflow, 16, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(rx_fifo_threshold, 12, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(tx_fifo_threshold, 8, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(rx_fifo_not_empty, 4, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(tx_fifo_empty, 0, 1, "ROW1TRG", 1, 1'h0, '{}, 1, 0, 0, "")
     endfunction
   endclass
   class qspi_axi4lite_slv_block_model extends rggen_ral_block;
@@ -185,7 +185,7 @@ package qspi_axi4lite_slv_ral_pkg;
       `rggen_ral_create_reg(qspi_threshold_level, '{}, '{}, 8'h18, "RW", "g_qspi_threshold_level.u_register")
       `rggen_ral_create_reg(qspi_status, '{}, '{}, 8'h1c, "RO", "g_qspi_status.u_register")
       `rggen_ral_create_reg(qspi_int_rs, '{}, '{}, 8'h20, "RO", "g_qspi_int_rs.u_register")
-      `rggen_ral_create_reg(qspi_int_ms, '{}, '{}, 8'h24, "WO", "g_qspi_int_ms.u_register")
+      `rggen_ral_create_reg(qspi_int_ms, '{}, '{}, 8'h24, "RW", "g_qspi_int_ms.u_register")
     endfunction
   endclass
 endpackage

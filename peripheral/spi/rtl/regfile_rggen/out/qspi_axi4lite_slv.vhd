@@ -127,11 +127,17 @@ entity qspi_axi4lite_slv is
     i_qspi_int_rs_tx_fifo_threshold: in std_logic_vector(0 downto 0);
     i_qspi_int_rs_rx_fifo_not_empty: in std_logic_vector(0 downto 0);
     i_qspi_int_rs_tx_fifo_empty: in std_logic_vector(0 downto 0);
+    i_qspi_int_ms_rx_fifo_overflow: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_rx_fifo_overflow_trigger: out std_logic_vector(0 downto 0);
+    i_qspi_int_ms_tx_fifo_overflow: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_tx_fifo_overflow_trigger: out std_logic_vector(0 downto 0);
+    i_qspi_int_ms_rx_fifo_threshold: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_rx_fifo_threshold_trigger: out std_logic_vector(0 downto 0);
+    i_qspi_int_ms_tx_fifo_threshold: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_tx_fifo_threshold_trigger: out std_logic_vector(0 downto 0);
+    i_qspi_int_ms_rx_fifo_not_empty: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_rx_fifo_not_empty_trigger: out std_logic_vector(0 downto 0);
+    i_qspi_int_ms_tx_fifo_empty: in std_logic_vector(0 downto 0);
     o_qspi_int_ms_tx_fifo_empty_trigger: out std_logic_vector(0 downto 0)
   );
 end qspi_axi4lite_slv;
@@ -1790,7 +1796,7 @@ begin
     end generate;
     u_register: entity work.rggen_default_register
       generic map (
-        READABLE        => false,
+        READABLE        => true,
         WRITABLE        => true,
         ADDRESS_WIDTH   => 8,
         OFFSET_ADDRESS  => x"24",
@@ -1834,7 +1840,7 @@ begin
           i_sw_write_data   => bit_field_write_data(20 downto 20),
           o_sw_read_data    => bit_field_read_data(20 downto 20),
           o_sw_value        => bit_field_value(20 downto 20),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_rx_fifo_overflow,
           o_trigger         => o_qspi_int_ms_rx_fifo_overflow_trigger
         );
     end block;
@@ -1855,7 +1861,7 @@ begin
           i_sw_write_data   => bit_field_write_data(16 downto 16),
           o_sw_read_data    => bit_field_read_data(16 downto 16),
           o_sw_value        => bit_field_value(16 downto 16),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_tx_fifo_overflow,
           o_trigger         => o_qspi_int_ms_tx_fifo_overflow_trigger
         );
     end block;
@@ -1876,7 +1882,7 @@ begin
           i_sw_write_data   => bit_field_write_data(12 downto 12),
           o_sw_read_data    => bit_field_read_data(12 downto 12),
           o_sw_value        => bit_field_value(12 downto 12),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_rx_fifo_threshold,
           o_trigger         => o_qspi_int_ms_rx_fifo_threshold_trigger
         );
     end block;
@@ -1897,7 +1903,7 @@ begin
           i_sw_write_data   => bit_field_write_data(8 downto 8),
           o_sw_read_data    => bit_field_read_data(8 downto 8),
           o_sw_value        => bit_field_value(8 downto 8),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_tx_fifo_threshold,
           o_trigger         => o_qspi_int_ms_tx_fifo_threshold_trigger
         );
     end block;
@@ -1918,7 +1924,7 @@ begin
           i_sw_write_data   => bit_field_write_data(4 downto 4),
           o_sw_read_data    => bit_field_read_data(4 downto 4),
           o_sw_value        => bit_field_value(4 downto 4),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_rx_fifo_not_empty,
           o_trigger         => o_qspi_int_ms_rx_fifo_not_empty_trigger
         );
     end block;
@@ -1939,7 +1945,7 @@ begin
           i_sw_write_data   => bit_field_write_data(0 downto 0),
           o_sw_read_data    => bit_field_read_data(0 downto 0),
           o_sw_value        => bit_field_value(0 downto 0),
-          i_value           => (others => '0'),
+          i_value           => i_qspi_int_ms_tx_fifo_empty,
           o_trigger         => o_qspi_int_ms_tx_fifo_empty_trigger
         );
     end block;

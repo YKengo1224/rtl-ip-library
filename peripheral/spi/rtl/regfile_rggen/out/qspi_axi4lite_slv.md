@@ -187,14 +187,14 @@
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
 |reserve_6|[31:21]|reserved||||*1|
-|rx_fifo_overflow|[20]|w1trg|default: 0x0||||
+|rx_fifo_overflow|[20]|row1trg|default: 0x0||||
 |reserve_5|[19:17]|reserved||||*1|
-|tx_fifo_overflow|[16]|w1trg|default: 0x0||||
+|tx_fifo_overflow|[16]|row1trg|default: 0x0||||
 |reserve_4|[15:13]|reserved||||*1|
-|rx_fifo_threshold|[12]|w1trg|default: 0x0||||
+|rx_fifo_threshold|[12]|row1trg|default: 0x0||||
 |reserve_3|[11:9]|reserved||||*1|
-|tx_fifo_threshold|[8]|w1trg|default: 0x0||||
+|tx_fifo_threshold|[8]|row1trg|default: 0x0||||
 |reserve_2|[7:5]|reserved||||*1|
-|rx_fifo_not_empty|[4]|w1trg|default: 0x0||||
+|rx_fifo_not_empty|[4]|row1trg|default: 0x0||||
 |reserve_1|[3:1]|reserved||||*1|
-|tx_fifo_empty|[0]|w1trg|default: 0x0||||
+|tx_fifo_empty|[0]|row1trg|default: 0x0||||

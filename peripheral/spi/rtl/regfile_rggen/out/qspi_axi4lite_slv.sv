@@ -125,11 +125,17 @@ module qspi_axi4lite_slv
   input logic i_qspi_int_rs_tx_fifo_threshold,
   input logic i_qspi_int_rs_rx_fifo_not_empty,
   input logic i_qspi_int_rs_tx_fifo_empty,
+  input logic i_qspi_int_ms_rx_fifo_overflow,
   output logic o_qspi_int_ms_rx_fifo_overflow_trigger,
+  input logic i_qspi_int_ms_tx_fifo_overflow,
   output logic o_qspi_int_ms_tx_fifo_overflow_trigger,
+  input logic i_qspi_int_ms_rx_fifo_threshold,
   output logic o_qspi_int_ms_rx_fifo_threshold_trigger,
+  input logic i_qspi_int_ms_tx_fifo_threshold,
   output logic o_qspi_int_ms_tx_fifo_threshold_trigger,
+  input logic i_qspi_int_ms_rx_fifo_not_empty,
   output logic o_qspi_int_ms_rx_fifo_not_empty_trigger,
+  input logic i_qspi_int_ms_tx_fifo_empty,
   output logic o_qspi_int_ms_tx_fifo_empty_trigger
 );
   rggen_register_if #(8, 32, 32) register_if[10]();
@@ -1270,7 +1276,7 @@ module qspi_axi4lite_slv
     rggen_bit_field_if #(32) bit_field_if();
     `rggen_tie_off_unused_signals(32, 32'h00111111, bit_field_if)
     rggen_default_register #(
-      .READABLE       (0),
+      .READABLE       (1),
       .WRITABLE       (1),
       .ADDRESS_WIDTH  (8),
       .OFFSET_ADDRESS (8'h24),
@@ -1293,7 +1299,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_rx_fifo_overflow),
         .o_trigger    (o_qspi_int_ms_rx_fifo_overflow_trigger)
       );
     end
@@ -1307,7 +1313,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_tx_fifo_overflow),
         .o_trigger    (o_qspi_int_ms_tx_fifo_overflow_trigger)
       );
     end
@@ -1321,7 +1327,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_rx_fifo_threshold),
         .o_trigger    (o_qspi_int_ms_rx_fifo_threshold_trigger)
       );
     end
@@ -1335,7 +1341,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_tx_fifo_threshold),
         .o_trigger    (o_qspi_int_ms_tx_fifo_threshold_trigger)
       );
     end
@@ -1349,7 +1355,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_rx_fifo_not_empty),
         .o_trigger    (o_qspi_int_ms_rx_fifo_not_empty_trigger)
       );
     end
@@ -1363,7 +1369,7 @@ module qspi_axi4lite_slv
         .i_clk        (i_clk),
         .i_rst_n      (i_rst_n),
         .bit_field_if (bit_field_sub_if),
-        .i_value      ('0),
+        .i_value      (i_qspi_int_ms_tx_fifo_empty),
         .o_trigger    (o_qspi_int_ms_tx_fifo_empty_trigger)
       );
     end

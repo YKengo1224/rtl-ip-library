@@ -100,11 +100,17 @@ pub module qspi_axi4lite_slv #(
   i_qspi_int_rs_tx_fifo_threshold: input logic,
   i_qspi_int_rs_rx_fifo_not_empty: input logic,
   i_qspi_int_rs_tx_fifo_empty: input logic,
+  i_qspi_int_ms_rx_fifo_overflow: input logic,
   o_qspi_int_ms_rx_fifo_overflow_trigger: output logic,
+  i_qspi_int_ms_tx_fifo_overflow: input logic,
   o_qspi_int_ms_tx_fifo_overflow_trigger: output logic,
+  i_qspi_int_ms_rx_fifo_threshold: input logic,
   o_qspi_int_ms_rx_fifo_threshold_trigger: output logic,
+  i_qspi_int_ms_tx_fifo_threshold: input logic,
   o_qspi_int_ms_tx_fifo_threshold_trigger: output logic,
+  i_qspi_int_ms_rx_fifo_not_empty: input logic,
   o_qspi_int_ms_rx_fifo_not_empty_trigger: output logic,
+  i_qspi_int_ms_tx_fifo_empty: input logic,
   o_qspi_int_ms_tx_fifo_empty_trigger: output logic
 ){
   import rggen::rggen_rtl_pkg::*;
@@ -1206,7 +1212,7 @@ pub module qspi_axi4lite_slv #(
   :g_qspi_int_ms {
     inst bit_field_if: rggen::rggen_bit_field_if#(WIDTH: 32);
     inst u_register: rggen::rggen_default_register #(
-      READABLE:       false,
+      READABLE:       true,
       WRITABLE:       true,
       ADDRESS_WIDTH:  8,
       OFFSET_ADDRESS: 8'h24,
@@ -1237,6 +1243,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_rx_fifo_overflow,
         o_trigger:    o_qspi_int_ms_rx_fifo_overflow_trigger
       );
     }
@@ -1257,6 +1264,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_tx_fifo_overflow,
         o_trigger:    o_qspi_int_ms_tx_fifo_overflow_trigger
       );
     }
@@ -1277,6 +1285,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_rx_fifo_threshold,
         o_trigger:    o_qspi_int_ms_rx_fifo_threshold_trigger
       );
     }
@@ -1297,6 +1306,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_tx_fifo_threshold,
         o_trigger:    o_qspi_int_ms_tx_fifo_threshold_trigger
       );
     }
@@ -1317,6 +1327,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_rx_fifo_not_empty,
         o_trigger:    o_qspi_int_ms_rx_fifo_not_empty_trigger
       );
     }
@@ -1337,6 +1348,7 @@ pub module qspi_axi4lite_slv #(
         i_clk:        i_clk,
         i_rst:        i_rst,
         bit_field_if: bit_field_sub_if,
+        i_value:      i_qspi_int_ms_tx_fifo_empty,
         o_trigger:    o_qspi_int_ms_tx_fifo_empty_trigger
       );
     }

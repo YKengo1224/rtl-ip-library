@@ -17,6 +17,10 @@ module tb_top ();
     logic aresetn;
     logic srstn_sysclk;
 
+    wire  qspi_instr_aclk_o_r;
+
+
+
     initial begin
         aclk <= 1'b0;
         forever begin
@@ -117,7 +121,7 @@ module tb_top ();
         .qspi_sclk_in_i,
         .qspi_csn_in_i,
         .qspi_data_in_i,
-        .qspi_instr_aclk_o_r()
+        .qspi_instr_aclk_o_r(qspi_instr_aclk_o_r)
     );
 
     bfm_connect #(
@@ -144,7 +148,7 @@ module tb_top ();
         .sysclk             (aclk),
         .aresetn            (aresetn),
         .srstn_sysclk       (srstn_sysclk),
-        .qspi_instr_aclk_o_r()
+        .qspi_instr_aclk_o_r(qspi_instr_aclk_o_r)
     );
 
 

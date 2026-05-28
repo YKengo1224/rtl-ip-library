@@ -29,7 +29,7 @@ class tb_seq_base extends uvm_sequence;
         end
     endtask
 
-    virtual task write_reg(bit [63:0] addr, bit [15:0] id = 0, bit [2:0] prot = 0, int xfer_bytes,
+    virtual task write_reg(bit [63:0] addr, bit [15:0] id = 0, bit [2:0] prot = 0, int wstrb,
                            bit [63:0] data);
         `uvm_do_on_with(reg_write, p_sequencer.axi4lite_m_sqr,
                         {
@@ -37,7 +37,7 @@ class tb_seq_base extends uvm_sequence;
         id==local::id;
         prot==local::prot;
         data==local::data;
-        xfer_bytes==local::xfer_bytes;
+        wstrb==local::wstrb;
         })
     endtask
 
@@ -94,7 +94,7 @@ class tb_seq_base extends uvm_sequence;
                     {2'b0, trans_dir},
                     4'b1
                 };
-                write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+                write_reg(.addr(32'h0000), .id(0), .prot(0), .wstrb(4'b1111), .data(write_data));
             end
             2: begin
                 write_data = {
@@ -107,7 +107,7 @@ class tb_seq_base extends uvm_sequence;
                     {2'b0, trans_dir},
                     4'b1
                 };
-                write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+                write_reg(.addr(32'h0000), .id(0), .prot(0), .wstrb(4'b1111), .data(write_data));
             end
             4: begin
                 write_data = {
@@ -120,7 +120,7 @@ class tb_seq_base extends uvm_sequence;
                     {2'b0, trans_dir},
                     4'b1
                 };
-                write_reg(.addr(32'h0000), .id(0), .prot(0), .xfer_bytes(4), .data(write_data));
+                write_reg(.addr(32'h0000), .id(0), .prot(0), .wstrb(4'b1111), .data(write_data));
             end
         endcase
         config_qspi(.bfm_sel(bfm_sel), .is_master(spi_slave_en), .is_lsb(order), .pha(mode[0]),

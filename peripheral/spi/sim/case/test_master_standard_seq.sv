@@ -16,21 +16,21 @@ class test_master_standard_seq extends tb_seq_base;
         $display("MODE 0 TEST");
         $display("===============================================");
         std_seq(2'b00);
-        // $display("===============================================");
-        // $display("MODE 1 TEST");
-        // $display("===============================================");
-        // std_seq(2'b01);
+        $display("===============================================");
+        $display("MODE 1 TEST");
+        $display("===============================================");
+        std_seq(2'b01);
 
 
-        // $display("===============================================");
-        // $display("MODE 2 TEST");
-        // $display("===============================================");
-        // std_seq(2'b10);
+        $display("===============================================");
+        $display("MODE 2 TEST");
+        $display("===============================================");
+        std_seq(2'b10);
 
-        // $display("===============================================");
-        // $display("MODE 3 TEST");
-        // $display("===============================================");
-        // std_seq(2'b11);
+        $display("===============================================");
+        $display("MODE 3 TEST");
+        $display("===============================================");
+        std_seq(2'b11);
 
     endtask
 
@@ -47,7 +47,7 @@ class test_master_standard_seq extends tb_seq_base;
             bfm_push_data(0, 16'hAA + i);
         end
         for (int i = 0; i < 4; i++) begin
-            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hBB + i));
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'hBB + i));
         end
 
         for (int i = 0; i < 4; i++) begin
@@ -67,7 +67,7 @@ class test_master_standard_seq extends tb_seq_base;
             bfm_push_data(0, 16'hCC + i);
         end
         for (int i = 0; i < 4; i++) begin
-            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0));
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0));
         end
 
         for (int i = 0; i < 4; i++) begin
@@ -83,7 +83,7 @@ class test_master_standard_seq extends tb_seq_base;
 
 
         for (int i = 0; i < 4; i++) begin
-            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hDD + i));
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'hDD + i));
         end
 
 
@@ -102,7 +102,7 @@ class test_master_standard_seq extends tb_seq_base;
             bfm_push_data(0, 16'hCC + i);
         end
         for (int i = 0; i < 4; i++) begin
-            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'h0));
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0));
         end
 
         for (int i = 0; i < 4; i++) begin
@@ -118,7 +118,7 @@ class test_master_standard_seq extends tb_seq_base;
 
 
         for (int i = 0; i < 4; i++) begin
-            write_reg(.addr(32'h0010), .id(0), .prot(0), .xfer_bytes(4), .data(32'hDD + i));
+            write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'hDD + i));
         end
 
 

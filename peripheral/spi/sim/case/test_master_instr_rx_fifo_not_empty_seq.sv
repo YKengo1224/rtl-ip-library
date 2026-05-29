@@ -1,7 +1,7 @@
-class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
-    `uvm_object_utils(test_master_instr_tx_fifo_threshold_seq)
+class test_master_instr_rx_fifo_not_empty_seq extends tb_seq_base;
+    `uvm_object_utils(test_master_instr_rx_fifo_not_empty_seq)
 
-    function new(string name = "test_master_instr_tx_fifo_threshold_seq");
+    function new(string name = "test_master_instr_rx_fifo_not_empty_seq");
         super.new(name);
         set_automatic_phase_objection(1);
     endfunction
@@ -22,7 +22,7 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
         bit [63:0] rdata;
         //instr
         if (instr_en) begin
-            write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_0002));
+            write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_0010));
         end else begin
             write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_0000));
         end
@@ -34,11 +34,11 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
              .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
 
         for (int i = 0; i < 2; i++) begin
-           `uvm_info("SEQ", $sformatf("------- loop : %0d", i), UVM_LOW)
-            for (int i = 0; i < level+1; i++) begin
+            `uvm_info("SEQ", $sformatf("------- loop : %0d", i), UVM_LOW)
+            for (int i = 0; i < level + 1; i++) begin
                 bfm_push_data(0, 16'hAA + i);
             end
-            for (int i = 0; i < level+1; i++) begin
+            for (int i = 0; i < level + 1; i++) begin
                 write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'hBB + i));
             end
 
@@ -83,6 +83,20 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
 
                     read_reg(.addr(32'h0020), .id(0), .prot(0), .data(rdata));
                     `uvm_info("SEQ", $sformatf("INSTR_RS:%0h", rdata), UVM_LOW)
+
+
+                    //read_reg
+                    forever begin
+                        read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+                        if (!rdata[24]) break;
+                    end
+
+                    forever begin
+                        read_reg(.addr(32'h001C), .id(0), .prot(0), .data(rdata));
+                        if (rdata[12]) break;
+                        else read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
+                    end
+
                 end
             join
         end

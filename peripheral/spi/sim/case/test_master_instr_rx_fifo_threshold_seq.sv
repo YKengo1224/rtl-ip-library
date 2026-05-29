@@ -1,7 +1,7 @@
-class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
-    `uvm_object_utils(test_master_instr_tx_fifo_threshold_seq)
+class test_master_instr_rx_fifo_threshold_seq extends tb_seq_base;
+    `uvm_object_utils(test_master_instr_rx_fifo_threshold_seq)
 
-    function new(string name = "test_master_instr_tx_fifo_threshold_seq");
+    function new(string name = "test_master_instr_rx_fifo_threshold_seq");
         super.new(name);
         set_automatic_phase_objection(1);
     endfunction
@@ -24,7 +24,7 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
         bit [63:0] rdata;
         //instr
         if (instr_en) begin
-            write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_0100));
+            write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_1000));
         end else begin
             write_reg(.addr(32'h0014), .id(0), .prot(0), .wstrb(4'b1111), .data(32'h0000_0000));
         end
@@ -34,28 +34,18 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
                   .data({level[4:0], 3'd0, level[4:0]}));
         `uvm_info("SEQ", $sformatf("intr:%0d", moni_vif.qspi_instr_aclk_o_r), UVM_LOW)
 
-        `uvm_info("SEQ", $sformatf("intr:%0d", moni_vif.qspi_instr_aclk_o_r), UVM_LOW)
-
         //Single
         conf(.mode(0), .protocol_sel(1), .trans_dir(0), .word_width(8), .spi_slave_en(0), .order(0),
              .rx_latch_delay(0), .bfm_sel(0), .clock_period_ps(2500));
 
         for (int i = 0; i < 2; i++) begin
             `uvm_info("SEQ", $sformatf("------- loop : %0d", i), UVM_LOW)
-
-            //disable
-            write_reg(.addr(32'h0000), .id(0), .prot(0), .wstrb(4'b0001), .data(0));
-
-
-            for (int i = 0; i < (32 - level + 1); i++) begin
+            for (int i = 0; i < level + 4; i++) begin
                 bfm_push_data(0, 16'hAA + i);
             end
-            for (int i = 0; i < (32 - level + 1); i++) begin
+            for (int i = 0; i < level + 4; i++) begin
                 write_reg(.addr(32'h0010), .id(0), .prot(0), .wstrb(4'b1111), .data(32'hBB + i));
             end
-
-            //enable
-            write_reg(.addr(32'h0000), .id(0), .prot(0), .wstrb(4'b0001), .data(1));
 
             fork
                 begin : TIME_OUT
@@ -96,7 +86,7 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
                     `uvm_info("SEQ", "result clear...", UVM_LOW)
 
                     write_reg(.addr(32'h0024), .id(0), .prot(0), .wstrb(4'b1111),
-                              .data(32'h0000_0100));
+                              .data(32'h0000_1000));
 
 
                     read_reg(.addr(32'h0024), .id(0), .prot(0), .data(rdata));
@@ -104,7 +94,6 @@ class test_master_instr_tx_fifo_threshold_seq extends tb_seq_base;
 
                     read_reg(.addr(32'h0020), .id(0), .prot(0), .data(rdata));
                     `uvm_info("SEQ", $sformatf("INSTR_RS:%0h", rdata), UVM_LOW)
-
 
 
                     //read_reg

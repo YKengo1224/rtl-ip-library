@@ -26,12 +26,12 @@ module qspi_instr_gen #(
     input wire [4:0] qspi_threshold_level_rx_threshold_level_aclk_i,
     input wire [4:0] qspi_threshold_level_tx_threshold_level_aclk_i,
 
-    input logic qspi_int_ms_rx_fifo_overflow_crear_trigger_aclk_i,
-    input logic qspi_int_ms_tx_fifo_overflow_crear_trigger_aclk_i,
-    input logic qspi_int_ms_rx_fifo_threshold_crear_trigger_aclk_i,
-    input logic qspi_int_ms_tx_fifo_threshold_crear_trigger_aclk_i,
-    input logic qspi_int_ms_rx_fifo_not_empty_crear_trigger_aclk_i,
-    input logic qspi_int_ms_tx_fifo_empty_crear_trigger_aclk_i,
+    input wire qspi_int_ms_rx_fifo_overflow_crear_trigger_aclk_i,
+    input wire qspi_int_ms_tx_fifo_overflow_crear_trigger_aclk_i,
+    input wire qspi_int_ms_rx_fifo_threshold_crear_trigger_aclk_i,
+    input wire qspi_int_ms_tx_fifo_threshold_crear_trigger_aclk_i,
+    input wire qspi_int_ms_rx_fifo_not_empty_crear_trigger_aclk_i,
+    input wire qspi_int_ms_tx_fifo_empty_crear_trigger_aclk_i,
 
 
     output logic qspi_int_rs_rx_fifo_overflow_aclk_o_r,
@@ -88,8 +88,8 @@ module qspi_instr_gen #(
     always_comb begin
         rx_fifo_overflow_aclk = (qspi_status_rx_fifo_full_aclk_i && qspi_data_rx_data_write_trigger_aclk_i);
         tx_fifo_overflow_aclk = (qspi_status_tx_fifo_full_aclk_i && qspi_data_tx_data_write_trigger_aclk_i);
-        rx_fifo_threshold_aclk = (qspi_status_rx_fifo_num_aclk_i <= qspi_threshold_level_rx_threshold_level_aclk_i);
-        tx_fifo_threshold_aclk = (qspi_status_tx_fifo_available_aclk_i <= qspi_threshold_level_tx_threshold_level_aclk_i);
+        rx_fifo_threshold_aclk = (qspi_status_rx_fifo_num_aclk_i >= qspi_threshold_level_rx_threshold_level_aclk_i);
+        tx_fifo_threshold_aclk = (qspi_status_tx_fifo_available_aclk_i >= qspi_threshold_level_tx_threshold_level_aclk_i);
         rx_fifo_not_empty_aclk = !qspi_status_rx_fifo_empty_aclk_i;
         tx_fifo_empty_aclk = qspi_status_tx_fifo_empty_aclk_i;
     end

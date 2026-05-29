@@ -185,13 +185,13 @@ module qspi_fifo_async #(
             full_wclkr <= '0;
             almost_full_wclkr <= '0;
             almost_empty_wclkr <= '1;
-            fifo_available_wclkr <= '0;
+            fifo_available_wclkr <= FIFO_SIZE;
         end else begin
             empty_wclkr <= (w_ptr_next == r_ptr_wclk);
             full_wclkr <= (fifo_cnt_wclk >= FIFO_SIZE);
             almost_full_wclkr <= (fifo_cnt_wclk >= ALMOST_FULL_SIZE);
             almost_empty_wclkr <= (fifo_cnt_wclk < ALMOST_EMPTY_SIZE);
-            fifo_available_wclkr <= fifo_cnt_wclk;
+            fifo_available_wclkr <= FIFO_SIZE - fifo_cnt_wclk;
         end
     end
 
@@ -201,13 +201,13 @@ module qspi_fifo_async #(
             full_rclkr <= '0;
             almost_full_rclkr <= '0;
             almost_empty_rclkr <= '1;
-            fifo_available_rclkr <= '0;
+            fifo_available_rclkr <= FIFO_SIZE;
         end else begin
             empty_rclkr <= (w_ptr_rclk == r_ptr_next);
             full_rclkr <= (fifo_cnt_rclk >= FIFO_SIZE);
             almost_full_rclkr <= (fifo_cnt_rclk >= ALMOST_FULL_SIZE);
             almost_empty_rclkr <= (fifo_cnt_rclk < ALMOST_EMPTY_SIZE);
-            fifo_available_rclkr <= fifo_cnt_rclk;
+            fifo_available_rclkr <= FIFO_SIZE - fifo_cnt_rclk;
         end
     end
 

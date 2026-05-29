@@ -199,9 +199,9 @@
 | Bit     | Field名           | Read/Write | 初期値 | 概要                                                  |
 |---------|-------------------|------------|--------|-------------------------------------------------------|
 | [32:13] | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。 |
-| [12:8]  | rx_theshold_level | R/W        |        | rx_fifo_threshold割り込みのトリガーレベルを設定します |
+| [12:8]  | rx_theshold_level | R/W        | 5'hA   | rx_fifo_threshold割り込みのトリガーレベルを設定します |
 | [7:5]   | Researved         | -          |        | 書き込みは無視されます。読み出しは0が読み出されます。 |
-| [4:0]   | tx_theshold_level | R/W        |        | tx_fifo_threshold割り込みのトリガーレベルを設定します |
+| [4:0]   | tx_theshold_level | R/W        | 5'hA   | tx_fifo_threshold割り込みのトリガーレベルを設定します |
 
 
 ## QSPI_STATUS

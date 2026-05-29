@@ -129,9 +129,9 @@
 |name|bit_assignments|type|initial_value|reference|labels|comment|
 |:--|:--|:--|:--|:--|:--|:--|
 |reserve_1|[31:13]|reserved||||*1|
-|rx_threshold_level|[12:8]|rw|default: 0x00||||
+|rx_threshold_level|[12:8]|rw|default: 0x0a||||
 |reserve_0|[6:5]|reserved||||*1|
-|tx_threshold_level|[4:0]|rw|default: 0x00||||
+|tx_threshold_level|[4:0]|rw|default: 0x0a||||
 
 ### <div id="qspi_axi4lite_slv-qspi_status"></div>qspi_status
 

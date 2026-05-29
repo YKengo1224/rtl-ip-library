@@ -98,8 +98,8 @@ package qspi_axi4lite_slv_ral_pkg;
       super.new(name, 32, 0);
     endfunction
     function void build();
-      `rggen_ral_create_field(rx_threshold_level, 8, 5, "RW", 0, 5'h00, '{}, 1, 0, 0, "")
-      `rggen_ral_create_field(tx_threshold_level, 0, 5, "RW", 0, 5'h00, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(rx_threshold_level, 8, 5, "RW", 0, 5'h0a, '{}, 1, 0, 0, "")
+      `rggen_ral_create_field(tx_threshold_level, 0, 5, "RW", 0, 5'h0a, '{}, 1, 0, 0, "")
     endfunction
   endclass
   class qspi_status_reg_model extends rggen_ral_reg;

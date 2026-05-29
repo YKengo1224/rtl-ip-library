@@ -36,8 +36,8 @@ entity qspi_axi4lite_slv is
     QSPI_INT_TX_FIFO_THRESHOLD_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_INT_RX_FIFO_NOT_EMPTY_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_INT_TX_FIFO_EMPTY_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
-    QSPI_THRESHOLD_LEVEL_RX_THRESHOLD_LEVEL_INITIAL_VALUE: unsigned(4 downto 0) := repeat(x"00", 5, 1);
-    QSPI_THRESHOLD_LEVEL_TX_THRESHOLD_LEVEL_INITIAL_VALUE: unsigned(4 downto 0) := repeat(x"00", 5, 1);
+    QSPI_THRESHOLD_LEVEL_RX_THRESHOLD_LEVEL_INITIAL_VALUE: unsigned(4 downto 0) := repeat(x"0a", 5, 1);
+    QSPI_THRESHOLD_LEVEL_TX_THRESHOLD_LEVEL_INITIAL_VALUE: unsigned(4 downto 0) := repeat(x"0a", 5, 1);
     QSPI_STATUS_SPI_BUSY_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);
     QSPI_STATUS_RX_FIFO_NUM_INITIAL_VALUE: unsigned(4 downto 0) := repeat(x"00", 5, 1);
     QSPI_STATUS_RX_FIFO_FULL_INITIAL_VALUE: unsigned(0 downto 0) := repeat(x"0", 1, 1);

@@ -207,7 +207,7 @@ register_block{
       name 'reserve_1'; bit_assignment lsb: 13,width: 19; type  :reserved; comment '*1'
     }    
     bit_field {      
-      name 'rx_threshold_level'; bit_assignment lsb: 8, width: 5; type :rw; initial_value default: 0
+      name 'rx_threshold_level'; bit_assignment lsb: 8, width: 5; type :rw; initial_value default: 10
     }
     
 
@@ -215,7 +215,7 @@ register_block{
       name 'reserve_0'; bit_assignment lsb: 5,width: 2; type  :reserved; comment '*1'
     }    
     bit_field {      
-      name 'tx_threshold_level'; bit_assignment lsb: 0, width: 5; type :rw; initial_value default: 0
+      name 'tx_threshold_level'; bit_assignment lsb: 0, width: 5; type :rw; initial_value default: 10
     }
 
   }

@@ -12,6 +12,7 @@ package case_pkg;
     `include "test_master_instr_rx_fifo_not_empty_seq.sv"
     `include "test_master_instr_tx_fifo_threshold_seq.sv"
     `include "test_master_instr_rx_fifo_threshold_seq.sv"
+    `include "test_master_instr_fifo_overflow_seq.sv"
 
 endpackage
 

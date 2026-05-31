@@ -72,7 +72,7 @@ module qspi_core #(
 
 
     // clock divisor signal
-    logic  [31:0] divisor_count_max;
+    logic  [31:0] divisor_count_max_r;
     logic         master_first_edge_sysclk_r;
     logic         master_second_edge_sysclk_r;
     logic  [31:0] divisor_count_sysclk_r;
@@ -83,6 +83,8 @@ module qspi_core #(
     // clock edge select
     logic         shift_edge_sysclk;
     logic         sample_edge_sysclk;
+    logic         shift_edge_sysclk_r;
+    logic         sample_edge_sysclk_r;
     // trans bit counter
     logic         transaction_start_sysclk;
     logic  [ 4:0] trans_bit_counter_sysclk_r;
@@ -178,17 +180,25 @@ module qspi_core #(
     // clock_divisor
     //-----------------------------------
 
-    assign divisor_count_max = (1 << (qspi_master_clk_clk_divisor_sysclk_i + 1));
+    // assign divisor_count_max = (1 << (qspi_master_clk_clk_divisor_sysclk_i + 1));
+
+    always_ff @(posedge sysclk or negedge srstn_sysclk) begin
+        if (!srstn_sysclk) begin
+            divisor_count_max_r <= '0;
+        end else begin
+            divisor_count_max_r <= (1 << (qspi_master_clk_clk_divisor_sysclk_i + 1));
+        end
+    end
 
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
             master_first_edge_sysclk_r  <= 1'b0;
             master_second_edge_sysclk_r <= 1'b0;
         end else if ((state_next != S_IDLE) && (state_next != S_FETCH) && (state != S_FETCH)) begin
-            if (divisor_count_sysclk_r == ((divisor_count_max >> 1) - 1)) begin
+            if (divisor_count_sysclk_r == ((divisor_count_max_r >> 1) - 1)) begin
                 master_first_edge_sysclk_r  <= 1'b1;
                 master_second_edge_sysclk_r <= 1'b0;
-            end else if (divisor_count_sysclk_r == (divisor_count_max - 1)) begin
+            end else if (divisor_count_sysclk_r == (divisor_count_max_r - 1)) begin
                 master_first_edge_sysclk_r  <= 1'b0;
                 master_second_edge_sysclk_r <= 1'b1;
             end else begin
@@ -216,7 +226,7 @@ module qspi_core #(
         if (!srstn_sysclk) begin
             divisor_count_sysclk_r <= '0;
         end else if ((state_next != S_IDLE) && (master_detect)) begin
-            if (divisor_count_sysclk_r == (divisor_count_max - 1)) begin
+            if (divisor_count_sysclk_r == (divisor_count_max_r - 1)) begin
                 divisor_count_sysclk_r <= '0;
             end else begin
                 divisor_count_sysclk_r <= divisor_count_sysclk_r + 'd1;
@@ -247,6 +257,8 @@ module qspi_core #(
     // clock edge select
     //-----------------------------------
     always_comb begin
+        shift_edge_sysclk  = 1'b0;
+        sample_edge_sysclk = 1'b0;
         if (master_detect) begin
             if (qspi_ctrl_cpha_sysclk_i) begin
                 shift_edge_sysclk  = master_first_edge_sysclk_r;
@@ -262,27 +274,30 @@ module qspi_core #(
             end else if (!qspi_ctrl_cpol_sysclk_i && qspi_ctrl_cpha_sysclk_i) begin
                 shift_edge_sysclk  = slave_posedge_sysclk;
                 sample_edge_sysclk = slave_negedge_sysclk;
-            end
-            if (qspi_ctrl_cpol_sysclk_i && !qspi_ctrl_cpha_sysclk_i) begin
+            end else if (qspi_ctrl_cpol_sysclk_i && !qspi_ctrl_cpha_sysclk_i) begin
                 shift_edge_sysclk  = slave_posedge_sysclk;
                 sample_edge_sysclk = slave_negedge_sysclk;
             end else if (qspi_ctrl_cpol_sysclk_i && qspi_ctrl_cpha_sysclk_i) begin
                 shift_edge_sysclk  = slave_negedge_sysclk;
                 sample_edge_sysclk = slave_posedge_sysclk;
             end
-        end else begin
-            shift_edge_sysclk  = 1'b0;
-            sample_edge_sysclk = 1'b0;
         end
     end
-
-
+    always_ff @(posedge sysclk or negedge srstn_sysclk) begin
+        if (!srstn_sysclk) begin
+            shift_edge_sysclk_r  <= 1'b0;
+            sample_edge_sysclk_r <= 1'b0;
+        end else begin
+            shift_edge_sysclk_r  <= shift_edge_sysclk;
+            sample_edge_sysclk_r <= sample_edge_sysclk;
+        end
+    end
 
     //-----------------------------------
     // trans_bit_counter
     //-----------------------------------    
     assign transaction_start_sysclk = ((state == S_IDLE) && (state_next != S_IDLE));
-    assign finish_trans_sysclk = (shift_edge_sysclk && (trans_bit_counter_sysclk_r == (max_trans_bit_counter_sysclk_r)));
+    assign finish_trans_sysclk = (shift_edge_sysclk_r && (trans_bit_counter_sysclk_r == (max_trans_bit_counter_sysclk_r)));
 
 
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
@@ -311,7 +326,7 @@ module qspi_core #(
         end else if ((state_next != S_IDLE)) begin
             if (!qspi_ctrl_cpha_sysclk_i && (state == S_FETCH) && (state_next == S_SEND)) begin
                 trans_bit_counter_next_sysclk = 5'b1;
-            end else if (shift_edge_sysclk) begin
+            end else if (shift_edge_sysclk_r) begin
                 if (trans_bit_counter_sysclk_r == (max_trans_bit_counter_sysclk_r)) begin
                     trans_bit_counter_next_sysclk = 5'b1;
                 end else begin
@@ -461,7 +476,7 @@ module qspi_core #(
 
     always_comb begin
         if (latch_delay_count_max == 5'd0) begin
-            rx_data_latch_en = sample_edge_sysclk;
+            rx_data_latch_en = sample_edge_sysclk_r;
             finish_latch_sysclk = finish_trans_sysclk;
         end else begin
             rx_data_latch_en = (latch_delay_count_r == latch_delay_count_max);
@@ -471,7 +486,7 @@ module qspi_core #(
 
 
     always_comb begin
-        if (sample_edge_sysclk && (latch_delay_count_max != 5'd0)) begin
+        if (sample_edge_sysclk_r && (latch_delay_count_max != 5'd0)) begin
             latch_delay_count_next = 5'd1;
         end else if (latch_delay_count_r != 5'd0) begin
             if (rx_data_latch_en) begin
@@ -600,66 +615,6 @@ module qspi_core #(
     end
 
 
-    // always_ff @(posedge sysclk or negedge srstn_sysclk) begin
-    //     if (!srstn_sysclk) begin
-    //         qspi_rx_fifo_data_in_sysclk_o_r <= 16'd0;
-    //         qspi_rx_fifo_w_en_sysclk_o_r <= 1'b0;
-    //     end else if (finish_latch_sysclk) begin
-    //         case (qspi_ctrl_protocol_sel_sysclk_i)
-    //             SINGLE_SPI_MODE: begin
-    //                 qspi_rx_fifo_w_en_sysclk_o_r <= 1'b1;
-    //                 if (qspi_ctrl_order_sysclk_i) begin
-    //                     qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                         single_spi_rx_bit_sysclk, rx_data_sysclk_r[15:1]
-    //                     } >> (16 - qspi_ctrl_word_width_sysclk_i);
-    //                 end else begin
-    //                     qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                         rx_data_sysclk_r[15:1], single_spi_rx_bit_sysclk
-    //                     };
-
-    //                 end
-    //             end
-    //             DUAL_SPI_MODE: begin
-    //                 if (qspi_ctrl_trans_dir_sysclk_i == 2'b0) begin
-    //                     qspi_rx_fifo_w_en_sysclk_o_r <= 1'b1;
-    //                     if (qspi_ctrl_order_sysclk_i) begin
-    //                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                             8'd0, qspi_data_in_sysclk_i[1:0], rx_data_sysclk_r[7:2]
-    //                         };
-    //                     end else begin
-    //                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                             8'd0, rx_data_sysclk_r[5:0], qspi_data_in_sysclk_i[1:0]
-    //                         };
-    //                     end
-    //                 end else begin
-    //                     qspi_rx_fifo_w_en_sysclk_o_r <= 1'b0;
-    //                     qspi_rx_fifo_data_in_sysclk_o_r <= '0;
-    //                 end
-    //             end
-    //             QUAD_SPI_MODE: begin
-    //                 if (qspi_ctrl_trans_dir_sysclk_i == 2'b0) begin
-    //                     qspi_rx_fifo_w_en_sysclk_o_r <= 1'b1;
-    //                     if (qspi_ctrl_order_sysclk_i) begin
-    //                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                             8'd0, qspi_data_in_sysclk_i[3:0], rx_data_sysclk_r[7:4]
-    //                         };
-    //                     end else begin
-    //                         qspi_rx_fifo_data_in_sysclk_o_r <= {
-    //                             8'd0, rx_data_sysclk_r[3:0], qspi_data_in_sysclk_i[3:0]
-    //                         };
-    //                     end
-    //                 end else begin
-    //                     qspi_rx_fifo_w_en_sysclk_o_r <= 1'b0;
-    //                     qspi_rx_fifo_data_in_sysclk_o_r <= '0;
-    //                 end
-    //             end
-    //         endcase
-    //     end else begin
-    //         qspi_rx_fifo_data_in_sysclk_o_r <= 16'd0;
-    //         qspi_rx_fifo_w_en_sysclk_o_r <= 1'b0;
-    //     end
-    // end
-
 
     //-----------------------------------
     // generate clk
@@ -676,7 +631,7 @@ module qspi_core #(
                     qspi_sclk_out_sysclk_o_r <= qspi_ctrl_cpol_sysclk_i;
                 end
                 S_SEND, S_SEND_FETCH: begin
-                    if (shift_edge_sysclk || sample_edge_sysclk) begin
+                    if (shift_edge_sysclk_r || sample_edge_sysclk_r) begin
                         qspi_sclk_out_sysclk_o_r <= ~qspi_sclk_out_sysclk_o_r;
                     end
                 end

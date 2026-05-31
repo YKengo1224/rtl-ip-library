@@ -60,7 +60,7 @@ class test_master_cs_ctrl_seq extends tb_seq_base;
         for (int i = 0; i < 4; i++) begin
             do begin
                 read_reg(.addr(32'h001c), .id(0), .prot(0), .data(rdata));
-            end while (!rdata[0]);
+            end while (rdata[12]);
             read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
         end
         wait_clk(10);
@@ -93,7 +93,7 @@ class test_master_cs_ctrl_seq extends tb_seq_base;
         for (int i = 0; i < 4; i++) begin
             do begin
                 read_reg(.addr(32'h001c), .id(0), .prot(0), .data(rdata));
-            end while (!rdata[0]);
+            end while (rdata[12]);
             read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
         end
 
@@ -113,7 +113,7 @@ class test_master_cs_ctrl_seq extends tb_seq_base;
         for (int i = 0; i < 4; i++) begin
             do begin
                 read_reg(.addr(32'h001c), .id(0), .prot(0), .data(rdata));
-            end while (!rdata[0]);
+            end while (rdata[12]);
             read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
         end
 
@@ -148,7 +148,7 @@ class test_master_cs_ctrl_seq extends tb_seq_base;
         for (int i = 0; i < 4; i++) begin
             do begin
                 read_reg(.addr(32'h001c), .id(0), .prot(0), .data(rdata));
-            end while (!rdata[0]);
+            end while (rdata[12]);
             read_reg(.addr(32'h0010), .id(0), .prot(0), .data(rdata));
         end
 

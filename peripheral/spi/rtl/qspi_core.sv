@@ -73,6 +73,7 @@ module qspi_core #(
 
     // clock divisor signal
     logic  [31:0] divisor_count_max_r;
+    logic  [31:0] divisor_count_max_half_r;
     logic         master_first_edge_sysclk_r;
     logic         master_second_edge_sysclk_r;
     logic  [31:0] divisor_count_sysclk_r;
@@ -186,8 +187,10 @@ module qspi_core #(
     always_ff @(posedge sysclk or negedge srstn_sysclk) begin
         if (!srstn_sysclk) begin
             divisor_count_max_r <= '0;
+            divisor_count_max_half_r <= '0;
         end else begin
-            divisor_count_max_r <= (1 << (qspi_master_clk_clk_divisor_sysclk_i + 1));
+            divisor_count_max_r <= (1 << (qspi_master_clk_clk_divisor_sysclk_i + 1))-1;
+            divisor_count_max_half_r <= (1 << (qspi_master_clk_clk_divisor_sysclk_i))-1;
         end
     end
 
@@ -196,10 +199,10 @@ module qspi_core #(
             master_first_edge_sysclk_r  <= 1'b0;
             master_second_edge_sysclk_r <= 1'b0;
         end else if ((state_next != S_IDLE) && (state_next != S_FETCH) && (state != S_FETCH)) begin
-            if (divisor_count_sysclk_r == ((divisor_count_max_r >> 1) - 1)) begin
+            if (divisor_count_sysclk_r == divisor_count_max_half_r) begin
                 master_first_edge_sysclk_r  <= 1'b1;
                 master_second_edge_sysclk_r <= 1'b0;
-            end else if (divisor_count_sysclk_r == (divisor_count_max_r - 1)) begin
+            end else if (divisor_count_sysclk_r == divisor_count_max_r) begin
                 master_first_edge_sysclk_r  <= 1'b0;
                 master_second_edge_sysclk_r <= 1'b1;
             end else begin
@@ -227,7 +230,7 @@ module qspi_core #(
         if (!srstn_sysclk) begin
             divisor_count_sysclk_r <= '0;
         end else if ((state_next != S_IDLE) && (master_detect)) begin
-            if (divisor_count_sysclk_r == (divisor_count_max_r - 1)) begin
+            if (divisor_count_sysclk_r == divisor_count_max_r) begin
                 divisor_count_sysclk_r <= '0;
             end else begin
                 divisor_count_sysclk_r <= divisor_count_sysclk_r + 'd1;

@@ -1,0 +1,56 @@
+echo on
+
+plugin -i slang
+
+read_slang --top qspi_top -f ../rtl/filelist.f 
+# read_slang ../rtl/regfile_rggen/rggen-sv-rtl/rggen_backdoor_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_backdoor_pkg.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_backdoor.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_rtl_pkg.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_or_reducer.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_mux.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_bit_field_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_bit_field.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_bit_field_counter.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_bit_field_w01trg.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_register_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_address_decoder.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_register_common.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_default_register.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_external_register.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_indirect_register.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_maskable_register.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_bus_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_adapter_common.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_apb_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_apb_adapter.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_apb_bridge.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_axi4lite_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_axi4lite_skid_buffer.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_axi4lite_adapter.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_axi4lite_bridge.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_avalon_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_avalon_adapter.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_avalon_bridge.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_wishbone_if.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_wishbone_adapter.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_wishbone_bridge.sv
+#  ../rtl/regfile_rggen/rggen-sv-rtl/rggen_native_adapter.sv
+#  ../rtl/regfile_rggen/out/qspi_axi4lite_slv_rtl_pkg.sv
+#  ../rtl/regfile_rggen/out/qspi_axi4lite_slv.sv
+#  ../rtl/qspi_pkg.sv
+#  ../rtl/qspi_axi4lite_connector.sv
+#  ../rtl/qspi_core.sv
+#  ../rtl/qspi_fifo_async.sv
+#  ../rtl/qspi_instr_gen.sv
+#  ../rtl/qspi_rx_fifo_async.sv
+#  ../rtl/qspi_tx_fifo_async.sv  
+#  ../rtl/qspi_synchronizer.sv
+#  ../rtl/qspi_sync_pclk2sysclk.sv
+#  ../rtl/qspi_top.sv
+
+hierarchy -check -top qspi_top
+
+synth_xilinx -family xc7
+
+write_json top_synth.json

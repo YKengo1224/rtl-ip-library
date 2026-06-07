@@ -1,0 +1,262 @@
+# UART Register Map Definition
+# このファイルを yaml.safe_load() で読み込むと自動生成スクリプトの入力として利用できます。
+
+registers:
+  - name: UART_CTRL
+    offset: 0x00
+    description: "UART Control"
+    fields:
+      - name: uart_enable
+        bits: "0"
+        access: RW
+        init: 0
+        description: "0:uart動作停止, 1:uart動作開始"
+
+  - name: UART_CONF_FRAME
+    offset: 0x04
+    description: "UART Config Frame"
+    fields:
+      - name: conf_data_bit_width
+        bits: "11:8"
+        access: RW
+        init: 8
+        description: "データビット幅(5~9)*0~4はreseaved"
+      - name: conf_stop_bit_width_sel
+        bits: "5:4"
+        access: RW
+        init: 1
+        description: "0: 0.5bit, 1: 1bit, 0x2:1.5bit, 0x3:2bit"
+      - name: conf_parity_bit
+        bits: "1:0"
+        access: RW
+        init: 0
+        description: "0x0: 無効、 0x1:奇数、 0x2:偶数"
+
+  - name: UART_CONF_MODE
+    offset: 0x08
+    description: "UART Mode Config"
+    fields:
+      - name: conf_tx_env
+        bits: "9"
+        access: RW
+        init: 0
+        description: "tx送信極性変更 0x0:無効、0x1:有効"
+      - name: conf_rx_env
+        bits: "8"
+        access: RW
+        init: 0
+        description: "rx送信極性変更 0x0:無効、0x1:有効"
+      - name: conf_break_en
+        bits: "5"
+        access: RW
+        init: 0
+        description: "break送信 0x0:無効、0x1:有効"
+      - name: conf_idle_en
+        bits: "4"
+        access: RW
+        init: 0
+        description: "idle送信 0x0:無効、0x1:有効"
+      - name: conf_hw_flow_en
+        bits: "0"
+        access: RW
+        init: 0
+        description: "HWフロー制御 0x0:無効、0x1:有効"
+
+  - name: UART_CONF_SAMP
+    offset: 0x0C
+    description: "UART Sampling Config"
+    fields:
+      # 【要確認】仕様書の表ではconf_clk_divが[15:0]で、上の2つが1, 2となっていますが、
+      # アドレス（ビット位置）が被っている可能性があります。一旦仕様書の記載通りにしています。
+      - name: conf__samp_num_sel
+        bits: "20" 
+        access: RW
+        init: 0
+        description: "0x0: 1点、0x1:3点"
+      - name: conf_over_samp_sel
+        bits: "17:16"
+        access: RW
+        init: 1
+        description: "0x0: 8倍, 0x1: 16倍, 0x2:32倍"
+      - name: conf_clk_div
+        bits: "15:0"
+        access: RW
+        init: 0
+        description: "サンプリング分周比設定"
+
+  - name: UART_DATA
+    offset: 0x10
+    description: "UART Data"
+    fields:
+      - name: break_send
+        bits: "5"
+        access: W
+        init: 0
+        description: "breakコマンド送信"
+      - name: idle_send
+        bits: "4"
+        access: W
+        init: 0
+        description: "idleコマンド送信"
+      # 【要確認】データビット幅が5~9bit選択可能ですが、ここは[3:0] (4bit)になっています。
+      # おそらく [8:0] などの間違いの可能性があります。
+      - name: data
+        bits: "3:0"
+        access: RW
+        init: 0
+        description: "W:txデータセット、R:受信データ取得"
+
+  - name: UART_FIFO_STATUS
+    offset: 0x14
+    description: "UART FIFO Status"
+    fields:
+      # 【要確認】ビット位置の指定が仕様書から抜けていたため、仮に割り当てています。
+      - name: rx_fifo_full
+        bits: "3"
+        access: R
+        init: 0
+      - name: rx_fifo_empty
+        bits: "2"
+        access: R
+        init: 0
+      - name: tx_fifo_full
+        bits: "1"
+        access: R
+        init: 0
+      - name: tx_fifo_empty
+        bits: "0"
+        access: R
+        init: 0
+
+  - name: UART_INT_CTRL
+    offset: 0x18
+    description: "UART Interrupt Control Status"
+    fields:
+      - name: int_break_det_en
+        bits: "24"
+        access: RW
+        init: 0
+      - name: int_parity_err_en
+        bits: "20"
+        access: RW
+        init: 0
+      - name: int_framing_err_en
+        bits: "16"
+        access: RW
+        init: 0
+      - name: int_rx_timeout_en
+        bits: "12"
+        access: RW
+        init: 0
+      - name: int_overrun_err_en
+        bits: "8"
+        access: RW
+        init: 0
+      - name: int_tx_fifo_th_en
+        bits: "4"
+        access: RW
+        init: 0
+      - name: int_rx_fifo_th_en
+        bits: "0"
+        access: RW
+        init: 0
+
+  - name: UART_INT_CONF_TH
+    offset: 0x20
+    description: "UART Interrupt Threshold config"
+    fields:
+      - name: rx_fifo_th_level
+        bits: "7:4"
+        access: RW
+        init: 0
+      - name: tx_fifo_th_level
+        bits: "3:0"
+        access: RW
+        init: 0
+
+  - name: UART_INT_RS
+    offset: 0x24
+    description: "UART Error Status"
+    fields:
+      - name: int_break_det_raw
+        bits: "24"
+        access: W1C
+        init: 0
+      - name: int_parity_err_raw
+        bits: "20"
+        access: W1C
+        init: 0
+      - name: int_framing_err_raw
+        bits: "16"
+        access: W1C
+        init: 0
+      - name: int_rx_timeout_raw
+        bits: "12"
+        access: W1C
+        init: 0
+      - name: int_overrun_err_raw
+        bits: "8"
+        access: W1C
+        init: 0
+      - name: int_tx_fifo_th_raw
+        bits: "4"
+        access: W1C
+        init: 0
+      - name: int_rx_fifo_th_raw
+        bits: "0"
+        access: W1C
+        init: 0
+
+  - name: UART_INT_MS
+    offset: 0x28
+    description: "UART Interrupt Masked Status"
+    fields:
+      - name: int_break_det_masked
+        bits: "24"
+        access: R
+        source: "int_break_det_raw"
+        mask: "int_break_det_en"
+        init: 0
+        is_interrupt: true
+      - name: int_parity_err_masked
+        bits: "20"
+        access: R
+        source: "int_parity_err_raw"
+        mask: "int_parity_err_en"
+        init: 0
+        is_interrupt: true
+      - name: int_framing_err_masked
+        bits: "16"
+        access: R
+        source: "int_framing_err_raw"
+        mask: "int_framing_err_en"
+        init: 0
+        is_interrupt: true
+      - name: int_rx_timeout_masked
+        bits: "12"
+        access: R
+        source: "int_rx_timeout_raw"
+        mask: "int_rx_timeout_en"        
+        init: 0
+        is_interrupt: true
+      - name: int_overrun_err_masked
+        bits: "8"
+        access: R
+        source: "int_overrun_err_raw"
+        mask: "int_overrun_err_en"        
+        init: 0
+        is_interrupt: true
+      - name: int_tx_fifo_th_masked
+        bits: "4"
+        source: "int_tx_fifo_th_raw"
+        mask: "int_tx_fifo_th_en"        
+        access: R
+        init: 0
+        is_interrupt: true
+      - name: int_rx_fifo_th_masked
+        bits: "0"
+        access: R
+        source: "int_rx_fifo_th_raw"
+        mask: "int_rx_fifo_th_en"        
+        init: 0
+        is_interrupt: true

@@ -1,0 +1,13 @@
+@startuml
+hide empty description
+
+[*] --> S_IDLE : リセット || !uart_enable
+
+S_IDLE :idle状態
+S_SEND :データ送信
+
+
+S_IDLE --> S_SEND : !tx_fifo_empty || tx_fifo_empty && idle_send || tx_fifo_empy && break_en 
+S_SEND --> S_IDLE : 送信完了
+
+@enduml

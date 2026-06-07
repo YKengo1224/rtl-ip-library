@@ -1,0 +1,30 @@
+@startuml
+hide empty description
+
+[*] --> S_IDLE : リセット || !uart_enable
+
+S_IDLE :idle状態
+S_JUDGE_START : スタートビットを判定する
+S_D_WAIT_SAMPLE : データサンプリングを待つ
+S_D_SAMPLE : データをサンプリングする
+S_P_WAIT_SAMPLE : パリティビットのサンプリングを待つ
+S_P_SAMPLE : パリティビットをサンプリングする
+S_S_WAIT_SAMPLE : ストップビットのサンプリングを待つ
+S_S_SAMPLE : ストップビットをサンプリングする
+S_JUDGE_ERROR : 受信結果から、エラーを判定する
+
+S_IDLE --> S_JUDGE_START : rxd == start_bit_pol
+S_JUDGE_START --> S_IDLE : サンプリングした各点で、rxd == start_bit_pol の点が閾値以下((samp_num/2  - 2))
+S_JUDGE_START --> S_D_WAIT_SAMPLE : サンプリングした各点で、rxd == start_bit_pol の点が閾値以上((samp_num/2  - 1))
+S_D_WAIT_SAMPLE --> S_D_SAMPLE : 規定のクロックが経過
+S_D_SAMPLE --> S_D_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && すべてのデータビットをサンプリングしていない
+S_D_SAMPLE --> S_P_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && すべてのデータビットをサンプリングした
+S_P_WAIT_SAMPLE --> S_P_SAMPLE : 規定のクロックが経過
+S_P_SAMPLE --> S_S_WAIT_SAMPLE : ストップビットのサンプリングが完了:
+S_S_WAIT_SAMPLE --> S_S_SAMPLE : 規定のクロックが経過 
+S_S_SAMPLE --> S_JUDGE_ERROR : ストップビットサンプル完了
+S_JUDGE_ERROR --> S_IDLE : エラー判定完了
+
+@enduml
+
+

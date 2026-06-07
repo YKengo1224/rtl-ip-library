@@ -37,25 +37,15 @@ registers:
     description: "UART Mode Config"
     fields:
       - name: conf_tx_env
-        bits: "9"
+        bits: "5"
         access: RW
         init: 0
         description: "tx送信極性変更 0x0:無効、0x1:有効"
       - name: conf_rx_env
-        bits: "8"
-        access: RW
-        init: 0
-        description: "rx送信極性変更 0x0:無効、0x1:有効"
-      - name: conf_break_en
-        bits: "5"
-        access: RW
-        init: 0
-        description: "break送信 0x0:無効、0x1:有効"
-      - name: conf_idle_en
         bits: "4"
         access: RW
         init: 0
-        description: "idle送信 0x0:無効、0x1:有効"
+        description: "rx送信極性変更 0x0:無効、0x1:有効"
       - name: conf_hw_flow_en
         bits: "0"
         access: RW
@@ -106,17 +96,24 @@ registers:
         init: 0
         description: "W:txデータセット、R:受信データ取得"
 
-  - name: UART_FIFO_STATUS
+  - name: UART_STATUS
     offset: 0x14
     description: "UART FIFO Status"
     fields:
-      # 【要確認】ビット位置の指定が仕様書から抜けていたため、仮に割り当てています。
+      - name: rx_busy
+        bits: "12"
+        access: R
+        init: 0
+      - name: tx_busy
+        bits: "8"
+        access: R
+        init: 0
       - name: rx_fifo_full
-        bits: "3"
+        bits: "5"
         access: R
         init: 0
       - name: rx_fifo_empty
-        bits: "2"
+        bits: "4"
         access: R
         init: 0
       - name: tx_fifo_full

@@ -21,10 +21,10 @@
 |------------------|----------|---------------------------------|
 | UART_CTRL        | 0x00     | UART Control                    |
 | UART_CONF_FRAME  | 0x04     | UART Config Frame               |
-| UART_COF_MODE    | 0x08     | UART Mode Config                |
+| UART_CONF_MODE    | 0x08     | UART Mode Config                |
 | UART_CONF_SAMP   | 0x0C     | UART Sampling Config            |
 | UART_DATA        | 0x10     | UART Data                       |
-| UART_FIFO_STATUS | 0x14     | UART FIFO Status                |
+| UART_STATUS | 0x14     | UART FIFO Status                |
 | UART_INT_CTRL    | 0x18     | UART Interrupt Control Status   |
 | UART_INT_CONF_TH | 0x20     | UART Interrupt Threshold config |
 | UART_INT_RS      | 0x24     | UART Error Status               |
@@ -57,16 +57,13 @@
 ### UART_CONF_MODE(0x08)
 モードの設定を行います。
 
-| ビット  | フィールド名    | RW  | init | 詳細                              |
-|---------|-----------------|-----|------|-----------------------------------|
-| [31:10] | reserved        | -   | -    |                                   |
-| [9]     | conf_tx_env     | R/W | 0    | tx送信極性変更 0x0:無効、0x1:有効 |
-| [8]     | conf_rx_env     | R/W | 0    | rx送信極性変更 0x0:無効、0x1:有効 |
-| [7:6]   | reserved        | -   | -    |                                   |
-| [5]     | conf_break_en   | R/W | 0    | break送信 0x0:無効、0x1:有効      |
-| [4]     | conf_idle_en    | R/W | 0    | idle送信 0x0:無効、0x1:有効       |
-| [3:1]   | reserved        | -   | -    |                                   |
-| [0]     | conf_hw_flow_en | R/W | 0    | HWフロー制御 0x0:無効、0x1:有効   |
+| ビット | フィールド名    | RW  | init | 詳細                              |
+|--------|-----------------|-----|------|-----------------------------------|
+| [31:6] | reserved        | -   | -    |                                   |
+| [5]    | conf_tx_env     | R/W | 0    | tx送信極性変更 0x0:無効、0x1:有効 |
+| [4]    | conf_rx_env     | R/W | 0    | rx送信極性変更 0x0:無効、0x1:有効 |
+| [3:1]  | reserved        | -   | -    |                                   |
+| [0]    | conf_hw_flow_en | R/W | 0    | HWフロー制御 0x0:無効、0x1:有効   |
 
 
 
@@ -89,23 +86,28 @@
 | ビット | フィールド名 | RW  | init | 詳細                               |
 |--------|--------------|-----|------|------------------------------------|
 | [31:6] | reserved     | -   | -    |                                    |
-| [5]    | break_send   | W   |      | breakコマンド送信                  |
-| [4]    | idle_send    | W   |      | idleコマンド送信                   |
+| [5]    | break_send   | W   | 0    | breakコマンド送信                  |
+| [4]    | idle_send    | W   | 0    | idleコマンド送信                   |
 | [3:0]  | data         | R/W | 0    | W:txデータセット、R:受信データ取得 |
 
 
 
  
-### UART_FIFO_STATUS(0x14)
+### UART_STATUS(0x14)
 fifoのステータスを示します。
 
-| ビット | フィールド名  | RW | init | 詳細          |
-|--------|---------------|----|------|---------------|
-| [31:6] | reserved      | -  | -    |               |
-|        | rx_fifo_full  | R  | 0    | tx fifo full  |
-|        | rx_fifo_empty | R  | 0    | tx fifo empty |
-|        | tx_fifo_full  | R  | 0    | tx fifo full  |
-|        | tx_fifo_empty | R  | 0    | tx fifo empty |
+| ビット  | フィールド名  | RW | init | 詳細          |
+|---------|---------------|----|------|---------------|
+| [31:13] | reserved      | -  | -    |               |
+| [12]    | rx_busy       | R  | 0    | rx busy       |
+| [11:9]  | reserved      | -  | -    |               |
+| [8]     | tx_busy       | R  | 0    | tx busy       |
+| [7:6]   | reserved      | -  | -    |               |
+| [5]     | rx_fifo_full  | R  | 0    | rx fifo full  |
+| [4]     | rx_fifo_empty | R  | 0    | rx fifo empty |
+| [3:2]   | reserved      | -  | -    |               |
+| [1]     | tx_fifo_full  | R  | 0    | tx fifo full  |
+| [0]     | tx_fifo_empty | R  | 0    | tx fifo empty |
 
 ### UART_INT_CTRL(0x18)
 割り込みを設定します。
@@ -141,44 +143,44 @@ int_rx_fifo_th_en、int_tx_ffio_th_enの割り込みを閾値を設定します�
 INT_CTRLでマスクされていない割り込みステータスを示します。
 クリアしたい割り込み要因のフィールドに1を書き込むことでクリアします。
 
-| ビット  | フィールド名    | RW  | init | 詳細                                                           |
-|---------|-----------------|-----|------|----------------------------------------------------------------|
-| [31:25] | reserved        | -   | -    |                                                                |
-| [24]    | int_break_det   | W1C | 0    | ブレーク(一定期間Low)検出割り込み                              |
-| [23:21] | reserved        | -   | -    |                                                                |
-| [20]    | int_parity_err  | W1C | 0    | パリティエラー割り込み                                         |
-| [19:17] | reserved        | -   | -    |                                                                |
-| [16]    | int_framing_err | W1C | 0    | フレーミングエラー割り込み                                     |
-| [15:13] | reserved        | -   | -    |                                                                |
-| [12]    | int_rx_timeout  | W1C | 0    | rx_fifoにデータがある && 一定時間(4データ受信分)受信しなかった |
-| [11:9]  | reserved        | -   | -    |                                                                |
-| [8]     | int_overrun_err | W1C | 0    | オーバーランエラー(RX FIFO溢れ)割り込み                        |
-| [7:5]   | reserved        | -   | -    |                                                                |
-| [4]     | int_tx_fifo_th  | W1C | 0    | TX FIFO閾値(送信データ要求)割り込み                            |
-| [3:1]   | reserved        | -   | -    |                                                                |
-| [0]     | int_rx_fifo_th  | W1C | 0    | RX FIFO閾値(受信データあり)割り込み                            |
+| ビット  | フィールド名        | RW  | init | 詳細                                                           |
+|---------|---------------------|-----|------|----------------------------------------------------------------|
+| [31:25] | reserved            | -   | -    |                                                                |
+| [24]    | int_break_det_raw   | W1C | 0    | ブレーク(一定期間Low)検出割り込み                              |
+| [23:21] | reserved            | -   | -    |                                                                |
+| [20]    | int_parity_err_raw  | W1C | 0    | パリティエラー割り込み                                         |
+| [19:17] | reserved            | -   | -    |                                                                |
+| [16]    | int_framing_err_raw | W1C | 0    | フレーミングエラー割り込み                                     |
+| [15:13] | reserved            | -   | -    |                                                                |
+| [12]    | int_rx_timeout_raw  | W1C | 0    | rx_fifoにデータがある && 一定時間(4データ受信分)受信しなかった |
+| [11:9]  | reserved            | -   | -    |                                                                |
+| [8]     | int_overrun_err_raw | W1C | 0    | オーバーランエラー(RX FIFO溢れ)割り込み                        |
+| [7:5]   | reserved            | -   | -    |                                                                |
+| [4]     | int_tx_fifo_th_raw  | W1C | 0    | TX FIFO閾値(送信データ要求)割り込み                            |
+| [3:1]   | reserved            | -   | -    |                                                                |
+| [0]     | int_rx_fifo_th_raw  | W1C | 0    | RX FIFO閾値(受信データあり)割り込み                            |
 
 
 
 ### UART_INT_MS(0x28)
 INT_CTRLでマスクされた割り込みステータスを示します。
 
-| ビット  | フィールド名    | RW | init | 詳細                                                           |
-|---------|-----------------|----|------|----------------------------------------------------------------|
-| [31:25] | reserved        | -  | -    |                                                                |
-| [24]    | int_break_det   | R  | 0    | ブレーク(一定期間Low)検出割り込み                              |
-| [23:21] | reserved        | -  | -    |                                                                |
-| [20]    | int_parity_err  | R  | 0    | パリティエラー割り込み                                         |
-| [19:17] | reserved        | -  | -    |                                                                |
-| [16]    | int_framing_err | R  | 0    | フレーミングエラー割り込み                                     |
-| [15:13] | reserved        | -  | -    |                                                                |
-| [12]    | int_rx_timeout  | R  | 0    | rx_fifoにデータがある && 一定時間(4データ受信分)受信しなかった |
-| [11:9]  | reserved        | -  | -    |                                                                |
-| [8]     | int_overrun_err | R  | 0    | オーバーランエラー(RX FIFO溢れ)割り込み                        |
-| [7:5]   | reserved        | -  | -    |                                                                |
-| [4]     | int_tx_fifo_th  | R  | 0    | TX FIFO閾値(送信データ要求)割り込み                            |
-| [3:1]   | reserved        | -  | -    |                                                                |
-| [0]     | int_rx_fifo_th  | R  | 0    | RX FIFO閾値(受信データあり)割り込み                            |
+| ビット  | フィールド名       | RW | init | 詳細                                                           |
+|---------|--------------------|----|------|----------------------------------------------------------------|
+| [31:25] | reserved           | -  | -    |                                                                |
+| [24]    | int_break_det_ms   | R  | 0    | ブレーク(一定期間Low)検出割り込み                              |
+| [23:21] | reserved           | -  | -    |                                                                |
+| [20]    | int_parity_err_ms  | R  | 0    | パリティエラー割り込み                                         |
+| [19:17] | reserved           | -  | -    |                                                                |
+| [16]    | int_framing_err_ms | R  | 0    | フレーミングエラー割り込み                                     |
+| [15:13] | reserved           | -  | -    |                                                                |
+| [12]    | int_rx_timeout_ms  | R  | 0    | rx_fifoにデータがある && 一定時間(4データ受信分)受信しなかった |
+| [11:9]  | reserved           | -  | -    |                                                                |
+| [8]     | int_overrun_err_ms | R  | 0    | オーバーランエラー(RX FIFO溢れ)割り込み                        |
+| [7:5]   | reserved           | -  | -    |                                                                |
+| [4]     | int_tx_fifo_th_ms  | R  | 0    | TX FIFO閾値(送信データ要求)割り込み                            |
+| [3:1]   | reserved           | -  | -    |                                                                |
+| [0]     | int_rx_fifo_th_ms  | R  | 0    | RX FIFO閾値(受信データあり)割り込み                            |
 
 
 
@@ -237,11 +239,11 @@ sysclkを分周し、オーバーサンプリング用のクロックを生成�
 
 オーバーサンプリング周波数は以下のように求められます、
 
-$$ F_{over\_samp} = \frac{F_{sysclk}}{{UART\_COF\_SAMP.conf\_clk\_div}}$$
+$$ F_{over\_samp} = \frac{F_{sysclk}}{{UART\_CONF\_SAMP.conf\_clk\_div}}$$
 
 また、ボーレートは以下のように求められます
 
-$$ baudrate = \frac{F_{over_samp}}{over\_samp\_ratio} =   \frac{F_{sysclk}}{{UART\_COF\_SAMP.conf\_clk\_div}* over\_samp\_ratio}$$
+$$ baudrate = \frac{F_{over_samp}}{over\_samp\_ratio} =   \frac{F_{sysclk}}{{UART\_CONF\_SAMP.conf\_clk\_div}* over\_samp\_ratio}$$
 
 
 ### uart_tx

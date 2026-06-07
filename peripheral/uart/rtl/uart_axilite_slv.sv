@@ -18,8 +18,6 @@ module uart_axilite_slv #(
     output reg [1:0] o_conf_parity_bit_r,
     output reg       o_conf_tx_env_r,
     output reg       o_conf_rx_env_r,
-    output reg       o_conf_break_en_r,
-    output reg       o_conf_idle_en_r,
     output reg       o_conf_hw_flow_en_r,
     output reg       o_conf__samp_num_sel_r,
     output reg [1:0] o_conf_over_samp_sel_r,
@@ -27,6 +25,8 @@ module uart_axilite_slv #(
     output reg       o_break_send_r,
     output reg       o_idle_send_r,
     output reg [3:0] o_data_r,
+    input wire       i_rx_busy,
+    input wire       i_tx_busy,
     input wire       i_rx_fifo_full,
     input wire       i_rx_fifo_empty,
     input wire       i_tx_fifo_full,
@@ -219,8 +219,6 @@ module uart_axilite_slv #(
     wire we_conf_parity_bit;
     wire we_conf_tx_env;
     wire we_conf_rx_env;
-    wire we_conf_break_en;
-    wire we_conf_idle_en;
     wire we_conf_hw_flow_en;
     wire we_conf__samp_num_sel;
     wire we_conf_over_samp_sel;
@@ -238,19 +236,19 @@ module uart_axilite_slv #(
     wire we_rx_fifo_th_level;
     wire we_tx_fifo_th_level;
     wire we_int_break_det_raw;
-    wire int_break_det_raw_r;
+    reg int_break_det_raw_r;
     wire we_int_parity_err_raw;
-    wire int_parity_err_raw_r;
+    reg int_parity_err_raw_r;
     wire we_int_framing_err_raw;
-    wire int_framing_err_raw_r;
+    reg int_framing_err_raw_r;
     wire we_int_rx_timeout_raw;
-    wire int_rx_timeout_raw_r;
+    reg int_rx_timeout_raw_r;
     wire we_int_overrun_err_raw;
-    wire int_overrun_err_raw_r;
+    reg int_overrun_err_raw_r;
     wire we_int_tx_fifo_th_raw;
-    wire int_tx_fifo_th_raw_r;
+    reg int_tx_fifo_th_raw_r;
     wire we_int_rx_fifo_th_raw;
-    wire int_rx_fifo_th_raw_r;
+    reg int_rx_fifo_th_raw_r;
     wire int_break_det_masked;
     wire int_parity_err_masked;
     wire int_framing_err_masked;
@@ -263,10 +261,8 @@ module uart_axilite_slv #(
     assign we_conf_data_bit_width = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[1];
     assign we_conf_stop_bit_width_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[0];
     assign we_conf_parity_bit = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[0];
-    assign we_conf_tx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[1];
-    assign we_conf_rx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[1];
-    assign we_conf_break_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
-    assign we_conf_idle_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
+    assign we_conf_tx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
+    assign we_conf_rx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
     assign we_conf_hw_flow_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
     assign we_conf__samp_num_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h0C) && target_wstrb[2];
     assign we_conf_over_samp_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h0C) && target_wstrb[2];
@@ -291,13 +287,13 @@ module uart_axilite_slv #(
     assign we_int_tx_fifo_th_raw = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h24) && target_wstrb[0];
     assign we_int_rx_fifo_th_raw = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h24) && target_wstrb[0];
 
-        assign int_break_det_masked = o_int_break_det_raw_r & o_int_break_det_en_r;
-    assign int_parity_err_masked = o_int_parity_err_raw_r & o_int_parity_err_en_r;
-    assign int_framing_err_masked = o_int_framing_err_raw_r & o_int_framing_err_en_r;
-    assign int_rx_timeout_masked = o_int_rx_timeout_raw_r & o_int_rx_timeout_en_r;
-    assign int_overrun_err_masked = o_int_overrun_err_raw_r & o_int_overrun_err_en_r;
-    assign int_tx_fifo_th_masked = o_int_tx_fifo_th_raw_r & o_int_tx_fifo_th_en_r;
-    assign int_rx_fifo_th_masked = o_int_rx_fifo_th_raw_r & o_int_rx_fifo_th_en_r;
+        assign int_break_det_masked = int_break_det_raw_r & o_int_break_det_en_r;
+    assign int_parity_err_masked = int_parity_err_raw_r & o_int_parity_err_en_r;
+    assign int_framing_err_masked = int_framing_err_raw_r & o_int_framing_err_en_r;
+    assign int_rx_timeout_masked = int_rx_timeout_raw_r & o_int_rx_timeout_en_r;
+    assign int_overrun_err_masked = int_overrun_err_raw_r & o_int_overrun_err_en_r;
+    assign int_tx_fifo_th_masked = int_tx_fifo_th_raw_r & o_int_tx_fifo_th_en_r;
+    assign int_rx_fifo_th_masked = int_rx_fifo_th_raw_r & o_int_rx_fifo_th_en_r;
     assign o_interrupt = (int_break_det_masked) | (int_parity_err_masked) | (int_framing_err_masked) | (int_rx_timeout_masked) | (int_overrun_err_masked) | (int_tx_fifo_th_masked) | (int_rx_fifo_th_masked);
 
     
@@ -350,7 +346,7 @@ module uart_axilite_slv #(
         if(!aresetn) begin
             o_conf_tx_env_r <= 1'd0;
         end else if(we_conf_tx_env) begin
-            o_conf_tx_env_r <= target_wdata[9]; 
+            o_conf_tx_env_r <= target_wdata[5]; 
         end
     end
 
@@ -361,29 +357,7 @@ module uart_axilite_slv #(
         if(!aresetn) begin
             o_conf_rx_env_r <= 1'd0;
         end else if(we_conf_rx_env) begin
-            o_conf_rx_env_r <= target_wdata[8]; 
-        end
-    end
-
-
-
-    //Field : conf_break_en
-    always @(posedge aclk or negedge aresetn) begin
-        if(!aresetn) begin
-            o_conf_break_en_r <= 1'd0;
-        end else if(we_conf_break_en) begin
-            o_conf_break_en_r <= target_wdata[5]; 
-        end
-    end
-
-
-
-    //Field : conf_idle_en
-    always @(posedge aclk or negedge aresetn) begin
-        if(!aresetn) begin
-            o_conf_idle_en_r <= 1'd0;
-        end else if(we_conf_idle_en) begin
-            o_conf_idle_en_r <= target_wdata[4]; 
+            o_conf_rx_env_r <= target_wdata[4]; 
         end
     end
 
@@ -665,13 +639,13 @@ module uart_axilite_slv #(
             case (araddr[VARID_ADDR_BITWIDTH-1:0])
                                 8'h00: rdata <= { 31'h0, o_uart_enable_r };
                 8'h04: rdata <= { 20'h0, o_conf_data_bit_width_r, 2'h0, o_conf_stop_bit_width_sel_r, 2'h0, o_conf_parity_bit_r };
-                8'h08: rdata <= { 22'h0, o_conf_tx_env_r, o_conf_rx_env_r, 2'h0, o_conf_break_en_r, o_conf_idle_en_r, 3'h0, o_conf_hw_flow_en_r };
+                8'h08: rdata <= { 26'h0, o_conf_tx_env_r, o_conf_rx_env_r, 3'h0, o_conf_hw_flow_en_r };
                 8'h0C: rdata <= { 11'h0, o_conf__samp_num_sel_r, 2'h0, o_conf_over_samp_sel_r, o_conf_clk_div_r };
                 8'h10: rdata <= { 28'h0, o_data_r };
-                8'h14: rdata <= { 28'h0, i_rx_fifo_full, i_rx_fifo_empty, i_tx_fifo_full, i_tx_fifo_empty };
+                8'h14: rdata <= { 19'h0, i_rx_busy, 3'h0, i_tx_busy, 2'h0, i_rx_fifo_full, i_rx_fifo_empty, 2'h0, i_tx_fifo_full, i_tx_fifo_empty };
                 8'h18: rdata <= { 7'h0, o_int_break_det_en_r, 3'h0, o_int_parity_err_en_r, 3'h0, o_int_framing_err_en_r, 3'h0, o_int_rx_timeout_en_r, 3'h0, o_int_overrun_err_en_r, 3'h0, o_int_tx_fifo_th_en_r, 3'h0, o_int_rx_fifo_th_en_r };
                 8'h20: rdata <= { 24'h0, o_rx_fifo_th_level_r, o_tx_fifo_th_level_r };
-                8'h24: rdata <= { 7'h0, i_int_break_det_raw_set, 3'h0, i_int_parity_err_raw_set, 3'h0, i_int_framing_err_raw_set, 3'h0, i_int_rx_timeout_raw_set, 3'h0, i_int_overrun_err_raw_set, 3'h0, i_int_tx_fifo_th_raw_set, 3'h0, i_int_rx_fifo_th_raw_set };
+                8'h24: rdata <= { 7'h0, int_break_det_raw_r, 3'h0, int_parity_err_raw_r, 3'h0, int_framing_err_raw_r, 3'h0, int_rx_timeout_raw_r, 3'h0, int_overrun_err_raw_r, 3'h0, int_tx_fifo_th_raw_r, 3'h0, int_rx_fifo_th_raw_r };
                 8'h28: rdata <= { 7'h0, int_break_det_masked, 3'h0, int_parity_err_masked, 3'h0, int_framing_err_masked, 3'h0, int_rx_timeout_masked, 3'h0, int_overrun_err_masked, 3'h0, int_tx_fifo_th_masked, 3'h0, int_rx_fifo_th_masked };
                 default: begin
                 end

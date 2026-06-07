@@ -69,7 +69,7 @@ class RegmapYamlParser:
                     self.rtl_decode.append(f"    assign {we_signal} = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == {offset_hex}) && {wstrb_cond};")
 
                     if acc == "W1C":
-                        self.rtl_decl.append(f"    wire {name}_r;")
+                        self.rtl_decl.append(f"    reg {name}_r;")
                         always_block = f"""
     //Field : {name}
     always @(posedge aclk or negedge aresetn) begin
@@ -104,16 +104,17 @@ class RegmapYamlParser:
 
                 #Read
                 if acc != "W":
-                    #select insert_read_logic 
+                    #select insert_read_logic
                     if "source" in field and "mask" in field:
-                        src_sig = f"o_{field['source']}_r"
+                        src_sig = f"{field['source']}_r"
                         mask_sig= f"o_{field['mask']}_r"
                         self.rtl_decl.append(f"    wire {name};")
                         self.rtl_comb.append(f"    assign {name} = {src_sig} & {mask_sig};")                        
                         insert_read_logic = name
-                        
+                    elif acc == "W1C":
+                        insert_read_logic = f"{name}_r"
                     else :
-                        insert_read_logic = port_name
+                        insert_read_logic = port_name                    
                     
                     if msb == lsb:
                         bit_map[31 - lsb] = insert_read_logic

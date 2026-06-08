@@ -49,7 +49,7 @@ class RegmapYamlParser:
                     port_name = f"i_{name}_set"
                     self.rtl_ports.append(f"    input wire {width_str} {port_name},")
                 elif "W" in acc:
-                    port_name = f"o_{name}_r"
+                    port_name = f"o_{name}_aclkr"
                     self.rtl_ports.append(f"    output reg {width_str} {port_name},")
                 elif (acc == "R"):
                     port_name = f"i_{name}"
@@ -69,23 +69,23 @@ class RegmapYamlParser:
                     self.rtl_decode.append(f"    assign {we_signal} = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == {offset_hex}) && {wstrb_cond};")
 
                     if acc == "W1C":
-                        self.rtl_decl.append(f"    reg {name}_r;")
+                        self.rtl_decl.append(f"    reg {name}_aclkr;")
                         always_block = f"""
     //Field : {name}
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            {name}_r <= {width}'d{init};
+            {name}_aclkr <= {width}'d{init};
         end else if({we_signal} && target_wdata{bit_range}) begin
-            {name}_r <= {width}'d0; 
+            {name}_aclkr <= {width}'d0; 
         end else if({port_name}) begin
-            {name}_r <= {width}'d1;
+            {name}_aclkr <= {width}'d1;
         end                                          
     end  
 
           """
                         #add interrupt source list
                         if field.get("is_interrupt") == True:
-                            self.interrupt_signals.append(f"({name}_r)")
+                            self.interrupt_signals.append(f"({name}_aclkr)")
                     
                     else:
                         always_block = f"""
@@ -106,13 +106,13 @@ class RegmapYamlParser:
                 if acc != "W":
                     #select insert_read_logic
                     if "source" in field and "mask" in field:
-                        src_sig = f"{field['source']}_r"
-                        mask_sig= f"o_{field['mask']}_r"
+                        src_sig = f"{field['source']}_aclkr"
+                        mask_sig= f"o_{field['mask']}_aclkr"
                         self.rtl_decl.append(f"    wire {name};")
                         self.rtl_comb.append(f"    assign {name} = {src_sig} & {mask_sig};")                        
                         insert_read_logic = name
                     elif acc == "W1C":
-                        insert_read_logic = f"{name}_r"
+                        insert_reead_logic = f"{name}_aclkr"
                     else :
                         insert_read_logic = port_name                    
                     
@@ -159,28 +159,19 @@ class RegmapYamlParser:
 
         #generate interrupt logic
         if self.interrupt_signals:
-            self.rtl_ports.append("    output wire        o_interrupt,")
-            self.rtl_comb.append(f"    assign o_interrupt = {' | '.join(self.interrupt_signals)};")
-        
-        print("// ==========================================")
-        print("// __INSERT_PORTS__")
-        print("\n".join(self.rtl_ports))
-        print("\n// ==========================================")
-        print("// __INSERT_DECLARATIONS__")
-        print("\n".join(self.rtl_decl))
-        print("\n// ==========================================")
-        print("// __INSERT_DECODE__")
-        print("\n".join(self.rtl_decode))
-        print("\n// ==========================================")
-        print("// __INSERT_OTHER_COMB_LOGIC__")
-        print("\n".join(self.rtl_comb))        
-        print("\n// ==========================================")
-        print("// __INSERT_WRITE_LOGIC__")
-        print("\n".join(self.rtl_write_logic))
-        print("\n// ==========================================")
-        print("// __INSERT_READ_LOGIC__")
-        print("\n".join(self.rtl_read_logic))
+            self.rtl_ports.append("    output wire        o_interrupt_aclkr,")            
+            always_block = f"""
+    //Field : {name}
+    always @(posedge aclk or negedge aresetn) begin
+        if(!aresetn) begin
+            o_interrupt_aclkr <= 1'd0;
+        end else if({we_signal}) begin
+            o_interrupt_aclkr <= {' | '.join(self.interrupt_signals)}; 
+        end
+    end
 
+"""        
+            self.rtl_comb.append(always_block)
     def output_file(self):
         if not os.path.exists(self.template_filename):
             print(f"Error:{self.template_filename} is not exist")

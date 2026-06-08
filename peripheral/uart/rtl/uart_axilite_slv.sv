@@ -12,34 +12,34 @@ module uart_axilite_slv #(
     //====================================================
     // USER Ports
     //====================================================
-        output reg       o_uart_enable_r,
-    output reg [3:0] o_conf_data_bit_width_r,
-    output reg [1:0] o_conf_stop_bit_width_sel_r,
-    output reg [1:0] o_conf_parity_bit_r,
-    output reg       o_conf_tx_env_r,
-    output reg       o_conf_rx_env_r,
-    output reg       o_conf_hw_flow_en_r,
-    output reg       o_conf__samp_num_sel_r,
-    output reg [1:0] o_conf_over_samp_sel_r,
-    output reg [15:0] o_conf_clk_div_r,
-    output reg       o_break_send_r,
-    output reg       o_idle_send_r,
-    output reg [3:0] o_data_r,
+        output reg       o_uart_enable_aclkr,
+    output reg [3:0] o_conf_data_bit_width_aclkr,
+    output reg [1:0] o_conf_stop_bit_width_sel_aclkr,
+    output reg [1:0] o_conf_parity_bit_aclkr,
+    output reg       o_conf_tx_env_aclkr,
+    output reg       o_conf_rx_env_aclkr,
+    output reg       o_conf_hw_flow_en_aclkr,
+    output reg       o_conf__samp_num_sel_aclkr,
+    output reg [1:0] o_conf_over_samp_sel_aclkr,
+    output reg [15:0] o_conf_clk_div_aclkr,
+    output reg       o_break_send_aclkr,
+    output reg       o_idle_send_aclkr,
+    output reg [3:0] o_data_aclkr,
     input wire       i_rx_busy,
     input wire       i_tx_busy,
     input wire       i_rx_fifo_full,
     input wire       i_rx_fifo_empty,
     input wire       i_tx_fifo_full,
     input wire       i_tx_fifo_empty,
-    output reg       o_int_break_det_en_r,
-    output reg       o_int_parity_err_en_r,
-    output reg       o_int_framing_err_en_r,
-    output reg       o_int_rx_timeout_en_r,
-    output reg       o_int_overrun_err_en_r,
-    output reg       o_int_tx_fifo_th_en_r,
-    output reg       o_int_rx_fifo_th_en_r,
-    output reg [3:0] o_rx_fifo_th_level_r,
-    output reg [3:0] o_tx_fifo_th_level_r,
+    output reg       o_int_break_det_en_aclkr,
+    output reg       o_int_parity_err_en_aclkr,
+    output reg       o_int_framing_err_en_aclkr,
+    output reg       o_int_rx_timeout_en_aclkr,
+    output reg       o_int_overrun_err_en_aclkr,
+    output reg       o_int_tx_fifo_th_en_aclkr,
+    output reg       o_int_rx_fifo_th_en_aclkr,
+    output reg [3:0] o_rx_fifo_th_level_aclkr,
+    output reg [3:0] o_tx_fifo_th_level_aclkr,
     input wire       i_int_break_det_raw_set,
     input wire       i_int_parity_err_raw_set,
     input wire       i_int_framing_err_raw_set,
@@ -47,7 +47,7 @@ module uart_axilite_slv #(
     input wire       i_int_overrun_err_raw_set,
     input wire       i_int_tx_fifo_th_raw_set,
     input wire       i_int_rx_fifo_th_raw_set,
-    output wire        o_interrupt,
+    output wire        o_interrupt_aclkr,
     //====================================================
     // AXI4-Lite Ports
     //====================================================
@@ -84,14 +84,14 @@ module uart_axilite_slv #(
     //====================================================
 
     logic                         aw_trans_done;
-    reg                           aw_trans_done_hold_r;
+    reg                           aw_trans_done_hold_aclkr;
     logic                         w_trans_done;
-    reg                           w_trans_done_hold_r;
+    reg                           w_trans_done_hold_aclkr;
 
-    reg   [   ADDR_BITWIDTH -1:0] awaddr_hold_r;
-    reg                           awprot_hold_r;
-    reg   [   DATA_BITWIDTH -1:0] wdata_hold_r;
-    reg   [(ADDR_BITWIDTH/8)-1:0] wstrb_hold_r;
+    reg   [   ADDR_BITWIDTH -1:0] awaddr_hold_aclkr;
+    reg                           awprot_hold_aclkr;
+    reg   [   DATA_BITWIDTH -1:0] wdata_hold_aclkr;
+    reg   [(ADDR_BITWIDTH/8)-1:0] wstrb_hold_aclkr;
 
     logic [    ADDR_BITWIDTH-1:0] target_awaddr;
     logic [    DATA_BITWIDTH-1:0] target_wdata;
@@ -105,8 +105,8 @@ module uart_axilite_slv #(
     assign aw_trans_done = awvalid && awready;
     assign w_trans_done = wvalid && wready;
 
-    assign aw_accepted = (aw_trans_done || aw_trans_done_hold_r);
-    assign w_accepted = (w_trans_done || w_trans_done_hold_r);
+    assign aw_accepted = (aw_trans_done || aw_trans_done_hold_aclkr);
+    assign w_accepted = (w_trans_done || w_trans_done_hold_aclkr);
     assign write_exec = aw_accepted && w_accepted;
 
 
@@ -115,57 +115,57 @@ module uart_axilite_slv #(
     //##########
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            aw_trans_done_hold_r <= 1'b0;
+            aw_trans_done_hold_aclkr <= 1'b0;
         end else if (aw_trans_done && !w_accepted) begin
-            aw_trans_done_hold_r <= 1'b1;
+            aw_trans_done_hold_aclkr <= 1'b1;
         end else if (w_accepted) begin
-            aw_trans_done_hold_r <= 1'b0;
+            aw_trans_done_hold_aclkr <= 1'b0;
         end
     end
-    assign awready = !aw_trans_done_hold_r && !bvalid;
+    assign awready = !aw_trans_done_hold_aclkr && !bvalid;
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            awaddr_hold_r <= '0;
-            awprot_hold_r <= '0;
+            awaddr_hold_aclkr <= '0;
+            awprot_hold_aclkr <= '0;
         end else if (aw_trans_done) begin
-            awaddr_hold_r <= awaddr;
-            awprot_hold_r <= awprot;
+            awaddr_hold_aclkr <= awaddr;
+            awprot_hold_aclkr <= awprot;
         end else if (write_exec) begin
-            awaddr_hold_r <= '0;
-            awprot_hold_r <= '0;
+            awaddr_hold_aclkr <= '0;
+            awprot_hold_aclkr <= '0;
         end
     end
-    assign target_awaddr = aw_trans_done_hold_r ? awaddr_hold_r : awaddr;
+    assign target_awaddr = aw_trans_done_hold_aclkr ? awaddr_hold_aclkr : awaddr;
 
     //##########
     //W Channel
     //##########
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            w_trans_done_hold_r <= 1'b0;
+            w_trans_done_hold_aclkr <= 1'b0;
         end else if (w_trans_done && !aw_accepted) begin
-            w_trans_done_hold_r <= 1'b1;
+            w_trans_done_hold_aclkr <= 1'b1;
         end else if (aw_accepted) begin
-            w_trans_done_hold_r <= 1'b0;
+            w_trans_done_hold_aclkr <= 1'b0;
         end
     end
-    assign wready = !w_trans_done_hold_r && !bvalid;
+    assign wready = !w_trans_done_hold_aclkr && !bvalid;
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            wdata_hold_r <= '0;
-            wstrb_hold_r <= '0;
+            wdata_hold_aclkr <= '0;
+            wstrb_hold_aclkr <= '0;
         end else if (w_trans_done) begin
-            wdata_hold_r <= wdata;
-            wstrb_hold_r <= wstrb;
+            wdata_hold_aclkr <= wdata;
+            wstrb_hold_aclkr <= wstrb;
         end else if (write_exec) begin
-            wdata_hold_r <= '0;
-            wstrb_hold_r <= '0;
+            wdata_hold_aclkr <= '0;
+            wstrb_hold_aclkr <= '0;
         end
     end
-    assign target_wdata = w_trans_done_hold_r ? wdata_hold_r : wdata;
-    assign target_wstrb = w_trans_done_hold_r ? wstrb_hold_r : wstrb;
+    assign target_wdata = w_trans_done_hold_aclkr ? wdata_hold_aclkr : wdata;
+    assign target_wstrb = w_trans_done_hold_aclkr ? wstrb_hold_aclkr : wstrb;
 
     //##########
     //B Channel
@@ -188,7 +188,6 @@ module uart_axilite_slv #(
     logic ar_trans_done;
     logic r_trans_done;
     logic read_exec;
-    // reg                           w_trans_done_hold_r;
 
     assign ar_trans_done = arvalid && arready;
     assign r_trans_done = rvalid && rready;
@@ -236,19 +235,19 @@ module uart_axilite_slv #(
     wire we_rx_fifo_th_level;
     wire we_tx_fifo_th_level;
     wire we_int_break_det_raw;
-    reg int_break_det_raw_r;
+    reg int_break_det_raw_aclkr;
     wire we_int_parity_err_raw;
-    reg int_parity_err_raw_r;
+    reg int_parity_err_raw_aclkr;
     wire we_int_framing_err_raw;
-    reg int_framing_err_raw_r;
+    reg int_framing_err_raw_aclkr;
     wire we_int_rx_timeout_raw;
-    reg int_rx_timeout_raw_r;
+    reg int_rx_timeout_raw_aclkr;
     wire we_int_overrun_err_raw;
-    reg int_overrun_err_raw_r;
+    reg int_overrun_err_raw_aclkr;
     wire we_int_tx_fifo_th_raw;
-    reg int_tx_fifo_th_raw_r;
+    reg int_tx_fifo_th_raw_aclkr;
     wire we_int_rx_fifo_th_raw;
-    reg int_rx_fifo_th_raw_r;
+    reg int_rx_fifo_th_raw_aclkr;
     wire int_break_det_masked;
     wire int_parity_err_masked;
     wire int_framing_err_masked;
@@ -287,22 +286,32 @@ module uart_axilite_slv #(
     assign we_int_tx_fifo_th_raw = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h24) && target_wstrb[0];
     assign we_int_rx_fifo_th_raw = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h24) && target_wstrb[0];
 
-        assign int_break_det_masked = int_break_det_raw_r & o_int_break_det_en_r;
-    assign int_parity_err_masked = int_parity_err_raw_r & o_int_parity_err_en_r;
-    assign int_framing_err_masked = int_framing_err_raw_r & o_int_framing_err_en_r;
-    assign int_rx_timeout_masked = int_rx_timeout_raw_r & o_int_rx_timeout_en_r;
-    assign int_overrun_err_masked = int_overrun_err_raw_r & o_int_overrun_err_en_r;
-    assign int_tx_fifo_th_masked = int_tx_fifo_th_raw_r & o_int_tx_fifo_th_en_r;
-    assign int_rx_fifo_th_masked = int_rx_fifo_th_raw_r & o_int_rx_fifo_th_en_r;
-    assign o_interrupt = (int_break_det_masked) | (int_parity_err_masked) | (int_framing_err_masked) | (int_rx_timeout_masked) | (int_overrun_err_masked) | (int_tx_fifo_th_masked) | (int_rx_fifo_th_masked);
+        assign int_break_det_masked = int_break_det_raw_aclkr & o_int_break_det_en_aclkr;
+    assign int_parity_err_masked = int_parity_err_raw_aclkr & o_int_parity_err_en_aclkr;
+    assign int_framing_err_masked = int_framing_err_raw_aclkr & o_int_framing_err_en_aclkr;
+    assign int_rx_timeout_masked = int_rx_timeout_raw_aclkr & o_int_rx_timeout_en_aclkr;
+    assign int_overrun_err_masked = int_overrun_err_raw_aclkr & o_int_overrun_err_en_aclkr;
+    assign int_tx_fifo_th_masked = int_tx_fifo_th_raw_aclkr & o_int_tx_fifo_th_en_aclkr;
+    assign int_rx_fifo_th_masked = int_rx_fifo_th_raw_aclkr & o_int_rx_fifo_th_en_aclkr;
+
+    //Field : int_rx_fifo_th_masked
+    always @(posedge aclk or negedge aresetn) begin
+        if(!aresetn) begin
+            o_interrupt_aclkr <= 1'd0;
+        end else if(we_int_rx_fifo_th_raw) begin
+            o_interrupt_aclkr <= (int_break_det_masked) | (int_parity_err_masked) | (int_framing_err_masked) | (int_rx_timeout_masked) | (int_overrun_err_masked) | (int_tx_fifo_th_masked) | (int_rx_fifo_th_masked); 
+        end
+    end
+
+
 
     
     //Field : uart_enable
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_uart_enable_r <= 1'd0;
+            o_uart_enable_aclkr <= 1'd0;
         end else if(we_uart_enable) begin
-            o_uart_enable_r <= target_wdata[0]; 
+            o_uart_enable_aclkr <= target_wdata[0]; 
         end
     end
 
@@ -311,9 +320,9 @@ module uart_axilite_slv #(
     //Field : conf_data_bit_width
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_data_bit_width_r <= 4'd8;
+            o_conf_data_bit_width_aclkr <= 4'd8;
         end else if(we_conf_data_bit_width) begin
-            o_conf_data_bit_width_r <= target_wdata[11:8]; 
+            o_conf_data_bit_width_aclkr <= target_wdata[11:8]; 
         end
     end
 
@@ -322,9 +331,9 @@ module uart_axilite_slv #(
     //Field : conf_stop_bit_width_sel
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_stop_bit_width_sel_r <= 2'd1;
+            o_conf_stop_bit_width_sel_aclkr <= 2'd1;
         end else if(we_conf_stop_bit_width_sel) begin
-            o_conf_stop_bit_width_sel_r <= target_wdata[5:4]; 
+            o_conf_stop_bit_width_sel_aclkr <= target_wdata[5:4]; 
         end
     end
 
@@ -333,9 +342,9 @@ module uart_axilite_slv #(
     //Field : conf_parity_bit
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_parity_bit_r <= 2'd0;
+            o_conf_parity_bit_aclkr <= 2'd0;
         end else if(we_conf_parity_bit) begin
-            o_conf_parity_bit_r <= target_wdata[1:0]; 
+            o_conf_parity_bit_aclkr <= target_wdata[1:0]; 
         end
     end
 
@@ -344,9 +353,9 @@ module uart_axilite_slv #(
     //Field : conf_tx_env
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_tx_env_r <= 1'd0;
+            o_conf_tx_env_aclkr <= 1'd0;
         end else if(we_conf_tx_env) begin
-            o_conf_tx_env_r <= target_wdata[5]; 
+            o_conf_tx_env_aclkr <= target_wdata[5]; 
         end
     end
 
@@ -355,9 +364,9 @@ module uart_axilite_slv #(
     //Field : conf_rx_env
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_rx_env_r <= 1'd0;
+            o_conf_rx_env_aclkr <= 1'd0;
         end else if(we_conf_rx_env) begin
-            o_conf_rx_env_r <= target_wdata[4]; 
+            o_conf_rx_env_aclkr <= target_wdata[4]; 
         end
     end
 
@@ -366,9 +375,9 @@ module uart_axilite_slv #(
     //Field : conf_hw_flow_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_hw_flow_en_r <= 1'd0;
+            o_conf_hw_flow_en_aclkr <= 1'd0;
         end else if(we_conf_hw_flow_en) begin
-            o_conf_hw_flow_en_r <= target_wdata[0]; 
+            o_conf_hw_flow_en_aclkr <= target_wdata[0]; 
         end
     end
 
@@ -377,9 +386,9 @@ module uart_axilite_slv #(
     //Field : conf__samp_num_sel
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf__samp_num_sel_r <= 1'd0;
+            o_conf__samp_num_sel_aclkr <= 1'd0;
         end else if(we_conf__samp_num_sel) begin
-            o_conf__samp_num_sel_r <= target_wdata[20]; 
+            o_conf__samp_num_sel_aclkr <= target_wdata[20]; 
         end
     end
 
@@ -388,9 +397,9 @@ module uart_axilite_slv #(
     //Field : conf_over_samp_sel
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_over_samp_sel_r <= 2'd1;
+            o_conf_over_samp_sel_aclkr <= 2'd1;
         end else if(we_conf_over_samp_sel) begin
-            o_conf_over_samp_sel_r <= target_wdata[17:16]; 
+            o_conf_over_samp_sel_aclkr <= target_wdata[17:16]; 
         end
     end
 
@@ -399,9 +408,9 @@ module uart_axilite_slv #(
     //Field : conf_clk_div
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_clk_div_r <= 16'd0;
+            o_conf_clk_div_aclkr <= 16'd0;
         end else if(we_conf_clk_div) begin
-            o_conf_clk_div_r <= target_wdata[15:0]; 
+            o_conf_clk_div_aclkr <= target_wdata[15:0]; 
         end
     end
 
@@ -410,9 +419,9 @@ module uart_axilite_slv #(
     //Field : break_send
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_break_send_r <= 1'd0;
+            o_break_send_aclkr <= 1'd0;
         end else if(we_break_send) begin
-            o_break_send_r <= target_wdata[5]; 
+            o_break_send_aclkr <= target_wdata[5]; 
         end
     end
 
@@ -421,9 +430,9 @@ module uart_axilite_slv #(
     //Field : idle_send
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_idle_send_r <= 1'd0;
+            o_idle_send_aclkr <= 1'd0;
         end else if(we_idle_send) begin
-            o_idle_send_r <= target_wdata[4]; 
+            o_idle_send_aclkr <= target_wdata[4]; 
         end
     end
 
@@ -432,9 +441,9 @@ module uart_axilite_slv #(
     //Field : data
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_data_r <= 4'd0;
+            o_data_aclkr <= 4'd0;
         end else if(we_data) begin
-            o_data_r <= target_wdata[3:0]; 
+            o_data_aclkr <= target_wdata[3:0]; 
         end
     end
 
@@ -443,9 +452,9 @@ module uart_axilite_slv #(
     //Field : int_break_det_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_break_det_en_r <= 1'd0;
+            o_int_break_det_en_aclkr <= 1'd0;
         end else if(we_int_break_det_en) begin
-            o_int_break_det_en_r <= target_wdata[24]; 
+            o_int_break_det_en_aclkr <= target_wdata[24]; 
         end
     end
 
@@ -454,9 +463,9 @@ module uart_axilite_slv #(
     //Field : int_parity_err_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_parity_err_en_r <= 1'd0;
+            o_int_parity_err_en_aclkr <= 1'd0;
         end else if(we_int_parity_err_en) begin
-            o_int_parity_err_en_r <= target_wdata[20]; 
+            o_int_parity_err_en_aclkr <= target_wdata[20]; 
         end
     end
 
@@ -465,9 +474,9 @@ module uart_axilite_slv #(
     //Field : int_framing_err_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_framing_err_en_r <= 1'd0;
+            o_int_framing_err_en_aclkr <= 1'd0;
         end else if(we_int_framing_err_en) begin
-            o_int_framing_err_en_r <= target_wdata[16]; 
+            o_int_framing_err_en_aclkr <= target_wdata[16]; 
         end
     end
 
@@ -476,9 +485,9 @@ module uart_axilite_slv #(
     //Field : int_rx_timeout_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_rx_timeout_en_r <= 1'd0;
+            o_int_rx_timeout_en_aclkr <= 1'd0;
         end else if(we_int_rx_timeout_en) begin
-            o_int_rx_timeout_en_r <= target_wdata[12]; 
+            o_int_rx_timeout_en_aclkr <= target_wdata[12]; 
         end
     end
 
@@ -487,9 +496,9 @@ module uart_axilite_slv #(
     //Field : int_overrun_err_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_overrun_err_en_r <= 1'd0;
+            o_int_overrun_err_en_aclkr <= 1'd0;
         end else if(we_int_overrun_err_en) begin
-            o_int_overrun_err_en_r <= target_wdata[8]; 
+            o_int_overrun_err_en_aclkr <= target_wdata[8]; 
         end
     end
 
@@ -498,9 +507,9 @@ module uart_axilite_slv #(
     //Field : int_tx_fifo_th_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_tx_fifo_th_en_r <= 1'd0;
+            o_int_tx_fifo_th_en_aclkr <= 1'd0;
         end else if(we_int_tx_fifo_th_en) begin
-            o_int_tx_fifo_th_en_r <= target_wdata[4]; 
+            o_int_tx_fifo_th_en_aclkr <= target_wdata[4]; 
         end
     end
 
@@ -509,9 +518,9 @@ module uart_axilite_slv #(
     //Field : int_rx_fifo_th_en
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_int_rx_fifo_th_en_r <= 1'd0;
+            o_int_rx_fifo_th_en_aclkr <= 1'd0;
         end else if(we_int_rx_fifo_th_en) begin
-            o_int_rx_fifo_th_en_r <= target_wdata[0]; 
+            o_int_rx_fifo_th_en_aclkr <= target_wdata[0]; 
         end
     end
 
@@ -520,9 +529,9 @@ module uart_axilite_slv #(
     //Field : rx_fifo_th_level
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_rx_fifo_th_level_r <= 4'd0;
+            o_rx_fifo_th_level_aclkr <= 4'd0;
         end else if(we_rx_fifo_th_level) begin
-            o_rx_fifo_th_level_r <= target_wdata[7:4]; 
+            o_rx_fifo_th_level_aclkr <= target_wdata[7:4]; 
         end
     end
 
@@ -531,9 +540,9 @@ module uart_axilite_slv #(
     //Field : tx_fifo_th_level
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_tx_fifo_th_level_r <= 4'd0;
+            o_tx_fifo_th_level_aclkr <= 4'd0;
         end else if(we_tx_fifo_th_level) begin
-            o_tx_fifo_th_level_r <= target_wdata[3:0]; 
+            o_tx_fifo_th_level_aclkr <= target_wdata[3:0]; 
         end
     end
 
@@ -542,11 +551,11 @@ module uart_axilite_slv #(
     //Field : int_break_det_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_break_det_raw_r <= 1'd0;
+            int_break_det_raw_aclkr <= 1'd0;
         end else if(we_int_break_det_raw && target_wdata[24]) begin
-            int_break_det_raw_r <= 1'd0; 
+            int_break_det_raw_aclkr <= 1'd0; 
         end else if(i_int_break_det_raw_set) begin
-            int_break_det_raw_r <= 1'd1;
+            int_break_det_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -555,11 +564,11 @@ module uart_axilite_slv #(
     //Field : int_parity_err_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_parity_err_raw_r <= 1'd0;
+            int_parity_err_raw_aclkr <= 1'd0;
         end else if(we_int_parity_err_raw && target_wdata[20]) begin
-            int_parity_err_raw_r <= 1'd0; 
+            int_parity_err_raw_aclkr <= 1'd0; 
         end else if(i_int_parity_err_raw_set) begin
-            int_parity_err_raw_r <= 1'd1;
+            int_parity_err_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -568,11 +577,11 @@ module uart_axilite_slv #(
     //Field : int_framing_err_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_framing_err_raw_r <= 1'd0;
+            int_framing_err_raw_aclkr <= 1'd0;
         end else if(we_int_framing_err_raw && target_wdata[16]) begin
-            int_framing_err_raw_r <= 1'd0; 
+            int_framing_err_raw_aclkr <= 1'd0; 
         end else if(i_int_framing_err_raw_set) begin
-            int_framing_err_raw_r <= 1'd1;
+            int_framing_err_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -581,11 +590,11 @@ module uart_axilite_slv #(
     //Field : int_rx_timeout_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_rx_timeout_raw_r <= 1'd0;
+            int_rx_timeout_raw_aclkr <= 1'd0;
         end else if(we_int_rx_timeout_raw && target_wdata[12]) begin
-            int_rx_timeout_raw_r <= 1'd0; 
+            int_rx_timeout_raw_aclkr <= 1'd0; 
         end else if(i_int_rx_timeout_raw_set) begin
-            int_rx_timeout_raw_r <= 1'd1;
+            int_rx_timeout_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -594,11 +603,11 @@ module uart_axilite_slv #(
     //Field : int_overrun_err_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_overrun_err_raw_r <= 1'd0;
+            int_overrun_err_raw_aclkr <= 1'd0;
         end else if(we_int_overrun_err_raw && target_wdata[8]) begin
-            int_overrun_err_raw_r <= 1'd0; 
+            int_overrun_err_raw_aclkr <= 1'd0; 
         end else if(i_int_overrun_err_raw_set) begin
-            int_overrun_err_raw_r <= 1'd1;
+            int_overrun_err_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -607,11 +616,11 @@ module uart_axilite_slv #(
     //Field : int_tx_fifo_th_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_tx_fifo_th_raw_r <= 1'd0;
+            int_tx_fifo_th_raw_aclkr <= 1'd0;
         end else if(we_int_tx_fifo_th_raw && target_wdata[4]) begin
-            int_tx_fifo_th_raw_r <= 1'd0; 
+            int_tx_fifo_th_raw_aclkr <= 1'd0; 
         end else if(i_int_tx_fifo_th_raw_set) begin
-            int_tx_fifo_th_raw_r <= 1'd1;
+            int_tx_fifo_th_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -620,11 +629,11 @@ module uart_axilite_slv #(
     //Field : int_rx_fifo_th_raw
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            int_rx_fifo_th_raw_r <= 1'd0;
+            int_rx_fifo_th_raw_aclkr <= 1'd0;
         end else if(we_int_rx_fifo_th_raw && target_wdata[0]) begin
-            int_rx_fifo_th_raw_r <= 1'd0; 
+            int_rx_fifo_th_raw_aclkr <= 1'd0; 
         end else if(i_int_rx_fifo_th_raw_set) begin
-            int_rx_fifo_th_raw_r <= 1'd1;
+            int_rx_fifo_th_raw_aclkr <= 1'd1;
         end                                          
     end  
 
@@ -637,15 +646,15 @@ module uart_axilite_slv #(
             rdata <= '0;
         end else if (read_exec) begin
             case (araddr[VARID_ADDR_BITWIDTH-1:0])
-                                8'h00: rdata <= { 31'h0, o_uart_enable_r };
-                8'h04: rdata <= { 20'h0, o_conf_data_bit_width_r, 2'h0, o_conf_stop_bit_width_sel_r, 2'h0, o_conf_parity_bit_r };
-                8'h08: rdata <= { 26'h0, o_conf_tx_env_r, o_conf_rx_env_r, 3'h0, o_conf_hw_flow_en_r };
-                8'h0C: rdata <= { 11'h0, o_conf__samp_num_sel_r, 2'h0, o_conf_over_samp_sel_r, o_conf_clk_div_r };
-                8'h10: rdata <= { 28'h0, o_data_r };
+                                8'h00: rdata <= { 31'h0, o_uart_enable_aclkr };
+                8'h04: rdata <= { 20'h0, o_conf_data_bit_width_aclkr, 2'h0, o_conf_stop_bit_width_sel_aclkr, 2'h0, o_conf_parity_bit_aclkr };
+                8'h08: rdata <= { 26'h0, o_conf_tx_env_aclkr, o_conf_rx_env_aclkr, 3'h0, o_conf_hw_flow_en_aclkr };
+                8'h0C: rdata <= { 11'h0, o_conf__samp_num_sel_aclkr, 2'h0, o_conf_over_samp_sel_aclkr, o_conf_clk_div_aclkr };
+                8'h10: rdata <= { 28'h0, o_data_aclkr };
                 8'h14: rdata <= { 19'h0, i_rx_busy, 3'h0, i_tx_busy, 2'h0, i_rx_fifo_full, i_rx_fifo_empty, 2'h0, i_tx_fifo_full, i_tx_fifo_empty };
-                8'h18: rdata <= { 7'h0, o_int_break_det_en_r, 3'h0, o_int_parity_err_en_r, 3'h0, o_int_framing_err_en_r, 3'h0, o_int_rx_timeout_en_r, 3'h0, o_int_overrun_err_en_r, 3'h0, o_int_tx_fifo_th_en_r, 3'h0, o_int_rx_fifo_th_en_r };
-                8'h20: rdata <= { 24'h0, o_rx_fifo_th_level_r, o_tx_fifo_th_level_r };
-                8'h24: rdata <= { 7'h0, int_break_det_raw_r, 3'h0, int_parity_err_raw_r, 3'h0, int_framing_err_raw_r, 3'h0, int_rx_timeout_raw_r, 3'h0, int_overrun_err_raw_r, 3'h0, int_tx_fifo_th_raw_r, 3'h0, int_rx_fifo_th_raw_r };
+                8'h18: rdata <= { 7'h0, o_int_break_det_en_aclkr, 3'h0, o_int_parity_err_en_aclkr, 3'h0, o_int_framing_err_en_aclkr, 3'h0, o_int_rx_timeout_en_aclkr, 3'h0, o_int_overrun_err_en_aclkr, 3'h0, o_int_tx_fifo_th_en_aclkr, 3'h0, o_int_rx_fifo_th_en_aclkr };
+                8'h20: rdata <= { 24'h0, o_rx_fifo_th_level_aclkr, o_tx_fifo_th_level_aclkr };
+                8'h24: rdata <= { 7'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr };
                 8'h28: rdata <= { 7'h0, int_break_det_masked, 3'h0, int_parity_err_masked, 3'h0, int_framing_err_masked, 3'h0, int_rx_timeout_masked, 3'h0, int_overrun_err_masked, 3'h0, int_tx_fifo_th_masked, 3'h0, int_rx_fifo_th_masked };
                 default: begin
                 end

@@ -49,14 +49,14 @@ module uart_axilite_slv #(
     //====================================================
 
     logic                         aw_trans_done;
-    reg                           aw_trans_done_hold_r;
+    reg                           aw_trans_done_hold_aclkr;
     logic                         w_trans_done;
-    reg                           w_trans_done_hold_r;
+    reg                           w_trans_done_hold_aclkr;
 
-    reg   [   ADDR_BITWIDTH -1:0] awaddr_hold_r;
-    reg                           awprot_hold_r;
-    reg   [   DATA_BITWIDTH -1:0] wdata_hold_r;
-    reg   [(ADDR_BITWIDTH/8)-1:0] wstrb_hold_r;
+    reg   [   ADDR_BITWIDTH -1:0] awaddr_hold_aclkr;
+    reg                           awprot_hold_aclkr;
+    reg   [   DATA_BITWIDTH -1:0] wdata_hold_aclkr;
+    reg   [(ADDR_BITWIDTH/8)-1:0] wstrb_hold_aclkr;
 
     logic [    ADDR_BITWIDTH-1:0] target_awaddr;
     logic [    DATA_BITWIDTH-1:0] target_wdata;
@@ -70,8 +70,8 @@ module uart_axilite_slv #(
     assign aw_trans_done = awvalid && awready;
     assign w_trans_done = wvalid && wready;
 
-    assign aw_accepted = (aw_trans_done || aw_trans_done_hold_r);
-    assign w_accepted = (w_trans_done || w_trans_done_hold_r);
+    assign aw_accepted = (aw_trans_done || aw_trans_done_hold_aclkr);
+    assign w_accepted = (w_trans_done || w_trans_done_hold_aclkr);
     assign write_exec = aw_accepted && w_accepted;
 
 
@@ -80,57 +80,57 @@ module uart_axilite_slv #(
     //##########
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            aw_trans_done_hold_r <= 1'b0;
+            aw_trans_done_hold_aclkr <= 1'b0;
         end else if (aw_trans_done && !w_accepted) begin
-            aw_trans_done_hold_r <= 1'b1;
+            aw_trans_done_hold_aclkr <= 1'b1;
         end else if (w_accepted) begin
-            aw_trans_done_hold_r <= 1'b0;
+            aw_trans_done_hold_aclkr <= 1'b0;
         end
     end
-    assign awready = !aw_trans_done_hold_r && !bvalid;
+    assign awready = !aw_trans_done_hold_aclkr && !bvalid;
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            awaddr_hold_r <= '0;
-            awprot_hold_r <= '0;
+            awaddr_hold_aclkr <= '0;
+            awprot_hold_aclkr <= '0;
         end else if (aw_trans_done) begin
-            awaddr_hold_r <= awaddr;
-            awprot_hold_r <= awprot;
+            awaddr_hold_aclkr <= awaddr;
+            awprot_hold_aclkr <= awprot;
         end else if (write_exec) begin
-            awaddr_hold_r <= '0;
-            awprot_hold_r <= '0;
+            awaddr_hold_aclkr <= '0;
+            awprot_hold_aclkr <= '0;
         end
     end
-    assign target_awaddr = aw_trans_done_hold_r ? awaddr_hold_r : awaddr;
+    assign target_awaddr = aw_trans_done_hold_aclkr ? awaddr_hold_aclkr : awaddr;
 
     //##########
     //W Channel
     //##########
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            w_trans_done_hold_r <= 1'b0;
+            w_trans_done_hold_aclkr <= 1'b0;
         end else if (w_trans_done && !aw_accepted) begin
-            w_trans_done_hold_r <= 1'b1;
+            w_trans_done_hold_aclkr <= 1'b1;
         end else if (aw_accepted) begin
-            w_trans_done_hold_r <= 1'b0;
+            w_trans_done_hold_aclkr <= 1'b0;
         end
     end
-    assign wready = !w_trans_done_hold_r && !bvalid;
+    assign wready = !w_trans_done_hold_aclkr && !bvalid;
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            wdata_hold_r <= '0;
-            wstrb_hold_r <= '0;
+            wdata_hold_aclkr <= '0;
+            wstrb_hold_aclkr <= '0;
         end else if (w_trans_done) begin
-            wdata_hold_r <= wdata;
-            wstrb_hold_r <= wstrb;
+            wdata_hold_aclkr <= wdata;
+            wstrb_hold_aclkr <= wstrb;
         end else if (write_exec) begin
-            wdata_hold_r <= '0;
-            wstrb_hold_r <= '0;
+            wdata_hold_aclkr <= '0;
+            wstrb_hold_aclkr <= '0;
         end
     end
-    assign target_wdata = w_trans_done_hold_r ? wdata_hold_r : wdata;
-    assign target_wstrb = w_trans_done_hold_r ? wstrb_hold_r : wstrb;
+    assign target_wdata = w_trans_done_hold_aclkr ? wdata_hold_aclkr : wdata;
+    assign target_wstrb = w_trans_done_hold_aclkr ? wstrb_hold_aclkr : wstrb;
 
     //##########
     //B Channel
@@ -153,7 +153,6 @@ module uart_axilite_slv #(
     logic ar_trans_done;
     logic r_trans_done;
     logic read_exec;
-    // reg                           w_trans_done_hold_r;
 
     assign ar_trans_done = arvalid && arready;
     assign r_trans_done = rvalid && rready;

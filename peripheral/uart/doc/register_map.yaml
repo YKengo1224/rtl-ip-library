@@ -36,12 +36,12 @@ registers:
     offset: 0x08
     description: "UART Mode Config"
     fields:
-      - name: conf_tx_env
+      - name: conf_tx_inv
         bits: "5"
         access: RW
         init: 0
         description: "tx送信極性変更 0x0:無効、0x1:有効"
-      - name: conf_rx_env
+      - name: conf_rx_inv
         bits: "4"
         access: RW
         init: 0
@@ -79,17 +79,10 @@ registers:
     description: "UART Data"
     fields:
       - name: break_send
-        bits: "5"
-        access: W
-        init: 0
-        description: "breakコマンド送信"
-      - name: idle_send
         bits: "4"
         access: W
         init: 0
-        description: "idleコマンド送信"
-      # 【要確認】データビット幅が5~9bit選択可能ですが、ここは[3:0] (4bit)になっています。
-      # おそらく [8:0] などの間違いの可能性があります。
+        description: "breakコマンド送信"
       - name: data
         bits: "3:0"
         access: RW

@@ -12,6 +12,7 @@ S_P_SAMPLE : パリティビットをサンプリングする
 S_S_WAIT_SAMPLE : ストップビットのサンプリングを待つ
 S_S_SAMPLE : ストップビットをサンプリングする
 S_JUDGE_ERROR : 受信結果から、エラーを判定する
+S_DEC_BREAK : break状態を判定する
 
 S_IDLE --> S_JUDGE_START : rxd == start_bit_pol
 S_JUDGE_START --> S_IDLE : サンプリングした各点で、rxd == start_bit_pol の点が閾値以下((samp_num/2  - 2))
@@ -23,7 +24,9 @@ S_P_WAIT_SAMPLE --> S_P_SAMPLE : 規定のクロックが経過
 S_P_SAMPLE --> S_S_WAIT_SAMPLE : ストップビットのサンプリングが完了:
 S_S_WAIT_SAMPLE --> S_S_SAMPLE : 規定のクロックが経過 
 S_S_SAMPLE --> S_JUDGE_ERROR : ストップビットサンプル完了
-S_JUDGE_ERROR --> S_IDLE : エラー判定完了
+S_JUDGE_ERROR --> S_DEC_BREAK : エラー判定完了 && break状態検出
+S_JUDGE_ERROR --> S_IDLE : エラー判定完了 && !break状態検出
+S_DEC_BREAK --> S_IDLE : break状態解除
 
 @enduml
 

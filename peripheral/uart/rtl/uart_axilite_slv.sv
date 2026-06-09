@@ -16,14 +16,13 @@ module uart_axilite_slv #(
     output reg [3:0] o_conf_data_bit_width_aclkr,
     output reg [1:0] o_conf_stop_bit_width_sel_aclkr,
     output reg [1:0] o_conf_parity_bit_aclkr,
-    output reg       o_conf_tx_env_aclkr,
-    output reg       o_conf_rx_env_aclkr,
+    output reg       o_conf_tx_inv_aclkr,
+    output reg       o_conf_rx_inv_aclkr,
     output reg       o_conf_hw_flow_en_aclkr,
     output reg       o_conf__samp_num_sel_aclkr,
     output reg [1:0] o_conf_over_samp_sel_aclkr,
     output reg [15:0] o_conf_clk_div_aclkr,
     output reg       o_break_send_aclkr,
-    output reg       o_idle_send_aclkr,
     output reg [3:0] o_data_aclkr,
     input wire       i_rx_busy,
     input wire       i_tx_busy,
@@ -216,14 +215,13 @@ module uart_axilite_slv #(
     wire we_conf_data_bit_width;
     wire we_conf_stop_bit_width_sel;
     wire we_conf_parity_bit;
-    wire we_conf_tx_env;
-    wire we_conf_rx_env;
+    wire we_conf_tx_inv;
+    wire we_conf_rx_inv;
     wire we_conf_hw_flow_en;
     wire we_conf__samp_num_sel;
     wire we_conf_over_samp_sel;
     wire we_conf_clk_div;
     wire we_break_send;
-    wire we_idle_send;
     wire we_data;
     wire we_int_break_det_en;
     wire we_int_parity_err_en;
@@ -260,14 +258,13 @@ module uart_axilite_slv #(
     assign we_conf_data_bit_width = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[1];
     assign we_conf_stop_bit_width_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[0];
     assign we_conf_parity_bit = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h04) && target_wstrb[0];
-    assign we_conf_tx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
-    assign we_conf_rx_env = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
+    assign we_conf_tx_inv = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
+    assign we_conf_rx_inv = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
     assign we_conf_hw_flow_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h08) && target_wstrb[0];
     assign we_conf__samp_num_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h0C) && target_wstrb[2];
     assign we_conf_over_samp_sel = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h0C) && target_wstrb[2];
     assign we_conf_clk_div = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h0C) && (target_wstrb[0] || target_wstrb[1]);
     assign we_break_send = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h10) && target_wstrb[0];
-    assign we_idle_send = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h10) && target_wstrb[0];
     assign we_data = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h10) && target_wstrb[0];
     assign we_int_break_det_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h18) && target_wstrb[3];
     assign we_int_parity_err_en = write_exec && (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h18) && target_wstrb[2];
@@ -350,23 +347,23 @@ module uart_axilite_slv #(
 
 
 
-    //Field : conf_tx_env
+    //Field : conf_tx_inv
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_tx_env_aclkr <= 1'd0;
-        end else if(we_conf_tx_env) begin
-            o_conf_tx_env_aclkr <= target_wdata[5]; 
+            o_conf_tx_inv_aclkr <= 1'd0;
+        end else if(we_conf_tx_inv) begin
+            o_conf_tx_inv_aclkr <= target_wdata[5]; 
         end
     end
 
 
 
-    //Field : conf_rx_env
+    //Field : conf_rx_inv
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
-            o_conf_rx_env_aclkr <= 1'd0;
-        end else if(we_conf_rx_env) begin
-            o_conf_rx_env_aclkr <= target_wdata[4]; 
+            o_conf_rx_inv_aclkr <= 1'd0;
+        end else if(we_conf_rx_inv) begin
+            o_conf_rx_inv_aclkr <= target_wdata[4]; 
         end
     end
 
@@ -421,18 +418,7 @@ module uart_axilite_slv #(
         if(!aresetn) begin
             o_break_send_aclkr <= 1'd0;
         end else if(we_break_send) begin
-            o_break_send_aclkr <= target_wdata[5]; 
-        end
-    end
-
-
-
-    //Field : idle_send
-    always @(posedge aclk or negedge aresetn) begin
-        if(!aresetn) begin
-            o_idle_send_aclkr <= 1'd0;
-        end else if(we_idle_send) begin
-            o_idle_send_aclkr <= target_wdata[4]; 
+            o_break_send_aclkr <= target_wdata[4]; 
         end
     end
 
@@ -648,7 +634,7 @@ module uart_axilite_slv #(
             case (araddr[VARID_ADDR_BITWIDTH-1:0])
                                 8'h00: rdata <= { 31'h0, o_uart_enable_aclkr };
                 8'h04: rdata <= { 20'h0, o_conf_data_bit_width_aclkr, 2'h0, o_conf_stop_bit_width_sel_aclkr, 2'h0, o_conf_parity_bit_aclkr };
-                8'h08: rdata <= { 26'h0, o_conf_tx_env_aclkr, o_conf_rx_env_aclkr, 3'h0, o_conf_hw_flow_en_aclkr };
+                8'h08: rdata <= { 26'h0, o_conf_tx_inv_aclkr, o_conf_rx_inv_aclkr, 3'h0, o_conf_hw_flow_en_aclkr };
                 8'h0C: rdata <= { 11'h0, o_conf__samp_num_sel_aclkr, 2'h0, o_conf_over_samp_sel_aclkr, o_conf_clk_div_aclkr };
                 8'h10: rdata <= { 28'h0, o_data_aclkr };
                 8'h14: rdata <= { 19'h0, i_rx_busy, 3'h0, i_tx_busy, 2'h0, i_rx_fifo_full, i_rx_fifo_empty, 2'h0, i_tx_fifo_full, i_tx_fifo_empty };

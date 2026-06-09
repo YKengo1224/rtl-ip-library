@@ -83,12 +83,11 @@
 
 
 
-| ビット | フィールド名 | RW  | init | 詳細                               |
-|--------|--------------|-----|------|------------------------------------|
-| [31:6] | reserved     | -   | -    |                                    |
-| [5]    | break_send   | W   | 0    | breakコマンド送信                  |
-| [4]    | idle_send    | W   | 0    | idleコマンド送信                   |
-| [3:0]  | data         | R/W | 0    | W:txデータセット、R:受信データ取得 |
+| ビット | フィールド名 | RW  | init | 詳細                                 |
+|--------|--------------|-----|------|--------------------------------------|
+| [31:5] | reserved     | -   | -    |                                      |
+| [4]    | break_send   | R/W | 0    | 1にしている間、break状態を送信します |
+| [3:0]  | data         | R/W | 0    | W:txデータセット、R:受信データ取得   |
 
 
 
@@ -202,25 +201,30 @@ INT_CTRLでマスクされた割り込みステータスを示します。
 
 ### モジュール階層表
 
-| 第１階層 | 第2階層                | 第3階層          |
-|----------|------------------------|------------------|
-| uart_top |                        |                  |
-|          | uart_axilite_slv       |                  |
-|          | uart_conf_sync         |                  |
-|          |                        | uart_syncronizer |
-|          | uart_fifo_async(tx,rx) |                  |
-|          | uart_instr_gen         |                  |
-|          | uart_clk_divider       |                  |
-|          | uart_tx                |                  |
-|          | uart_rx                |                  |
+| 第１階層 | 第2階層                  | 第3階層          |
+|----------|--------------------------|------------------|
+| uart_top |                          |                  |
+|          | uart_axilite_slv         |                  |
+|          | uart_sync_aclk2sysclk    |                  |
+|          | uart_sync_sysclkclk2aclk |                  |
+|          |                          | uart_syncronizer |
+|          | uart_fifo_async(tx,rx)   |                  |
+|          | uart_clk_divider         |                  |
+|          | uart_tx                  |                  |
+|          | uart_rx                  |                  |
 
 ### uart_axilite_slv
 
 AXI4LITE interafaceのslaveモジュールです
+割り込み信号も出力します。
 
-### uart_conf_sync
+### uart_sync_aclk2sysclk
 
-レジスタの設定値のクロック載せ替えを行います(aclkドメイン -> sysclkドメイン)
+aclkドメイン -> sysclkドメインのクロック載せ替えを行います
+
+### uart_sync_sysclk2aclk
+
+sysclkドメイン -> aclkドメインのクロック載せ替えを行います
 
 ### uart_fifo_async
 
@@ -228,9 +232,7 @@ AXI4LITE interafaceのslaveモジュールです
 
 ### uart_instr_gen
 
-fifoのステータス信号、uart_rxのエラー信号を受取割り込み信号の生成を行います。
 
-クロック載せ替えも行い、割り込みステータス信号の出力、clear信号の受取をuart_axilite_slvと行います。
 
 
 ### uart_clk_divider

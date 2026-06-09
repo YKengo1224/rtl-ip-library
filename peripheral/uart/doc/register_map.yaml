@@ -6,6 +6,11 @@ registers:
     offset: 0x00
     description: "UART Control"
     fields:
+      - name: break_send
+        bits: "4"
+        access: RW
+        init: 0
+        description: "breakコマンド送信"
       - name: uart_enable
         bits: "0"
         access: RW
@@ -78,17 +83,11 @@ registers:
     offset: 0x10
     description: "UART Data"
     fields:
-      - name: break_send
-        bits: "4"
-        access: W
-        init: 0
-        description: "breakコマンド送信"
-      - name: data
-        bits: "3:0"
-        access: RW
+      - name: uart_data
+        bits: "7:0"
+        access: WOR1TRIG
         init: 0
         description: "W:txデータセット、R:受信データ取得"
-
   - name: UART_STATUS
     offset: 0x14
     description: "UART FIFO Status"

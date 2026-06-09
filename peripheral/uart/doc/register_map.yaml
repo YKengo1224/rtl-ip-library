@@ -94,23 +94,23 @@ registers:
     fields:
       - name: rx_busy
         bits: "12"
-        access: R
+        access: RO
         init: 0
       - name: tx_busy
         bits: "8"
-        access: R
+        access: RO
         init: 0
       - name: rx_fifo_full
         bits: "5"
-        access: R
+        access: RO
         init: 0
       - name: rx_fifo_empty
         bits: "4"
-        access: R
+        access: RO
         init: 0
       - name: tx_fifo_full
         bits: "1"
-        access: R
+        access: RO
         init: 0
       - name: tx_fifo_empty
         bits: "0"
@@ -202,35 +202,35 @@ registers:
     fields:
       - name: int_break_det_masked
         bits: "24"
-        access: R
+        access: RO
         source: "int_break_det_raw"
         mask: "int_break_det_en"
         init: 0
         is_interrupt: true
       - name: int_parity_err_masked
         bits: "20"
-        access: R
+        access: RO
         source: "int_parity_err_raw"
         mask: "int_parity_err_en"
         init: 0
         is_interrupt: true
       - name: int_framing_err_masked
         bits: "16"
-        access: R
+        access: RO
         source: "int_framing_err_raw"
         mask: "int_framing_err_en"
         init: 0
         is_interrupt: true
       - name: int_rx_timeout_masked
         bits: "12"
-        access: R
+        access: RO
         source: "int_rx_timeout_raw"
         mask: "int_rx_timeout_en"        
         init: 0
         is_interrupt: true
       - name: int_overrun_err_masked
         bits: "8"
-        access: R
+        access: RO
         source: "int_overrun_err_raw"
         mask: "int_overrun_err_en"        
         init: 0
@@ -239,12 +239,12 @@ registers:
         bits: "4"
         source: "int_tx_fifo_th_raw"
         mask: "int_tx_fifo_th_en"        
-        access: R
+        access: RO
         init: 0
         is_interrupt: true
       - name: int_rx_fifo_th_masked
         bits: "0"
-        access: R
+        access: RO
         source: "int_rx_fifo_th_raw"
         mask: "int_rx_fifo_th_en"        
         init: 0

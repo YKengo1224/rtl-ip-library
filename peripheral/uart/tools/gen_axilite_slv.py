@@ -49,13 +49,22 @@ class RegmapYamlParser:
                     port_name = f"i_{name}_set"
                     self.rtl_ports.append(f"    input wire {width_str} {port_name},")
                 elif "W" in acc:
-                    port_name = f"o_{name}_aclkr"
+                    port_name = f"o_{name}_aclkr"                    
                     self.rtl_ports.append(f"    output reg {width_str} {port_name},")
-                elif (acc == "R"):
-                    port_name = f"i_{name}"
+                    if "WO" in acc:
+                        wtrig_port_name = f"o_{name}_wtrig_aclkr"
+                        self.rtl_ports.append(f"    output reg {width_str} {wtrig_port_name},")
+                        
+                if "RO" in acc:
+                    read_port_name = f"i_{name}_aclk"
                     if "source" not in field:
-                        self.rtl_ports.append(f"    input wire {width_str} {port_name},")
-
+                        self.rtl_ports.append(f"    input wire {width_str} {read_port_name},")
+                if "R1TRIG" in acc:
+                    read_port_name = f"i_{name}_aclk"
+                    rtrig_port_name = f"o_{name}_rtrig_aclkr"
+                    if "source" not in field:
+                        self.rtl_ports.append(f"    input wire {width_str} {read_port_name},")
+                        self.rtl_ports.append(f"    output reg {width_str} {rtrig_port_name},")
                     
                 #Write logic 
                 if "W" in acc:
@@ -71,7 +80,7 @@ class RegmapYamlParser:
                     if acc == "W1C":
                         self.rtl_decl.append(f"    reg {name}_aclkr;")
                         always_block = f"""
-    //Field : {name}
+    //Field : {name}_aclkr
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
             {name}_aclkr <= {width}'d{init};
@@ -89,7 +98,7 @@ class RegmapYamlParser:
                     
                     else:
                         always_block = f"""
-    //Field : {name}
+    //Field : {port_name}
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
             {port_name} <= {width}'d{init};
@@ -101,9 +110,37 @@ class RegmapYamlParser:
 """
                     self.rtl_write_logic.append(always_block)
 
+                    if "WO" in acc:
+                        print('hoge')
+                        always_block = f"""
+    //Field : {wtrig_port_name}
+    always @(posedge aclk or negedge aresetn) begin
+        if(!aresetn) begin
+            {wtrig_port_name} <= 1'd0;
+        end else begin
+            {wtrig_port_name} <= {we_signal};
+        end
+    end
 
+"""
+                        self.rtl_write_logic.append(always_block)
+                        
                 #Read
-                if acc != "W":
+                if "R1TRIG" in acc:
+                    print("piyo")
+                    trig_always_block = f"""
+    //Field : {wtrig_port_name}
+    always @(posedge aclk or negedge aresetn) begin
+        if(!aresetn) begin
+            {rtrig_port_name} <= 1'd0;
+        end else begin
+            {rtrig_port_name} <= read_exec &&  (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == {offset_hex});
+        end
+    end
+
+"""
+                    self.rtl_write_logic.append(trig_always_block)
+                if acc != "WO":
                     #select insert_read_logic
                     if "source" in field and "mask" in field:
                         src_sig = f"{field['source']}_aclkr"
@@ -112,7 +149,13 @@ class RegmapYamlParser:
                         self.rtl_comb.append(f"    assign {name} = {src_sig} & {mask_sig};")                        
                         insert_read_logic = name
                     elif acc == "W1C":
-                        insert_reead_logic = f"{name}_aclkr"
+                        insert_read_logic = f"{name}_aclkr"
+                    elif "R1TRIG" in acc:
+                        print(read_port_name)
+                        insert_read_logic = read_port_name
+                    elif "RO" in acc:
+                        print(read_port_name)
+                        insert_read_logic = read_port_name
                     else :
                         insert_read_logic = port_name                    
                     

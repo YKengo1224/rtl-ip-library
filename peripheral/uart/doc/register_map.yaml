@@ -63,7 +63,7 @@ registers:
     fields:
       # 【要確認】仕様書の表ではconf_clk_divが[15:0]で、上の2つが1, 2となっていますが、
       # アドレス（ビット位置）が被っている可能性があります。一旦仕様書の記載通りにしています。
-      - name: conf__samp_num_sel
+      - name: conf_samp_num_sel
         bits: "20" 
         access: RW
         init: 0
@@ -92,6 +92,10 @@ registers:
     offset: 0x14
     description: "UART FIFO Status"
     fields:
+      - name: break_det
+        bits: "16"
+        access: RO
+        init: 0      
       - name: rx_busy
         bits: "12"
         access: RO

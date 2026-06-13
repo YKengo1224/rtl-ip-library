@@ -15,11 +15,12 @@ S_JUDGE_ERROR : 受信結果から、エラーを判定する
 S_DEC_BREAK : break状態を判定する
 
 S_IDLE --> S_JUDGE_START : rxd == start_bit_pol
-S_JUDGE_START --> S_IDLE : サンプリングした各点で、rxd == start_bit_pol の点が閾値以下((samp_num/2  - 2))
-S_JUDGE_START --> S_D_WAIT_SAMPLE : サンプリングした各点で、rxd == start_bit_pol の点が閾値以上((samp_num/2  - 1))
+S_JUDGE_START --> S_IDLE : サンプリングした各点で、\n rxd == start_bit_pol の点が閾値以下((samp_num/2  - 2))
+S_JUDGE_START --> S_D_WAIT_SAMPLE : サンプリングした各点で、\n rxd == start_bit_pol の点が閾値以上((samp_num/2  - 1))
 S_D_WAIT_SAMPLE --> S_D_SAMPLE : 規定のクロックが経過
-S_D_SAMPLE --> S_D_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && すべてのデータビットをサンプリングしていない
-S_D_SAMPLE --> S_P_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && すべてのデータビットをサンプリングした
+S_D_SAMPLE --> S_D_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && \n すべてのデータビットをサンプリングしていない
+S_D_SAMPLE --> S_P_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && \n すべてのデータビットをサンプリングした && \n parity_en
+S_D_SAMPLE --> S_S_WAIT_SAMPLE : 現在のデータビットのサンプリングが完了 && \n すべてのデータビットをサンプリングした && \n !parity_en
 S_P_WAIT_SAMPLE --> S_P_SAMPLE : 規定のクロックが経過
 S_P_SAMPLE --> S_S_WAIT_SAMPLE : ストップビットのサンプリングが完了:
 S_S_WAIT_SAMPLE --> S_S_SAMPLE : 規定のクロックが経過 

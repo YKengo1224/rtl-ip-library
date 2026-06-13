@@ -13,8 +13,8 @@ S_SEND_BREAK :ブレーク送信
 
 
 
-S_IDLE --> S_SEND_BREAK : break_send && tx_fifo_empty
-S_IDLE --> S_SEND_START : !tx_fifo_empty
+S_IDLE --> S_SEND_BREAK : break_send && tx_fifo_empty && (!i_uart_ctsn && hwflow_en)
+S_IDLE --> S_SEND_START : !tx_fifo_empty && (!i_uart_ctsn && hwflow_en)
 S_SEND_START --> S_SEND_DATA : スタートビットの送信が完了
 S_SEND_DATA --> S_SEND_DATA : データビットの送信が完了 && すべてのデータビットを送信していない
 S_SEND_DATA --> S_SEND_PARITY : データビットの送信が完了 && すべてのデータビットを送信した && parity != "NONE"

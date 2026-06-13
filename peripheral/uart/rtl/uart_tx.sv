@@ -1,30 +1,28 @@
 `default_nettype none
 module uart_tx (
-    input  wire        sysclk,
-    input  wire        sysrst_n,
+    input  wire       sysclk,
+    input  wire       sysrst_n,
     //config
-    input  wire        i_break_send_sysclk,
-    input  wire        i_uart_enable_sysclk,
-    input  wire [ 3:0] i_conf_data_bit_width_sysclk,
-    input  wire [ 1:0] i_conf_stop_bit_width_sel_sysclk,
-    input  wire [ 1:0] i_conf_parity_bit_sysclk,
-    input  wire        i_conf_tx_inv_sysclk,
-    input  wire        i_conf_hw_flow_en_sysclk,
-    input  wire        i_conf_samp_num_sel_sysclk,
-    input  wire [ 1:0] i_conf_over_samp_sel_sysclk,
-    input  wire [15:0] i_conf_clk_div_sysclk,
+    input  wire       i_break_send_sysclk,
+    input  wire       i_uart_enable_sysclk,
+    input  wire [3:0] i_conf_data_bit_width_sysclk,
+    input  wire [1:0] i_conf_stop_bit_width_sel_sysclk,
+    input  wire [1:0] i_conf_parity_bit_sysclk,
+    input  wire       i_conf_tx_inv_sysclk,
+    input  wire       i_conf_hw_flow_en_sysclk,
+    input  wire [1:0] i_conf_over_samp_sel_sysclk,
     //oversampel clk_en
-    input  wire        i_over_samp_clken,
+    input  wire       i_over_samp_clken,
     //fifo signals
-    output reg         o_fifo_ren_sysclkr,
-    input  wire [ 8:0] i_fifo_rdata_sysclk,
-    input  wire        i_fifo_rdata_valid_sysclk,
-    input  wire        i_fifo_empty_sysclk,
+    output reg        o_fifo_ren_sysclkr,
+    input  wire [8:0] i_fifo_rdata_sysclk,
+    input  wire       i_fifo_rdata_valid_sysclk,
+    input  wire       i_fifo_empty_sysclk,
     //status
-    output reg         o_rx_busy_sysclkr,
+    output reg        o_tx_busy_sysclkr,
     //uart signals
-    output reg         o_uart_txd_sysclkr,
-    input  wire        i_uart_ctsn_sysclk
+    output reg        o_uart_txd_sysclkr,
+    input  wire       i_uart_ctsn_sysclk
 
 );
 

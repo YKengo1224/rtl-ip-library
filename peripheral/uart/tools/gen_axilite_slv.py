@@ -46,14 +46,14 @@ class RegmapYamlParser:
                
                 #Port declear
                 if acc == "W1C":
-                    port_name = f"i_{name}_set"
+                    port_name = f"i_{name}_set_aclk"
                     self.rtl_ports.append(f"    input wire {width_str} {port_name},")
                 elif "W" in acc:
                     port_name = f"o_{name}_aclkr"                    
                     self.rtl_ports.append(f"    output reg {width_str} {port_name},")
                     if "WO" in acc:
                         wtrig_port_name = f"o_{name}_wtrig_aclkr"
-                        self.rtl_ports.append(f"    output reg {width_str} {wtrig_port_name},")
+                        self.rtl_ports.append(f"    output reg     {wtrig_port_name},")
                         
                 if "RO" in acc:
                     read_port_name = f"i_{name}_aclk"
@@ -64,7 +64,7 @@ class RegmapYamlParser:
                     rtrig_port_name = f"o_{name}_rtrig_aclkr"
                     if "source" not in field:
                         self.rtl_ports.append(f"    input wire {width_str} {read_port_name},")
-                        self.rtl_ports.append(f"    output reg {width_str} {rtrig_port_name},")
+                        self.rtl_ports.append(f"    output reg        {rtrig_port_name},")
                     
                 #Write logic 
                 if "W" in acc:

@@ -49,7 +49,7 @@ module uart_axilite_slv #(
     input wire       i_int_overrun_err_raw_set_aclk,
     input wire       i_int_tx_fifo_th_raw_set_aclk,
     input wire       i_int_rx_fifo_th_raw_set_aclk,
-    output wire        o_interrupt_aclkr,
+    output reg        o_interrupt_aclkr,
     //====================================================
     // AXI4-Lite Ports
     //====================================================

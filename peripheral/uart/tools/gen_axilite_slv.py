@@ -202,7 +202,7 @@ class RegmapYamlParser:
 
         #generate interrupt logic
         if self.interrupt_signals:
-            self.rtl_ports.append("    output wire        o_interrupt_aclkr,")            
+            self.rtl_ports.append("    output reg        o_interrupt_aclkr,")            
             always_block = f"""
     //Field : {name}
     always @(posedge aclk or negedge aresetn) begin

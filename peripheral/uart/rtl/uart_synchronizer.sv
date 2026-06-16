@@ -1,6 +1,6 @@
 `default_nettype none
 
-module synchronizer #(
+module uart_synchronizer #(
     parameter int FF_DEPTH = 2
 ) (
     input  wire  CLK,

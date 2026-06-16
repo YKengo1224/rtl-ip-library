@@ -12,7 +12,7 @@ module uart_tx (
     input  wire       i_conf_hw_flow_en_sysclk,
     input  wire [1:0] i_conf_over_samp_sel_sysclk,
     //oversampel clk_en
-    input  wire       i_over_samp_clken,
+    input  wire       i_over_samp_clken_sysclk,
     //fifo signals
     output reg        o_fifo_ren_sysclkr,
     input  wire [8:0] i_fifo_rdata_sysclk,
@@ -152,7 +152,7 @@ module uart_tx (
             over_samp_cnt_sysclkr <= '0;
         end else if (state_next == S_IDLE) begin
             over_samp_cnt_sysclkr <= '0;
-        end else if (i_over_samp_clken) begin
+        end else if (i_over_samp_clken_sysclk) begin
             if (send_bit_done_sysclk) begin
                 over_samp_cnt_sysclkr <= '0;
             end else begin

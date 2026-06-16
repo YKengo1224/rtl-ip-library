@@ -29,7 +29,7 @@ module uart_rx (
     output reg        o_rx_detect_break_sysclkr,
     //uart signals
     input  wire       i_uart_rxd_sysclk,
-    output reg        o_uart_rtsn_sysclk
+    output wire       o_uart_rtsn_sysclk
 );
 
 
@@ -87,7 +87,7 @@ module uart_rx (
     localparam int TIMEOUT_CNT_MAX = 32 * 12 * 4;  //over sample_num * bitnum * data nnnnum
     reg   [$clog2(TIMEOUT_CNT_MAX):0] over_samp_timeout_cnt_sysclkr;
     reg   [$clog2(TIMEOUT_CNT_MAX):0] over_samp_timeout_cnt_max_sysclkr;
-    logic                               detect_timeout_tirg_sysclk;
+    logic                             detect_timeout_tirg_sysclk;
 
 
 
@@ -315,7 +315,7 @@ module uart_rx (
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             sample_data_bit_cnt_sysclkr <= '0;
-        end else if ((state == S_D_WAIT_SAMPLE) && (state == S_D_SAMPLE)) begin
+        end else if ((state == S_D_WAIT_SAMPLE) && (state_next == S_D_SAMPLE)) begin
             if (sample_rx_bit_done_sysclk) begin
                 if (sample_data_done_sysclk) begin
                     sample_data_bit_cnt_sysclkr <= '0;
@@ -340,9 +340,29 @@ module uart_rx (
         end else if (state == S_IDLE) begin
             sample_data_latch_sysclkr <= '0;
         end else if (state == S_D_SAMPLE) begin
-            sample_data_latch_sysclkr = {
-                sample_data_latch_sysclkr[8:0], sample_data_bit_judge_sysclk
-            };
+            case (i_conf_data_bit_width_sysclk)
+                4'd5:
+                sample_data_latch_sysclkr <= {
+                    4'd0, sample_bit_judge_sysclk, sample_data_latch_sysclkr[4:1]
+                };
+                4'd6:
+                sample_data_latch_sysclkr <= {
+                    3'd1, sample_bit_judge_sysclk, sample_data_latch_sysclkr[5:1]
+                };
+                4'd7:
+                sample_data_latch_sysclkr <= {
+                    2'd0, sample_bit_judge_sysclk, sample_data_latch_sysclkr[6:1]
+                };
+                4'd8:
+                sample_data_latch_sysclkr <= {
+                    1'd0, sample_bit_judge_sysclk, sample_data_latch_sysclkr[7:1]
+                };
+                4'd9:
+                sample_data_latch_sysclkr <= {
+                    sample_bit_judge_sysclk, sample_data_latch_sysclkr[8:1]
+                };
+                default: sample_data_latch_sysclkr = 9'h000;
+            endcase
         end else begin
             sample_data_latch_sysclkr <= sample_data_latch_sysclkr;
         end
@@ -366,9 +386,9 @@ module uart_rx (
             data_parity_sysclkr <= 1'b0;
         end else if (state == S_P_SAMPLE) begin
             if (i_conf_parity_bit_sysclk[0]) begin
-                data_parity_sysclkr <= ^sample_data_latch_mask_sysclk;  //odd 
+                data_parity_sysclkr <= ~(^sample_data_latch_mask_sysclk);  //odd 
             end else begin
-                data_parity_sysclkr <= ~sample_data_latch_mask_sysclk;  //even
+                data_parity_sysclkr <= ^sample_data_latch_mask_sysclk;  //even
             end
         end else begin
             data_parity_sysclkr <= data_parity_sysclkr;
@@ -399,7 +419,7 @@ module uart_rx (
             sample_stop_bit_sysclkr <= 1'b0;
         end else if (state == S_IDLE) begin
             sample_stop_bit_sysclkr <= 1'b0;
-        end else if (state == S_P_SAMPLE) begin
+        end else if (state == S_S_SAMPLE) begin
             sample_stop_bit_sysclkr <= sample_bit_judge_sysclk;
         end else begin
             sample_stop_bit_sysclkr <= sample_stop_bit_sysclkr;
@@ -471,7 +491,7 @@ module uart_rx (
                      !o_rx_parity_err_trig_sysclkr &&
                      !o_rx_overrun_err_tirg_sysclkr
         ) begin
-            o_fifo_wen_sysclkr   <= 1'b0;
+            o_fifo_wen_sysclkr   <= 1'b1;
             o_fifo_wdata_sysclkr <= sample_data_latch_mask_sysclk;
         end else begin
             o_fifo_wen_sysclkr   <= 1'b0;
@@ -490,11 +510,20 @@ module uart_rx (
     //theck timeout
     //####################
     assign detect_timeout_tirg_sysclk = over_samp_timeout_cnt_sysclkr == (TIMEOUT_CNT_MAX - 1);
-   
+
+
+    always @(posedge sysclk or negedge sysrst_n) begin
+        if (!sysrst_n) begin
+            o_rx_detect_timeout_tirg_sysclkr <= '0;
+        end else begin
+            o_rx_detect_timeout_tirg_sysclkr <= detect_timeout_tirg_sysclk;
+        end
+    end
+
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             over_samp_timeout_cnt_sysclkr <= '0;
-        end else if ((state_next == S_IDLE) && i_fifo_empty_sysclk) begin
+        end else if ((state_next == S_IDLE) && !i_fifo_empty_sysclk) begin
             if (i_over_samp_clken_sysclk) begin
                 if (detect_timeout_tirg_sysclk) begin
                     over_samp_timeout_cnt_sysclkr <= '0;
@@ -503,7 +532,7 @@ module uart_rx (
                 end
             end
         end else begin
-            over_samp_cnt_sysclkr <= '0;
+            over_samp_timeout_cnt_sysclkr <= '0;
         end
     end
 

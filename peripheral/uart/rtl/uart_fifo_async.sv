@@ -1,33 +1,33 @@
 `default_nettype none
-module fifo_async #(
+module uart_fifo_async #(
     parameter int BITWIDTH = 32,
     parameter int FIFO_SIZE = 8,  //only 2**n
     parameter int SYNC_FF_DEPTH = 2,
     parameter int ALMOST_FULL_SIZE = 5,
     parameter int ALMOST_EMPTY_SIZE = 2
 ) (
-    input  wire                 WCLK,
-    input  wire                 RCLK,
-    input  wire                 RST_N_WCLK,
-    input  wire                 RST_N_RCLK,
+    input  wire                        WCLK,
+    input  wire                        RCLK,
+    input  wire                        RST_N_WCLK,
+    input  wire                        RST_N_RCLK,
     //data 
-    input  wire                 W_EN_WCLK,
-    input  wire  [BITWIDTH-1:0] DATA_IN_WCLK,
-    input  wire                 R_EN_RCLK,
-    output logic [BITWIDTH-1:0] DATA_OUT_RCLKR,
-    output logic                DATA_OUT_VALID_RCLKR,
+    input  wire                        W_EN_WCLK,
+    input  wire  [       BITWIDTH-1:0] DATA_IN_WCLK,
+    input  wire                        R_EN_RCLK,
+    output logic [       BITWIDTH-1:0] DATA_OUT_RCLKR,
+    output logic                       DATA_OUT_VALID_RCLKR,
     //fifo status
-    output logic                EMPTY_WCLKR,
-    output logic                FULL_WCLKR,
-    output logic                ALMOST_FULL_WCLKR,
-    output logic                ALMOST_EMPTY_WCLKR,
-    output logic [BITWIDTH-1:0] FIFO_AVAILABLE_WCLKR,
+    output logic                       EMPTY_WCLKR,
+    output logic                       FULL_WCLKR,
+    output logic                       ALMOST_FULL_WCLKR,
+    output logic                       ALMOST_EMPTY_WCLKR,
+    output logic [$clog2(FIFO_SIZE):0] FIFO_AVAILABLE_WCLKR,
 
-    output logic                EMPTY_RCLKR,
-    output logic                FULL_RCLKR,
-    output logic                ALMOST_FULL_RCLKR,
-    output logic                ALMOST_EMPTY_RCLKR,
-    output logic [BITWIDTH-1:0] FIFO_AVAILABLE_RCLKR
+    output logic                       EMPTY_RCLKR,
+    output logic                       FULL_RCLKR,
+    output logic                       ALMOST_FULL_RCLKR,
+    output logic                       ALMOST_EMPTY_RCLKR,
+    output logic [$clog2(FIFO_SIZE):0] FIFO_AVAILABLE_RCLKR
 );
 
     //########################################
@@ -139,7 +139,7 @@ module fifo_async #(
     genvar gi;
     generate
         for (gi = 0; gi <= ADDR_BITWIDTH; gi++) begin
-            synchronizer #(
+            uart_synchronizer #(
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) wr2rd_synchronizer (
                 .CLK(RCLK),
@@ -147,7 +147,7 @@ module fifo_async #(
                 .DATA_IN(w_ptr_wclk[gi]),
                 .DATA_OUT(w_ptr_rclk[gi])
             );
-            synchronizer #(
+            uart_synchronizer #(
                 .FF_DEPTH(SYNC_FF_DEPTH)
             ) rd2wd_synchronizer (
                 .CLK(WCLK),

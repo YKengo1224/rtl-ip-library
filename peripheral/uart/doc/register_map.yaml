@@ -84,7 +84,7 @@ registers:
     description: "UART Data"
     fields:
       - name: uart_data
-        bits: "7:0"
+        bits: "8:0"
         access: WOR1TRIG
         init: 0
         description: "W:txデータセット、R:受信データ取得"
@@ -159,11 +159,11 @@ registers:
     description: "UART Interrupt Threshold config"
     fields:
       - name: rx_fifo_th_level
-        bits: "7:4"
+        bits: "12:8"
         access: RW
         init: 0
       - name: tx_fifo_th_level
-        bits: "3:0"
+        bits: "4:0"
         access: RW
         init: 0
 

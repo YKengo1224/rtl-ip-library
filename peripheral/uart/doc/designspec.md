@@ -87,8 +87,8 @@
 
 | ビット | フィールド名 | RW  | init | 詳細                                 |
 |--------|--------------|-----|------|--------------------------------------|
-| [31:8] | reserved     | -   | -    |                                      |
-| [7:0]  | data         | R/W | 0    | W:txデータセット、R:受信データ取得   |
+| [31:9] | reserved     | -   | -    |                                      |
+| [8:0]  | data         | R/W | 0    | W:txデータセット、R:受信データ取得   |
 
 
 
@@ -137,9 +137,10 @@ int_rx_fifo_th_en、int_tx_ffio_th_enの割り込みを閾値を設定します�
 
 | ビット  | フィールド名     | RW  | init | 詳細              |
 |---------|------------------|-----|------|-------------------|
-| [31:25] | reserved         | -   | -    |                   |
-| [7:4]   | rx_fifo_th_level | R/W | 0    | RX FIFO閾値レベル |
-| [3:0]   | tx_fifo_th_level | R/W | 0    | TX FIFO閾値レベル |
+| [31:13] | reserved         | -   | -    |                   |
+| [12:8]  | rx_fifo_th_level | R/W | 0    | RX FIFO閾値レベル |
+| [7:5]   | reserved         | -   | -    |                   |
+| [4:0]   | tx_fifo_th_level | R/W | 0    | TX FIFO閾値レベル |
 
 ### UART_INT_RS(0x24)
 INT_CTRLでマスクされていない割り込みステータスを示します。
@@ -211,6 +212,7 @@ INT_CTRLでマスクされた割り込みステータスを示します。
 |          | uart_sync_aclk2sysclk    |                  |
 |          | uart_sync_sysclkclk2aclk |                  |
 |          |                          | uart_syncronizer |
+|          |                          | uart_handshake   |
 |          | uart_fifo_async(tx,rx)   |                  |
 |          | uart_clk_divider         |                  |
 |          | uart_tx                  |                  |

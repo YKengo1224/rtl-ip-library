@@ -63,20 +63,10 @@ class axi4lite_write_seq #(
     rand bit [15:0] id    = 0;
     rand bit [ 2:0] prot  = 0;
     rand bit [63:0] data;
-    bit [ 7:0] wstrb;
-    rand int    xfer_bytes;
-
-    constraint c_bytes {xfer_bytes inside {1, 2, 4, 8};}
+    rand bit [ 7:0] wstrb;
 
     function new(string name = "axi4lite_write_seq");
         super.new(name);
-    endfunction
-
-    function void post_randomize();
-        bit [7:0] base_strb = (1 << xfer_bytes) - 1;
-
-        wstrb = base_strb << (addr % 8);
-
     endfunction
 
     virtual task body();

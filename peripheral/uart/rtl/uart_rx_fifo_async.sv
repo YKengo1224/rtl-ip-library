@@ -109,6 +109,8 @@ module uart_rx_fifo_async #(
             rx_fifo_rdata_hold_aclkr <= '0;
         end else if (rx_fifo_rdata_valid_aclk) begin
             rx_fifo_rdata_hold_aclkr <= rx_fifo_rdata_aclk;
+        end else begin
+            rx_fifo_rdata_hold_aclkr <= rx_fifo_rdata_hold_aclkr;
         end
     end
 

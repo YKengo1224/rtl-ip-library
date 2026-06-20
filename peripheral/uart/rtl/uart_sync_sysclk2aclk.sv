@@ -20,7 +20,7 @@ module uart_sync_sysclk2aclk (
     output wire o_tx_busy_aclkr,
     output wire o_int_break_det_raw_set_aclk,
     output wire o_int_parity_err_raw_set_aclkr,
-    output wire o_int_framing_err_raw_se_aclkr,
+    output wire o_int_framing_err_raw_set_aclkr,
     output wire o_int_rx_timeout_raw_set_aclkr,
     output wire o_int_overrun_err_raw_set_aclkr
 );
@@ -74,7 +74,7 @@ module uart_sync_sysclk2aclk (
         .src_pulse(i_rx_framing_err_trig_sysclk),
         .dest_clk(aclk),
         .dest_rst_n(aresetn),
-        .dest_pulse(o_int_framing_err_raw_se_aclkr)
+        .dest_pulse(o_int_framing_err_raw_set_aclkr)
     );
 
     uart_pulse_synchronizer #(

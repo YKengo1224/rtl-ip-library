@@ -57,7 +57,7 @@ module uart_rx (
     logic sample_rx_bit_done_sysclk;
 
     //sample start bit signals
-    logic [1:0] detect_start_bit_sysclk; // 0:detect busy 1: detect(->S_D_WAIT_SAMPLE) ,2:not detect(->S_IDLE)
+    reg [1:0] detect_start_bit_sysclkr; // 0:detect busy 1: detect(->S_D_WAIT_SAMPLE) ,2:not detect(->S_IDLE)
     logic [5:0] detect_start_bit_criteria_sysclk;
     reg [5:0] judge_start_latch_cnt_sysclkr;
 
@@ -109,7 +109,7 @@ module uart_rx (
                 end
             end
             S_JUDGE_START: begin
-                case (detect_start_bit_sysclk)
+                case (detect_start_bit_sysclkr)
                     2'b01: state_next = S_D_WAIT_SAMPLE;
                     2'b10: state_next = S_IDLE;
                 endcase
@@ -215,7 +215,7 @@ module uart_rx (
         end
     end
 
-    assign sample_rx_bit_done_sysclk = (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclk - 1));
+    assign sample_rx_bit_done_sysclk = (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1));
 
     //####################
     //detect start bit
@@ -225,7 +225,7 @@ module uart_rx (
             judge_start_latch_cnt_sysclkr <= '0;
         end else if (state == S_JUDGE_START) begin
             if (i_over_samp_clken_sysclk) begin
-                judge_start_latch_cnt_sysclkr <= judge_start_latch_cnt_sysclkr + ~uart_txd_sysclk;
+                judge_start_latch_cnt_sysclkr <= judge_start_latch_cnt_sysclkr + ~uart_rxd_sysclk;
             end else begin
                 judge_start_latch_cnt_sysclkr <= judge_start_latch_cnt_sysclkr;
             end
@@ -262,9 +262,9 @@ module uart_rx (
     always_comb begin
         if (i_conf_samp_num_sel_sysclk) begin  //3
             sample_bit_trig_sysclk = i_over_samp_clken_sysclk && 
-                                    ((over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclk - 3))  ||
-                                     (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclk - 2))  ||
-                                     (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclk - 1)));
+                                    ((over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 3))  ||
+                                     (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 2))  ||
+                                     (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1)));
         end else begin
             sample_bit_trig_sysclk = sample_rx_bit_done_sysclk;
         end

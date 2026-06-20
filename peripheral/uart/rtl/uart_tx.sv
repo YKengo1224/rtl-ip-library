@@ -161,7 +161,7 @@ module uart_tx (
         end
     end
 
-    assign send_bit_done_sysclk = over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclk - 1);
+    assign send_bit_done_sysclk = over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1);
 
     //####################
     //send data bit cnt

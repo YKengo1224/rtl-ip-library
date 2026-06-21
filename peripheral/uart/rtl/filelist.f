@@ -1,0 +1,12 @@
+${UART_RTL_PATH}/uart_synchronizer.sv
+${UART_RTL_PATH}/uart_pulse_synchronizer.sv
+${UART_RTL_PATH}/uart_sync_aclk2sysclk.sv
+${UART_RTL_PATH}/uart_sync_sysclk2aclk.sv
+${UART_RTL_PATH}/uart_clk_divider.sv
+${UART_RTL_PATH}/uart_tx.sv
+${UART_RTL_PATH}/uart_rx.sv
+${UART_RTL_PATH}/uart_fifo_async.sv
+${UART_RTL_PATH}/uart_tx_fifo_async.sv
+${UART_RTL_PATH}/uart_rx_fifo_async.sv
+${UART_RTL_PATH}/uart_axilite_slv.sv
+${UART_RTL_PATH}/uart_top.sv

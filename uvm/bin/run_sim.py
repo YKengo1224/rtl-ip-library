@@ -85,9 +85,13 @@ class Runsim:
         self.simulator = Simulator[self.args.simulator.upper()]
 
         if self.args.work_dir:
-            self.work_dir = Path(self.args.work_dir)
+            self.work_dir = Path(self.args.work_dir) / self.args.testname
+        else:
+            self.work_dir = self.work_dir / self.args.testname
         if self.args.log_dir:
-            self.log_dir = Path(self.args.log_dir)
+            self.log_dir = Path(self.args.log_dir) / self.args.testname
+        else:
+            self.log_dir = self.log_dir / self.args.testname
 
 
     def build(self):

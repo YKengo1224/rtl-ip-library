@@ -26,19 +26,11 @@ class sample_ral_seq extends uart_seq_base;
         
         // UART_CTRL reset check (Expected: 32'h0000_0000)
         regmodel.uart_ctrl.read(status, rdata, .parent(this));
-        if (rdata === 32'h0) begin
-            `uvm_info("RAL_SEQ", "uart_ctrl Reset Value: PASS (32'h0000_0000)", UVM_LOW)
-        end else begin
-            `uvm_error("RAL_SEQ", $sformatf("uart_ctrl Reset Value: FAIL (Act: 'h%0x, Exp: 'h0)", rdata))
-        end
+        check_reg("uart_ctrl Reset Value", rdata, 32'h0);
 
         // UART_CONF_FRAME reset check (Expected: 32'h0000_0810)
         regmodel.uart_conf_frame.read(status, rdata, .parent(this));
-        if (rdata === 32'h0000_0810) begin
-            `uvm_info("RAL_SEQ", "uart_conf_frame Reset Value: PASS (32'h0000_0810)", UVM_LOW)
-        end else begin
-            `uvm_error("RAL_SEQ", $sformatf("uart_conf_frame Reset Value: FAIL (Act: 'h%0x, Exp: 'h810)", rdata))
-        end
+        check_reg("uart_conf_frame Reset Value", rdata, 32'h0000_0810);
 
         //---------------------------------------------------------
         // Test 2: Write/Read check on Read/Write Register
@@ -48,11 +40,7 @@ class sample_ral_seq extends uart_seq_base;
         // Write to UART_CONF_FRAME
         regmodel.uart_conf_frame.write(status, 32'h0000_0921, .parent(this)); // 9-bit width, 1.5 stop, odd parity
         regmodel.uart_conf_frame.read(status, rdata, .parent(this));
-        if (rdata === 32'h0000_0921) begin
-            `uvm_info("RAL_SEQ", "uart_conf_frame RW test: PASS ('h0000_0921)", UVM_LOW)
-        end else begin
-            `uvm_error("RAL_SEQ", $sformatf("uart_conf_frame RW test: FAIL (Act: 'h%0x, Exp: 'h0000_0921)", rdata))
-        end
+        check_reg("uart_conf_frame RW test", rdata, 32'h0000_0921);
 
         //---------------------------------------------------------
         // Test 3: Write check on Read-Only Register (Should not change value)
@@ -70,11 +58,7 @@ class sample_ral_seq extends uart_seq_base;
         begin
             bit [31:0] next_rdata;
             regmodel.uart_status.read(status, next_rdata, .parent(this));
-            if (next_rdata === rdata) begin
-                `uvm_info("RAL_SEQ", $sformatf("uart_status RO test: PASS (Value remains 'h%0x)", next_rdata), UVM_LOW)
-            end else begin
-                `uvm_error("RAL_SEQ", $sformatf("uart_status RO test: FAIL (Value changed from 'h%0x to 'h%0x)", rdata, next_rdata))
-            end
+            check_reg("uart_status RO test", next_rdata, rdata);
         end
 
         `uvm_info("RAL_SEQ", "========== RAL Verification Sequence Finished ==========", UVM_LOW)

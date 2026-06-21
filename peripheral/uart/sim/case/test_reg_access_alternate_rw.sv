@@ -25,10 +25,7 @@ class test_reg_access_alternate_rw extends uart_seq_base;
             wdata = i; // Target the clk_div field in UART_CONF_SAMP
             regmodel.uart_conf_samp.write(status, wdata, .parent(this));
             regmodel.uart_conf_samp.read(status, rdata, .parent(this));
-            
-            if (rdata[15:0] !== wdata[15:0]) begin
-                `uvm_error("REG_TEST", $sformatf("UART_CONF_SAMP alternate RW check failed: Exp 'h%0x, Act 'h%0x", wdata[15:0], rdata[15:0]))
-            end
+            check_reg($sformatf("UART_CONF_SAMP alternate RW test [step %0d]", i), rdata[15:0], wdata[15:0]);
         end
 
         `uvm_info("REG_TEST", "========== Finished test_reg_access_alternate_rw ==========", UVM_LOW)

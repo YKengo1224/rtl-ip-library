@@ -6,6 +6,7 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 import axi4lite_pkg::*;
 import uart_bfm_pkg::*;
+import common_pkg::*;
 
 class uart_seq_base extends uvm_sequence;
     `uvm_object_utils(uart_seq_base)
@@ -13,6 +14,7 @@ class uart_seq_base extends uvm_sequence;
 
     uart_reg_block regmodel;
     axi4lite_default_interface vif;
+    test_result result_obj;
 
     // Instantiated sequences inside the base sequence
     axi4lite_write_seq    axil_write;
@@ -42,6 +44,43 @@ class uart_seq_base extends uvm_sequence;
             @(posedge vif.aclk);
         end
     endtask
+
+    // Retrieve comparison result object
+    virtual function void get_result_obj();
+        if (result_obj == null) begin
+            if (!uvm_config_db#(test_result)::get(null, "", "test_result", result_obj)) begin
+                `uvm_info("UART_SEQ", "test_result object not found in config_db", UVM_DEBUG)
+            end
+        end
+    endfunction
+
+    // Perform register value comparison and count it in result_obj
+    virtual function void check_reg(string msg, bit [31:0] act, bit [31:0] exp);
+        bit err = (act !== exp);
+        get_result_obj();
+        if (result_obj != null) begin
+            result_obj.add_reg_cmp(1, err);
+        end
+        if (err) begin
+            `uvm_error("REG_CMP", $sformatf("%s error: Exp 'h%0x, Act 'h%0x", msg, exp, act))
+        end else begin
+            `uvm_info("REG_CMP", $sformatf("%s check: PASS ('h%0x)", msg, act), UVM_HIGH)
+        end
+    endfunction
+
+    // Perform sequence/data value comparison and count it in result_obj
+    virtual function void check_seq(string msg, bit [31:0] act, bit [31:0] exp);
+        bit err = (act !== exp);
+        get_result_obj();
+        if (result_obj != null) begin
+            result_obj.add_seq_cmp(1, err);
+        end
+        if (err) begin
+            `uvm_error("SEQ_CMP", $sformatf("%s error: Exp 'h%0x, Act 'h%0x", msg, exp, act))
+        end else begin
+            `uvm_info("SEQ_CMP", $sformatf("%s check: PASS ('h%0x)", msg, act), UVM_HIGH)
+        end
+    endfunction
 
 endclass
 

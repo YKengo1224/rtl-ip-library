@@ -1,8 +1,12 @@
 `ifndef _H_UART_SCOREBOARD_SV
 `define _H_UART_SCOREBOARD_SV
 
+import common_pkg::*;
+
 class uart_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(uart_scoreboard)
+
+    test_result result_obj;
 
     // AXI4-Lite and UART BFM TLM FIFOs
     uvm_tlm_analysis_fifo #(axi4lite_transfer) axil_fifo;
@@ -23,6 +27,10 @@ class uart_scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
         axil_fifo = new("axil_fifo", this);
         uart_fifo = new("uart_fifo", this);
+        
+        // Instantiate and set test_result to config_db
+        result_obj = test_result::type_id::create("test_result");
+        uvm_config_db#(test_result)::set(null, "*", "test_result", result_obj);
     endfunction
 
     virtual task run_phase(uvm_phase phase);
@@ -60,6 +68,7 @@ class uart_scoreboard extends uvm_scoreboard;
                 `uvm_error("UART_SCOREBOARD", $sformatf("Unexpected UART TX packet detected: 'h%0x",
                                                         uart_trans.receive_data))
                 mismatch_count++;
+                if (result_obj != null) result_obj.add_seq_cmp(1, 1);
                 continue;
             end
 
@@ -73,11 +82,13 @@ class uart_scoreboard extends uvm_scoreboard;
 
                 if (masked_act === masked_exp) begin
                     match_count++;
+                    if (result_obj != null) result_obj.add_seq_cmp(1, 0);
                     `uvm_info("UART_SCOREBOARD",
                               $sformatf("TX Data MATCH: Act 'h%0x, Exp 'h%0x (width: %0d)",
                                         masked_act, masked_exp, uart_trans.data_bit_width), UVM_LOW)
                 end else begin
                     mismatch_count++;
+                    if (result_obj != null) result_obj.add_seq_cmp(1, 1);
                     `uvm_error("UART_SCOREBOARD", $sformatf(
                                "TX Data MISMATCH: Act 'h%0x, Exp 'h%0x (width: %0d)",
                                masked_act,
@@ -109,6 +120,21 @@ class uart_scoreboard extends uvm_scoreboard;
         `uvm_info("UART_SCOREBOARD", $sformatf("  Total Mismatches   : %0d", mismatch_count),
                   UVM_LOW)
         `uvm_info("UART_SCOREBOARD", $sformatf("======================================="), UVM_LOW)
+
+        // Detailed Report
+        if (result_obj != null) begin
+            result_obj.report();
+            
+            // Overall Check
+            if (result_obj.reg_cmp_error == 0 && result_obj.seq_cmp_error == 0 && 
+                (result_obj.reg_cmp_count > 0 || result_obj.seq_cmp_count > 0)) begin
+                `uvm_info("UART_SCOREBOARD", ">>> TEST RESULT: PASS <<<", UVM_LOW)
+            end else begin
+                `uvm_error("UART_SCOREBOARD", ">>> TEST RESULT: FAIL <<<")
+            end
+        end else begin
+            `uvm_error("UART_SCOREBOARD", ">>> TEST RESULT: FAIL (test_result object not initialized) <<<")
+        end
     endfunction
 endclass
 

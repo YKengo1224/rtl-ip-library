@@ -46,11 +46,7 @@ class test_rx_normal extends uart_seq_base;
 
         // 4. Read RX FIFO data via UART_DATA register
         regmodel.uart_data.read(status, rdata, .parent(this));
-        if (rdata[7:0] === 8'h5A) begin
-            `uvm_info("UART_SEQ", "test_rx_normal PASS (Received 8'h5A)", UVM_LOW)
-        end else begin
-            `uvm_error("UART_SEQ", $sformatf("test_rx_normal FAIL: Exp 8'h5A, Act 8'h%0x", rdata[7:0]))
-        end
+        check_seq("test_rx_normal receive data", rdata[7:0], 8'h5A);
 
         `uvm_info("UART_SEQ", "========== Finished test_rx_normal ==========", UVM_LOW)
     endtask

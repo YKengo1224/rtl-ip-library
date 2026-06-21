@@ -175,11 +175,58 @@ class Runsim:
         subprocess.run(self.run_cmd, cwd=self.work_dir, check=True)
   
 
+    def check_result(self):
+        log_file = self.log_dir / 'xsim.log'
+        if not log_file.exists():
+            print(f"ERROR: Log file not found: {log_file}")
+            import sys
+            sys.exit(1)
+            
+        print(f"\n--- Checking Simulation Result ({self.args.testname}) ---")
+        
+        uvm_errors = -1
+        uvm_fatals = -1
+        has_pass_keyword = False
+        
+        with open(log_file, 'r', errors='ignore') as f:
+            for line in f:
+                if "Number of UVM_ERROR messages" in line:
+                    parts = line.split(":")
+                    if len(parts) >= 2:
+                        try:
+                            uvm_errors = int(parts[-1].strip())
+                        except ValueError:
+                            pass
+                if "Number of UVM_FATAL messages" in line:
+                    parts = line.split(":")
+                    if len(parts) >= 2:
+                        try:
+                            uvm_fatals = int(parts[-1].strip())
+                        except ValueError:
+                            pass
+                
+                # Detect the PASS keyword from test sequence logs
+                if "PASS" in line:
+                    if "UVM_INFO" in line or "RAL_SEQ" in line or "UART_SEQ" in line:
+                        has_pass_keyword = True
+
+        print(f"UVM Errors: {uvm_errors}")
+        print(f"UVM Fatals: {uvm_fatals}")
+        print(f"PASS Keyword Detected: {has_pass_keyword}")
+
+        if uvm_errors == 0 and uvm_fatals == 0 and has_pass_keyword:
+            print("\n>>> RESULT: PASS <<<\n")
+        else:
+            print("\n>>> RESULT: FAIL <<<\n")
+            import sys
+            sys.exit(1)
+
     def run(self):
         self.parse_arg()
         self.def_env()
         self.build()
         self.execute_cmd()
+        self.check_result()
 
 
 if __name__ == "__main__":

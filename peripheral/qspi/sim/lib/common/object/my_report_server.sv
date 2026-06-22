@@ -129,7 +129,7 @@ class my_report_server extends uvm_default_report_server;
 	endfunction
 
     function void report_summarize(UVM_FILE file = 0);
-        // NOP
+        super.report_summarize(file);
     endfunction
 
 endclass : my_report_server

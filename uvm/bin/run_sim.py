@@ -197,10 +197,27 @@ class Runsim:
                             uvm_errors = int(parts[-1].strip())
                         except ValueError:
                             pass
+                elif "UVM_ERROR" in line and ":" in line:
+                    parts = line.split(":")
+                    if len(parts) >= 2:
+                        try:
+                            # Extract numeric value
+                            uvm_errors = int(parts[-1].strip())
+                        except ValueError:
+                            pass
+                            
                 if "Number of UVM_FATAL messages" in line:
                     parts = line.split(":")
                     if len(parts) >= 2:
                         try:
+                            uvm_fatals = int(parts[-1].strip())
+                        except ValueError:
+                            pass
+                elif "UVM_FATAL" in line and ":" in line:
+                    parts = line.split(":")
+                    if len(parts) >= 2:
+                        try:
+                            # Extract numeric value
                             uvm_fatals = int(parts[-1].strip())
                         except ValueError:
                             pass

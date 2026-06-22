@@ -77,7 +77,7 @@ module uart_tx (
                 end
             end
             S_SEND_START: begin
-                if (send_bit_done_sysclk) begin
+                if (i_over_samp_clken_sysclk && send_bit_done_sysclk) begin
                     state_next = S_SEND_DATA;
                 end
             end
@@ -128,7 +128,7 @@ module uart_tx (
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             over_samp_cnt_max_sysclkr <= '0;
-        end else if ((state != S_SEND_STOP) || (state_next == S_SEND_STOP)) begin
+        end else if ((state == S_SEND_STOP) || (state_next == S_SEND_STOP)) begin
             case (i_conf_stop_bit_width_sel_sysclk)
                 2'b00: over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr >> 1;
                 2'b01: over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr;
@@ -161,11 +161,13 @@ module uart_tx (
         end
     end
 
-    assign send_bit_done_sysclk = over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1);
+    assign send_bit_done_sysclk = i_over_samp_clken_sysclk && (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1));
 
     //####################
     //send data bit cnt
-    //####################
+    //####################   
+
+
     always_comb begin
         case (i_conf_data_bit_width_sysclk)
             4'd5: send_data_bit_cnt_max_sysclk = 4'd5;
@@ -182,7 +184,7 @@ module uart_tx (
             send_data_bit_cnt_sysclkr <= '0;
         end else if (state_next == S_IDLE) begin
             send_data_bit_cnt_sysclkr <= '0;
-        end else if (send_bit_done_sysclk) begin
+        end else if ((state == S_SEND_DATA) && send_bit_done_sysclk) begin
             if (send_data_bit_done_sysclk) begin
                 send_data_bit_cnt_sysclkr <= '0;
             end else begin
@@ -191,7 +193,7 @@ module uart_tx (
         end
     end
 
-    assign send_data_bit_done_sysclk = (send_data_bit_cnt_sysclkr == (send_data_bit_cnt_max_sysclk - 1));
+    assign send_data_bit_done_sysclk = send_bit_done_sysclk && (send_data_bit_cnt_sysclkr == (send_data_bit_cnt_max_sysclk - 1));
 
 
     //####################
@@ -283,6 +285,14 @@ module uart_tx (
         end
     end
 
+    always @(posedge sysclk or negedge sysrst_n) begin
+        if (!sysrst_n) begin
+            o_tx_busy_sysclkr <= 1'd1;
+        end else begin
+            o_tx_busy_sysclkr <= state != S_IDLE;
+        end
+    end
+   
 endmodule
 
 `default_nettype wire

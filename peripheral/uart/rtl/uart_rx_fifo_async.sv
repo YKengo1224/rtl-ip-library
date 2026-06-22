@@ -14,8 +14,8 @@ module uart_rx_fifo_async #(
     //=========================================
     input  wire       i_rx_fifo_wen_sysclk,
     input  wire [8:0] i_rx_fifo_wdata_sysclk,
-    input  wire       i_uart_data_rtrig_aclk,  // Read trigger from AXI
-    output wire [8:0] o_uart_data_aclkr,       // FWFT read data output
+    input  wire       i_uart_rx_data_rtrig_aclk,  // Read trigger from AXI
+    output wire [8:0] o_uart_rx_data_aclkr,       // FWFT read data output
 
     //=========================================
     // FIFO Status Interface
@@ -96,7 +96,7 @@ module uart_rx_fifo_async #(
         if (!o_rx_fifo_empty_aclkr && !rx_fifo_rdata_hold_valid_aclkr && !rx_fifo_rdata_valid_aclk) begin
             rx_fifo_ren_aclk = 1'b1;
             // User read: trigger a new read from the FIFO
-        end else if (i_uart_data_rtrig_aclk) begin
+        end else if (i_uart_rx_data_rtrig_aclk) begin
             rx_fifo_ren_aclk = 1'b1;
         end else begin
             rx_fifo_ren_aclk = 1'b0;
@@ -120,13 +120,13 @@ module uart_rx_fifo_async #(
             rx_fifo_rdata_hold_valid_aclkr <= 1'b0;
         end else if (rx_fifo_rdata_valid_aclk) begin
             rx_fifo_rdata_hold_valid_aclkr <= 1'b1;  // New data arrived
-        end else if (i_uart_data_rtrig_aclk) begin
+        end else if (i_uart_rx_data_rtrig_aclk) begin
             rx_fifo_rdata_hold_valid_aclkr <= 1'b0;  // Data was consumed by AXI
         end
     end
 
     // Direct output to the AXI bus
-    assign o_uart_data_aclkr = rx_fifo_rdata_hold_aclkr;
+    assign o_uart_rx_data_aclkr = rx_fifo_rdata_hold_aclkr;
 
     //=========================================
     // Threshold Interrupt Logic

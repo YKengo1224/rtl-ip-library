@@ -12,8 +12,8 @@ module uart_tx_fifo_async #(
     //=========================================
     // Data Interface
     //=========================================
-    input wire       i_uart_data_wtrig_aclk,  // Read trigger from AXI
-    input wire [8:0] i_uart_data_aclk,
+    input wire       i_uart_tx_data_wtrig_aclk,  // Read trigger from AXI
+    input wire [8:0] i_uart_tx_data_aclk,
 
     input  wire       i_tx_fifo_ren_sysclk,
     output wire [8:0] o_tx_fifo_rdata_sysclkr,
@@ -63,8 +63,8 @@ module uart_tx_fifo_async #(
         .RCLK                (sysclk),
         .RST_N_WCLK          (aresetn),
         .RST_N_RCLK          (sysrst_n),
-        .W_EN_WCLK           (i_uart_data_wtrig_aclk),
-        .DATA_IN_WCLK        (i_uart_data_aclk),
+        .W_EN_WCLK           (i_uart_tx_data_wtrig_aclk),
+        .DATA_IN_WCLK        (i_uart_tx_data_aclk),
         .R_EN_RCLK           (i_tx_fifo_ren_sysclk),
         .DATA_OUT_RCLKR      (o_tx_fifo_rdata_sysclkr),
         .DATA_OUT_VALID_RCLKR(o_tx_fifo_rdata_valid_sysclkr),

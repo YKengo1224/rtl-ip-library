@@ -92,7 +92,6 @@ module uart_top #(
     wire                int_rx_timeout_raw_set_aclk;// From uart_sync_sysclk2aclk of uart_sync_sysclk2aclk.v
     wire                int_tx_fifo_th_en_aclk; // From uart_axilite_slv of uart_axilite_slv.v
     wire                int_tx_fifo_th_raw_set_aclk;// From uart_tx_fifo_async of uart_tx_fifo_async.v
-    wire                interrupt_aclk;         // From uart_axilite_slv of uart_axilite_slv.v
     wire                over_samp_clken_sysclk; // From uart_clk_divider of uart_clk_divider.v
     wire                rx_busy_aclk;           // From uart_sync_sysclk2aclk of uart_sync_sysclk2aclk.v
     wire                rx_busy_sysclk;         // From uart_rx of uart_rx.v
@@ -126,19 +125,23 @@ module uart_top #(
     wire                tx_fifo_rdata_valid_sysclk;// From uart_tx_fifo_async of uart_tx_fifo_async.v
     wire                tx_fifo_ren_sysclk;     // From uart_tx of uart_tx.v
     wire [4:0]          tx_fifo_th_level_aclk;  // From uart_axilite_slv of uart_axilite_slv.v
-    wire [8:0]          uart_data_aclk;         // From uart_axilite_slv of uart_axilite_slv.v, ...
-    wire                uart_data_rtrig_aclk;   // From uart_axilite_slv of uart_axilite_slv.v
-    wire                uart_data_wtrig_aclk;   // From uart_axilite_slv of uart_axilite_slv.v
     wire                uart_enable_aclk;       // From uart_axilite_slv of uart_axilite_slv.v
     wire                uart_enable_sysclk;     // From uart_sync_aclk2sysclk of uart_sync_aclk2sysclk.v
-    wire                uart_rtsn_sysclk;       // From uart_rx of uart_rx.v
-    wire                uart_txd_sysclk;        // From uart_tx of uart_tx.v
+    wire [8:0]          uart_rx_data_aclk;      // From uart_rx_fifo_async of uart_rx_fifo_async.v
+    wire                uart_rx_data_rtrig_aclk;// From uart_axilite_slv of uart_axilite_slv.v
+    wire [8:0]          uart_tx_data_aclk;      // From uart_axilite_slv of uart_axilite_slv.v
+    wire                uart_tx_data_wtrig_aclk;// From uart_axilite_slv of uart_axilite_slv.v
     // End of automatics
 
     //=========================================
     // AUTO_TEMPLATE definitions
     //=========================================
     /* uart_axilite_slv AUTO_TEMPLATE (
+        .o_interrupt_aclkr (o_interrupt_aclkr),
+    .o_uart_data_aclkr(uart_tx_data_aclk[]),
+    .o_uart_data_wtrig_aclkr(uart_tx_data_wtrig_aclk),
+    .i_uart_data_aclk(uart_rx_data_aclk[]),
+    .o_uart_data_rtrig_aclkr(uart_rx_data_rtrig_aclk),
         .i_\(.*\)_\([a-z]+\) (\1_\2[]),
         .o_\(.*\)_\([a-z]+clk\)r? (\1_\2[]),
       
@@ -178,6 +181,7 @@ module uart_top #(
     ); */
 
     /* uart_tx AUTO_TEMPLATE (
+        .o_uart_txd_sysclkr (o_uart_txd_sysclkr),
         .\(.*\)_fifo_\(.*\)\([a-z]+clk\)r? (tx_fifo_\2\3[]),
         .i_\(.*\)_\([a-z]+clk\) (\1_\2[]),
         .o_\(.*\)_\([a-z]+clk\)r? (\1_\2[]),
@@ -185,6 +189,7 @@ module uart_top #(
     ); */
 
     /* uart_rx AUTO_TEMPLATE (
+        .o_uart_rtsn_sysclk (o_uart_rts_sysclkr),
         .\(.*\)_fifo_\(.*\)\([a-z]+clk\)r? (rx_fifo_\2\3[]),
         .i_\(.*\)_\([a-z]+clk\) (\1_\2[]),
         .o_\(.*\)_\([a-z]+clk\)r? (\1_\2[]),
@@ -231,9 +236,9 @@ module uart_top #(
                         .o_conf_samp_num_sel_aclkr(conf_samp_num_sel_aclk), // Templated
                         .o_conf_over_samp_sel_aclkr(conf_over_samp_sel_aclk[1:0]), // Templated
                         .o_conf_clk_div_aclkr(conf_clk_div_aclk[15:0]), // Templated
-                        .o_uart_data_aclkr(uart_data_aclk[8:0]), // Templated
-                        .o_uart_data_wtrig_aclkr(uart_data_wtrig_aclk), // Templated
-                        .o_uart_data_rtrig_aclkr(uart_data_rtrig_aclk), // Templated
+                        .o_uart_data_aclkr(uart_tx_data_aclk[8:0]), // Templated
+                        .o_uart_data_wtrig_aclkr(uart_tx_data_wtrig_aclk), // Templated
+                        .o_uart_data_rtrig_aclkr(uart_rx_data_rtrig_aclk), // Templated
                         .o_int_break_det_en_aclkr(int_break_det_en_aclk), // Templated
                         .o_int_parity_err_en_aclkr(int_parity_err_en_aclk), // Templated
                         .o_int_framing_err_en_aclkr(int_framing_err_en_aclk), // Templated
@@ -243,7 +248,7 @@ module uart_top #(
                         .o_int_rx_fifo_th_en_aclkr(int_rx_fifo_th_en_aclk), // Templated
                         .o_rx_fifo_th_level_aclkr(rx_fifo_th_level_aclk[4:0]), // Templated
                         .o_tx_fifo_th_level_aclkr(tx_fifo_th_level_aclk[4:0]), // Templated
-                        .o_interrupt_aclkr(interrupt_aclk),      // Templated
+                        .o_interrupt_aclkr(o_interrupt_aclkr),   // Templated
                         .awready        (awready),
                         .wready         (wready),
                         .bresp          (bresp[1:0]),
@@ -255,7 +260,7 @@ module uart_top #(
                         // Inputs
                         .aclk           (aclk),
                         .aresetn        (aresetn),
-                        .i_uart_data_aclk(uart_data_aclk[8:0]),  // Templated
+                        .i_uart_data_aclk(uart_rx_data_aclk[8:0]), // Templated
                         .i_break_det_aclk(break_det_aclk),       // Templated
                         .i_rx_busy_aclk (rx_busy_aclk),          // Templated
                         .i_tx_busy_aclk (tx_busy_aclk),          // Templated
@@ -367,8 +372,8 @@ module uart_top #(
                           .sysclk               (sysclk),
                           .aresetn              (aresetn),
                           .sysrst_n             (sysrst_n),
-                          .i_uart_data_wtrig_aclk(uart_data_wtrig_aclk), // Templated
-                          .i_uart_data_aclk     (uart_data_aclk[8:0]), // Templated
+                          .i_uart_tx_data_wtrig_aclk(uart_tx_data_wtrig_aclk), // Templated
+                          .i_uart_tx_data_aclk  (uart_tx_data_aclk[8:0]), // Templated
                           .i_tx_fifo_ren_sysclk (tx_fifo_ren_sysclk), // Templated
                           .i_tx_fifo_th_level_aclk(tx_fifo_th_level_aclk[4:0])); // Templated
 
@@ -379,7 +384,7 @@ module uart_top #(
     ) uart_rx_fifo_async (
         /*AUTOINST*/
                           // Outputs
-                          .o_uart_data_aclkr    (uart_data_aclk[8:0]), // Templated
+                          .o_uart_rx_data_aclkr (uart_rx_data_aclk[8:0]), // Templated
                           .o_rx_fifo_empty_sysclkr(rx_fifo_empty_sysclk), // Templated
                           .o_rx_fifo_full_sysclkr(rx_fifo_full_sysclk), // Templated
                           .o_rx_fifo_almost_full_sysclkr(rx_fifo_almost_full_sysclk), // Templated
@@ -396,7 +401,7 @@ module uart_top #(
                           .sysrst_n             (sysrst_n),
                           .i_rx_fifo_wen_sysclk (rx_fifo_wen_sysclk), // Templated
                           .i_rx_fifo_wdata_sysclk(rx_fifo_wdata_sysclk[8:0]), // Templated
-                          .i_uart_data_rtrig_aclk(uart_data_rtrig_aclk), // Templated
+                          .i_uart_rx_data_rtrig_aclk(uart_rx_data_rtrig_aclk), // Templated
                           .i_rx_fifo_th_level_aclk(rx_fifo_th_level_aclk[4:0])); // Templated
 
     uart_tx uart_tx (
@@ -404,7 +409,7 @@ module uart_top #(
                      // Outputs
                      .o_fifo_ren_sysclkr(tx_fifo_ren_sysclk),    // Templated
                      .o_tx_busy_sysclkr (tx_busy_sysclk),        // Templated
-                     .o_uart_txd_sysclkr(uart_txd_sysclk),       // Templated
+                     .o_uart_txd_sysclkr(o_uart_txd_sysclkr),    // Templated
                      // Inputs
                      .sysclk            (sysclk),
                      .sysrst_n          (sysrst_n),
@@ -433,7 +438,7 @@ module uart_top #(
                      .o_rx_overrun_err_tirg_sysclkr(rx_overrun_err_tirg_sysclk), // Templated
                      .o_rx_detect_timeout_tirg_sysclkr(rx_detect_timeout_tirg_sysclk), // Templated
                      .o_rx_detect_break_sysclkr(rx_detect_break_sysclk), // Templated
-                     .o_uart_rtsn_sysclk(uart_rtsn_sysclk),      // Templated
+                     .o_uart_rtsn_sysclk(o_uart_rts_sysclkr),    // Templated
                      // Inputs
                      .sysclk            (sysclk),
                      .sysrst_n          (sysrst_n),

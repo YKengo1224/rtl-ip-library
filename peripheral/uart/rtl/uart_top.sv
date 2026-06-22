@@ -267,6 +267,7 @@ module uart_top #(
                         .i_rx_fifo_full_aclk(rx_fifo_full_aclk), // Templated
                         .i_rx_fifo_empty_aclk(rx_fifo_empty_aclk), // Templated
                         .i_tx_fifo_full_aclk(tx_fifo_full_aclk), // Templated
+                        .i_tx_fifo_empty_aclk(tx_fifo_empty_aclk), // Templated
                         .i_int_break_det_raw_set_aclk(int_break_det_raw_set_aclk), // Templated
                         .i_int_parity_err_raw_set_aclk(int_parity_err_raw_set_aclk), // Templated
                         .i_int_framing_err_raw_set_aclk(int_framing_err_raw_set_aclk), // Templated

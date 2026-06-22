@@ -51,7 +51,7 @@ class uart_bfm_monitor #(
 
         // Wait to the middle of the start bit
         period_ps = 64'd1_000_000_000_000 / uart_bfm_cfg.baudrate;
-        #(period_ps / 2);
+        #((period_ps / 2) * 1ps);
 
         // Check if start bit is still valid
         start_val = uart_bfm_cfg.rx_env ? 1'b1 : 1'b0;
@@ -61,7 +61,7 @@ class uart_bfm_monitor #(
 
         // Sample data bits at the middle of each bit period
         for (int i = 0; i < uart_bfm_cfg.data_bit_width; i++) begin
-            #(period_ps);
+            #(period_ps * 1ps);
             rx_data[i] = vif.rxd;
         end
 
@@ -83,7 +83,7 @@ class uart_bfm_monitor #(
 
         // Sample parity bit if enabled
         if (^uart_bfm_cfg.parity_bit) begin
-            #(period_ps);
+            #(period_ps * 1ps);
             parity_val = vif.rxd;
             
             // Check parity
@@ -110,7 +110,7 @@ class uart_bfm_monitor #(
         end
 
         // Sample stop bit
-        #(period_ps);
+        #(period_ps * 1ps);
         stop_val = vif.rxd;
 
         // Check frame error (Stop bit should be high under normal polarity, low under rx_env polarity)

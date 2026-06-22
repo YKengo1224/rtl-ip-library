@@ -33,6 +33,7 @@ module uart_axilite_slv #(
     input wire       i_rx_fifo_full_aclk,
     input wire       i_rx_fifo_empty_aclk,
     input wire       i_tx_fifo_full_aclk,
+    input wire       i_tx_fifo_empty_aclk,
     output reg       o_int_break_det_en_aclkr,
     output reg       o_int_parity_err_en_aclkr,
     output reg       o_int_framing_err_en_aclkr,
@@ -662,7 +663,7 @@ module uart_axilite_slv #(
                 8'h08: rdata <= { 26'h0, o_conf_tx_inv_aclkr, o_conf_rx_inv_aclkr, 3'h0, o_conf_hw_flow_en_aclkr };
                 8'h0C: rdata <= { 11'h0, o_conf_samp_num_sel_aclkr, 2'h0, o_conf_over_samp_sel_aclkr, o_conf_clk_div_aclkr };
                 8'h10: rdata <= { 23'h0, i_uart_data_aclk };
-                8'h14: rdata <= { 15'h0, i_break_det_aclk, 3'h0, i_rx_busy_aclk, 3'h0, i_tx_busy_aclk, 2'h0, i_rx_fifo_full_aclk, i_rx_fifo_empty_aclk, 2'h0, i_tx_fifo_full_aclk, o_uart_data_aclkr };
+                8'h14: rdata <= { 15'h0, i_break_det_aclk, 3'h0, i_rx_busy_aclk, 3'h0, i_tx_busy_aclk, 2'h0, i_rx_fifo_full_aclk, i_rx_fifo_empty_aclk, 2'h0, i_tx_fifo_full_aclk, i_tx_fifo_empty_aclk };
                 8'h18: rdata <= { 7'h0, o_int_break_det_en_aclkr, 3'h0, o_int_parity_err_en_aclkr, 3'h0, o_int_framing_err_en_aclkr, 3'h0, o_int_rx_timeout_en_aclkr, 3'h0, o_int_overrun_err_en_aclkr, 3'h0, o_int_tx_fifo_th_en_aclkr, 3'h0, o_int_rx_fifo_th_en_aclkr };
                 8'h20: rdata <= { 19'h0, o_rx_fifo_th_level_aclkr, 3'h0, o_tx_fifo_th_level_aclkr };
                 8'h24: rdata <= { 7'h0, int_break_det_raw_aclkr, 3'h0, int_parity_err_raw_aclkr, 3'h0, int_framing_err_raw_aclkr, 3'h0, int_rx_timeout_raw_aclkr, 3'h0, int_overrun_err_raw_aclkr, 3'h0, int_tx_fifo_th_raw_aclkr, 3'h0, int_rx_fifo_th_raw_aclkr };

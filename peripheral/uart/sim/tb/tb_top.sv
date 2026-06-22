@@ -25,7 +25,7 @@ module tb_top;
 
     initial begin
         sysclk = 0;
-        forever #2.5ns sysclk = ~sysclk; // 200MHz
+        forever #6.7797ns sysclk = ~sysclk; // 73.750MHz
     end
 
     // Reset generation

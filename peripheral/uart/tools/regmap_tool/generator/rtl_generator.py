@@ -30,6 +30,11 @@ class RtlGenerator(BaseGenerator):
                 lsb = field.lsb
                 width = field.width
                 bit_range = field.bit_range
+                
+                port_name = None
+                read_port_name = None
+                wtrig_port_name = None
+                rtrig_port_name = None
                     
                 width_str = f"[{width-1}:0]" if width > 1 else "     "
                

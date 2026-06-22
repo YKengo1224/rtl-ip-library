@@ -118,7 +118,7 @@ registers:
         init: 0
       - name: tx_fifo_empty
         bits: "0"
-        access: R
+        access: RO
         init: 0
 
   - name: UART_INT_CTRL

@@ -8,7 +8,7 @@ ACTIVATE     = $(VENV)/bin/activate
 YAML         = ../doc/register_map.yaml
 TEMPLATE     = ./axilite_slv_template.sv
 RTL_OUT      = ../rtl/uart_axilite_slv.sv
-RAL_OUT      = ../sim/tb/uart_reg_model.sv
+RAL_OUT      = ../sim/uvm/ral/uart_reg_model.sv
 
 .PHONY: all run clean venv
 

@@ -34,18 +34,25 @@ class test_tx_normal extends uart_seq_base;
         // UART_CONF_FRAME: data_bit_width=8, stop=1, parity=none
         regmodel.uart_conf_frame.write(status, 32'h0000_0810, .parent(this));
 
-        // UART_CONF_SAMP: over_samp=16, clk_div=54 (100MHz / (115200 * 16) = 54.25)
-        regmodel.uart_conf_samp.write(status, 32'h0001_0036, .parent(this));
+        // UART_CONF_SAMP: over_samp=16, clk_div=40 (73.750MHz / (115200 * 16) = 40.01)
+        regmodel.uart_conf_samp.write(status, 32'h0001_0028, .parent(this));
 
         // 3. Write data to TX FIFO (UART_DATA = 8'hA5)
         regmodel.uart_data.write(status, 32'h0000_00A5, .parent(this));
 
-        // Wait for transmission to finish (100MHz clock: 20000 cycles = 200us)
-        wait_clk(20000);
+        // Wait for tx_busy to become 1 (starting transmission)
+        do begin
+            wait_clk(50);
+            regmodel.uart_status.read(status, rdata, .parent(this));
+        end while (rdata[8] == 1'b0);
+        `uvm_info("UART_SEQ", "tx_busy detected high. Waiting for it to become low...", UVM_LOW)
 
-        // 4. Read Status Register and check tx_busy is back to 0
-        regmodel.uart_status.read(status, rdata, .parent(this));
-        `uvm_info("UART_SEQ", $sformatf("Status read: 'h%0x", rdata), UVM_LOW)
+        // Wait for tx_busy to become 0 (transmission finished)
+        do begin
+            wait_clk(50);
+            regmodel.uart_status.read(status, rdata, .parent(this));
+        end while (rdata[8] == 1'b1);
+        `uvm_info("UART_SEQ", "tx_busy detected low. Transmission finished.", UVM_LOW)
 
         `uvm_info("UART_SEQ", "========== Finished test_tx_normal ==========", UVM_LOW)
     endtask

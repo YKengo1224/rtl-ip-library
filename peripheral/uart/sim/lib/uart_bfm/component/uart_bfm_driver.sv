@@ -126,7 +126,7 @@ class uart_bfm_driver #(
             end
 
             vif.txd = start_bit;
-            #(tick_ps);
+            #(tick_ps * 1ps);
             slots_left--;
 
             for (int i = 0; i < (over_samp / 2) - 1; i++) begin
@@ -147,12 +147,12 @@ class uart_bfm_driver #(
                     vif.txd = start_bit;
                 end
 
-                #(tick_ps);
+                #(tick_ps * 1ps);
                 slots_left--;
             end
 
             vif.txd = start_bit;
-            #(period_ps - (tick_ps * (over_samp / 2)));
+            #( (period_ps - (tick_ps * (over_samp / 2))) * 1ps );
 
             if (start_fail_en) begin
                 vif.txd = !uart_bfm_cfg.tx_env;
@@ -161,7 +161,7 @@ class uart_bfm_driver #(
 
         end else begin
             vif.txd = start_bit;
-            #(period_ps);
+            #(period_ps * 1ps);
         end
 
         //=========================================
@@ -174,13 +174,13 @@ class uart_bfm_driver #(
                 longint wait_before = tick_ps * (over_samp / 2);
                 longint wait_after = period_ps - wait_before - tick_ps;
 
-                #(wait_before);
+                #(wait_before * 1ps);
                 vif.txd = ~send_data[i];
-                #(tick_ps);
+                #(tick_ps * 1ps);
                 vif.txd = send_data[i];
-                #(wait_after);
+                #(wait_after * 1ps);
             end else begin
-                #(period_ps);
+                #(period_ps * 1ps);
             end
         end
 
@@ -193,7 +193,7 @@ class uart_bfm_driver #(
             end else begin
                 vif.txd = parity_bit;
             end
-            #(period_ps);
+            #(period_ps * 1ps);
         end
 
         //=========================================
@@ -206,10 +206,10 @@ class uart_bfm_driver #(
         end
 
         case (uart_bfm_cfg.stop_bit_width)
-            2'b00: #(period_ps / 2);
-            2'b01: #(period_ps);
-            2'b10: #(period_ps + (period_ps / 2));
-            2'b11: #(period_ps * 2);
+            2'b00: #((period_ps / 2) * 1ps);
+            2'b01: #(period_ps * 1ps);
+            2'b10: #((period_ps + (period_ps / 2)) * 1ps);
+            2'b11: #((period_ps * 2) * 1ps);
         endcase
 
         vif.txd = !uart_bfm_cfg.tx_env;

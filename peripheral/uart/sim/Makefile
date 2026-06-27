@@ -12,5 +12,23 @@ TEST_CASE := test_master_standard_seq
 # TEST_CASE := test_master_random_seq
 # TEST_CASE := sample_seq
 
+COV_EN ?= 1
+WAVE_EN ?= 1
+
+ifeq ($(COV_EN),1)
+  COV_OPT = -c
+else
+  COV_OPT =
+endif
+
+ifeq ($(WAVE_EN),1)
+  WAVE_OPT = -w
+else
+  WAVE_OPT =
+endif
+
 run:
-	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) -c -w -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) $(TEST_CASE)
+	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) $(TEST_CASE)
+
+run_all:
+	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) -a

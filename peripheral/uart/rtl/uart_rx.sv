@@ -104,7 +104,7 @@ module uart_rx (
         state_next = state;
         case (state)
             S_IDLE: begin
-                if (uart_rxd_sysclk != 0) begin
+                if (uart_rxd_sysclk == 0) begin
                     state_next = S_JUDGE_START;
                 end
             end
@@ -115,7 +115,8 @@ module uart_rx (
                 endcase
             end
             S_D_WAIT_SAMPLE: begin
-                if (sample_data_done_sysclk) begin
+                if (sample_rx_bit_done_sysclk) begin
+                    state_next = S_D_SAMPLE;
                 end
             end
             S_D_SAMPLE: begin
@@ -158,7 +159,7 @@ module uart_rx (
                 end
             end
         endcase
-        if (i_uart_enable_sysclk) begin
+        if (!i_uart_enable_sysclk) begin
             state_next = S_IDLE;
         end
     end
@@ -204,10 +205,10 @@ module uart_rx (
             over_samp_cnt_sysclkr <= '0;
         end else if (state_next == S_IDLE) begin
             over_samp_cnt_sysclkr <= '0;
+        end else if ((state == S_JUDGE_START) && (state_next == S_D_WAIT_SAMPLE)) begin
+            over_samp_cnt_sysclkr <= '0;
         end else if (i_over_samp_clken_sysclk) begin
             if (sample_rx_bit_done_sysclk) begin
-                over_samp_cnt_sysclkr <= '0;
-            end else if ((state == S_JUDGE_START) && (state_next == S_D_WAIT_SAMPLE)) begin
                 over_samp_cnt_sysclkr <= '0;
             end else begin
                 over_samp_cnt_sysclkr <= over_samp_cnt_sysclkr + 1;
@@ -215,7 +216,7 @@ module uart_rx (
         end
     end
 
-    assign sample_rx_bit_done_sysclk = (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1));
+    assign sample_rx_bit_done_sysclk = i_over_samp_clken_sysclk && (over_samp_cnt_sysclkr == (over_samp_cnt_max_sysclkr - 1));
 
     //####################
     //detect start bit
@@ -316,15 +317,13 @@ module uart_rx (
         if (!sysrst_n) begin
             sample_data_bit_cnt_sysclkr <= '0;
         end else if ((state == S_D_WAIT_SAMPLE) && (state_next == S_D_SAMPLE)) begin
-            if (sample_rx_bit_done_sysclk) begin
-                if (sample_data_done_sysclk) begin
-                    sample_data_bit_cnt_sysclkr <= '0;
-                end else begin
-                    sample_data_bit_cnt_sysclkr <= sample_data_bit_cnt_sysclkr + 'd1;
-                end
+            if (sample_data_done_sysclk) begin
+                sample_data_bit_cnt_sysclkr <= '0;
             end else begin
-                sample_data_bit_cnt_sysclkr <= sample_data_bit_cnt_sysclkr;
+                sample_data_bit_cnt_sysclkr <= sample_data_bit_cnt_sysclkr + 'd1;
             end
+        end else if ((state == S_D_WAIT_SAMPLE) || (state == S_D_SAMPLE)) begin
+            sample_data_bit_cnt_sysclkr <= sample_data_bit_cnt_sysclkr;
         end else begin
             sample_data_bit_cnt_sysclkr <= '0;
         end
@@ -503,7 +502,7 @@ module uart_rx (
     //####################
     //hw flow signal
     //####################
-    assign o_uart_rtsn_sysclk = i_fifo_almost_full_sysclk;
+    assign o_uart_rtsn_sysclk = i_conf_hw_flow_en_sysclk && i_fifo_almost_full_sysclk;
 
 
     //####################

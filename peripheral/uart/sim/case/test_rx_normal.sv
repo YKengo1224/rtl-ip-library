@@ -34,9 +34,10 @@ class test_rx_normal extends uart_seq_base;
         // UART_CONF_FRAME: data_bit_width=8, stop=1, parity=none
         regmodel.uart_conf_frame.write(status, 32'h0000_0810, .parent(this));
 
-        // UART_CONF_SAMP: over_samp=16, clk_div=54
-        regmodel.uart_conf_samp.write(status, 32'h0001_0036, .parent(this));
+        // UART_CONF_SAMP: over_samp=16, clk_div=40 (73.750MHz / (115200 * 16) = 40.01)
+        regmodel.uart_conf_samp.write(status, 32'h0001_0028, .parent(this));
 
+   
         // 3. Trigger BFM to transmit serial data 8'h5A to DUT
         bfm_tx.data = 8'h5A;
         bfm_tx.start(p_sequencer.uart_sqr);

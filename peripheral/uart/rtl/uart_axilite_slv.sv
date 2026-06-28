@@ -455,7 +455,7 @@ module uart_axilite_slv #(
         if(!aresetn) begin
             o_uart_data_rtrig_aclkr <= 1'd0;
         end else begin
-            o_uart_data_rtrig_aclkr <= read_exec &&  (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == 8'h10);
+            o_uart_data_rtrig_aclkr <= read_exec &&  (araddr[VARID_ADDR_BITWIDTH-1:0] == 8'h10);
         end
     end
 

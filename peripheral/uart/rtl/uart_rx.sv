@@ -53,7 +53,7 @@ module uart_rx (
 
     reg [5:0] over_samp_cnt_sysclkr;
     reg [5:0] over_samp_cnt_max_sysclkr;
-    reg [5:0] over_stop_samp_cnt_max_sysclkr;
+    logic [5:0] over_stop_samp_cnt_max_sysclk;
     logic sample_rx_bit_done_sysclk;
 
     //sample start bit signals
@@ -175,21 +175,30 @@ module uart_rx (
     //####################
     //over samp cnt
     //####################
-    always_comb begin
+    function [5:0] set_over_stop_samp_cnt_max(input [5:0] over_samp_cnt_max);
         case (i_conf_stop_bit_width_sel_sysclk)
-            2'b00: over_stop_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr >> 1;
-            2'b01: over_stop_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr;
-            2'b10:
-            over_stop_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr + (over_samp_cnt_max_sysclkr >>1);
-            2'b11: over_stop_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr << 1;
+            2'b00: set_over_stop_samp_cnt_max = over_samp_cnt_max >> 1;
+            2'b01: set_over_stop_samp_cnt_max = over_samp_cnt_max;
+            2'b10: set_over_stop_samp_cnt_max = over_samp_cnt_max + (over_samp_cnt_max >> 1);
+            2'b11: set_over_stop_samp_cnt_max = over_samp_cnt_max << 1;
         endcase
+    endfunction
+
+    always_comb begin
+        case (i_conf_over_samp_sel_sysclk)
+            2'b00:   over_stop_samp_cnt_max_sysclk = set_over_stop_samp_cnt_max(6'd8);  //8
+            2'b01:   over_stop_samp_cnt_max_sysclk = set_over_stop_samp_cnt_max(6'd16);  //16
+            2'b10:   over_stop_samp_cnt_max_sysclk = set_over_stop_samp_cnt_max(6'd32);  // 32
+            default: over_stop_samp_cnt_max_sysclk = 6'd0;
+        endcase
+
     end
 
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             over_samp_cnt_max_sysclkr <= '0;
         end else if (state_next == S_S_WAIT_SAMPLE) begin
-            over_samp_cnt_max_sysclkr <= (over_samp_cnt_max_sysclkr >> 1) + (over_stop_samp_cnt_max_sysclkr >> 1);
+            over_samp_cnt_max_sysclkr <= (over_samp_cnt_max_sysclkr >> 1) + (over_stop_samp_cnt_max_sysclk >> 1);
         end else begin
             case (i_conf_over_samp_sel_sysclk)
                 2'b00:   over_samp_cnt_max_sysclkr <= 6'd8;  //8
@@ -252,6 +261,9 @@ module uart_rx (
             end else begin
                 detect_start_bit_sysclkr <= '0;
             end
+        end
+        else begin
+            detect_start_bit_sysclkr <= '0;
         end
     end
 

@@ -124,24 +124,37 @@ module uart_tx (
 
     //####################
     //over samp cnt
-    //####################
+    //####################    
+
+    function [5:0] set_S_SEND_STOP_cnt_max(input [5:0] bit_cnt_max);
+        case (i_conf_stop_bit_width_sel_sysclk)
+            2'b00: set_S_SEND_STOP_cnt_max = bit_cnt_max >> 1;
+            2'b01: set_S_SEND_STOP_cnt_max = bit_cnt_max;
+            2'b10: set_S_SEND_STOP_cnt_max <= bit_cnt_max + (bit_cnt_max >> 1);
+            2'b11: set_S_SEND_STOP_cnt_max <= bit_cnt_max << 1;
+        endcase
+    endfunction
+
+
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             over_samp_cnt_max_sysclkr <= '0;
         end else if ((state == S_SEND_STOP) || (state_next == S_SEND_STOP)) begin
-            case (i_conf_stop_bit_width_sel_sysclk)
-                2'b00: over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr >> 1;
-                2'b01: over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr;
-                2'b10:
-                over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr + (over_samp_cnt_max_sysclkr >>1);
-                2'b11: over_samp_cnt_max_sysclkr <= over_samp_cnt_max_sysclkr << 1;
+
+            case (i_conf_over_samp_sel_sysclk)
+                2'b00:   over_samp_cnt_max_sysclkr <= set_S_SEND_STOP_cnt_max(6'd8);
+                2'b01:   over_samp_cnt_max_sysclkr <= set_S_SEND_STOP_cnt_max(6'd16);
+                2'b10:   over_samp_cnt_max_sysclkr <= set_S_SEND_STOP_cnt_max(6'd32);
+                default: over_samp_cnt_max_sysclkr <= 6'd0;
             endcase
+
+
         end else begin
             case (i_conf_over_samp_sel_sysclk)
-                2'b00:   over_samp_cnt_max_sysclkr = 6'd8;  //8
-                2'b01:   over_samp_cnt_max_sysclkr = 6'd16;  //16
-                2'b10:   over_samp_cnt_max_sysclkr = 6'd32;  // 32
-                default: over_samp_cnt_max_sysclkr = 6'd0;
+                2'b00:   over_samp_cnt_max_sysclkr <= 6'd8;  //8
+                2'b01:   over_samp_cnt_max_sysclkr <= 6'd16;  //16
+                2'b10:   over_samp_cnt_max_sysclkr <= 6'd32;  // 32
+                default: over_samp_cnt_max_sysclkr <= 6'd0;
             endcase
         end
     end
@@ -292,7 +305,7 @@ module uart_tx (
             o_tx_busy_sysclkr <= state != S_IDLE;
         end
     end
-   
+
 endmodule
 
 `default_nettype wire

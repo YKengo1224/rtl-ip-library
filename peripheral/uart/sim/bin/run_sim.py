@@ -288,6 +288,10 @@ class Runsim:
         self.args.testname = "shared_build"
         self.work_dir = self.base_work_dir
         self.log_dir = self.base_log_dir
+        
+        self.base_work_dir.mkdir(parents=True, exist_ok=True)
+        self.base_log_dir.mkdir(parents=True, exist_ok=True)
+        
         self.build_cmd = []
         self.elab_cmd = []
         self.run_cmd = []

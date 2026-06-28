@@ -184,7 +184,7 @@ class axi4lite_master_driver #(
                 if (vif.bvalid) break;
             end
 
-            vif.bvalid <= 1'b0;
+            vif.bready <= 1'b0;
             if (vif.aresetn) begin
                 rsp = t_trans::type_id::create("rsp");
                 rsp.resp = vif.bresp;

@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 `ifndef _H_AXI4LITE_PKG_SV
 `define _H_AXI4LITE_PKG_SV
 

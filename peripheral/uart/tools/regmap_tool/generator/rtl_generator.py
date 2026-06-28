@@ -128,7 +128,7 @@ class RtlGenerator(BaseGenerator):
         if(!aresetn) begin
             {rtrig_port_name} <= 1'd0;
         end else begin
-            {rtrig_port_name} <= read_exec &&  (target_awaddr[VARID_ADDR_BITWIDTH-1:0] == {offset_hex});
+            {rtrig_port_name} <= read_exec &&  (araddr[VARID_ADDR_BITWIDTH-1:0] == {offset_hex});
         end
     end
 
@@ -197,7 +197,7 @@ class RtlGenerator(BaseGenerator):
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
             o_interrupt_aclkr <= 1'd0;
-        end else if({we_signal}) begin
+        end else begin
             o_interrupt_aclkr <= {' | '.join(self.interrupt_signals)}; 
         end
     end

@@ -299,7 +299,7 @@ module uart_axilite_slv #(
     always @(posedge aclk or negedge aresetn) begin
         if(!aresetn) begin
             o_interrupt_aclkr <= 1'd0;
-        end else if(we_int_rx_fifo_th_raw) begin
+        end else begin
             o_interrupt_aclkr <= (int_break_det_masked) | (int_parity_err_masked) | (int_framing_err_masked) | (int_rx_timeout_masked) | (int_overrun_err_masked) | (int_tx_fifo_th_masked) | (int_rx_fifo_th_masked); 
         end
     end

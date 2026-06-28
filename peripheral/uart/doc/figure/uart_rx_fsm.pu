@@ -4,7 +4,7 @@ hide empty description
 [*] --> S_IDLE : リセット || !uart_enable
 
 S_IDLE :idle状態
-S_JUDGE_START : スタートビットを判定する
+S_JUDGE_START : スタートビッgsトを判定する
 S_D_WAIT_SAMPLE : データサンプリングを待つ
 S_D_SAMPLE : データをサンプリングする
 S_P_WAIT_SAMPLE : パリティビットのサンプリングを待つ

@@ -67,9 +67,9 @@ class uart_bfm_driver #(
     endtask
 
     virtual task send_data(t_trans trans);
-        longint       period_ps;
+        int           period_ns;
         longint       over_samp;
-        longint       tick_ps;
+        int           tick_ns;
         bit           start_bit = 1'b0;
         bit           stop_bit = 1'b1;
         bit     [8:0] send_data = trans.send_data;
@@ -88,14 +88,16 @@ class uart_bfm_driver #(
         int           noise_budget;
         int           slots_left;
 
-        period_ps = 64'd1_000_000_000_000 / uart_bfm_cfg.baudrate;
+        period_ns = 1000000000 / uart_bfm_cfg.baudrate;
         case (uart_bfm_cfg.over_samp_sel)
             2'b00:   over_samp = 8;
             2'b01:   over_samp = 16;
             2'b10:   over_samp = 32;
             default: over_samp = 1;
         endcase
-        tick_ps = period_ps / over_samp;
+        tick_ns = period_ns / over_samp;
+        `uvm_info("UART_BFM_DRV", $sformatf("Debug Value: baudrate=%0d, period_ns=%0d, tick_ns=%0d", 
+            uart_bfm_cfg.baudrate, period_ns, tick_ns), UVM_LOW)
 
         noize   = 3 << uart_bfm_cfg.over_samp_sel;
 
@@ -126,7 +128,7 @@ class uart_bfm_driver #(
             end
 
             vif.txd = start_bit;
-            #(tick_ps * 1ps);
+            #(tick_ns);
             slots_left--;
 
             for (int i = 0; i < (over_samp / 2) - 1; i++) begin
@@ -147,12 +149,12 @@ class uart_bfm_driver #(
                     vif.txd = start_bit;
                 end
 
-                #(tick_ps * 1ps);
+                #(tick_ns);
                 slots_left--;
             end
 
             vif.txd = start_bit;
-            #( (period_ps - (tick_ps * (over_samp / 2))) * 1ps );
+            #( period_ns - (tick_ns * (over_samp / 2)) );
 
             if (start_fail_en) begin
                 vif.txd = !uart_bfm_cfg.tx_env;
@@ -161,7 +163,7 @@ class uart_bfm_driver #(
 
         end else begin
             vif.txd = start_bit;
-            #(period_ps * 1ps);
+            #(period_ns);
         end
 
         //=========================================
@@ -171,16 +173,16 @@ class uart_bfm_driver #(
             vif.txd = send_data[i];
 
             if (noize_en) begin
-                longint wait_before = tick_ps * (over_samp / 2);
-                longint wait_after = period_ps - wait_before - tick_ps;
+                int wait_before_ns = tick_ns * (over_samp / 2);
+                int wait_after_ns = period_ns - wait_before_ns - tick_ns;
 
-                #(wait_before * 1ps);
+                #(wait_before_ns);
                 vif.txd = ~send_data[i];
-                #(tick_ps * 1ps);
+                #(tick_ns);
                 vif.txd = send_data[i];
-                #(wait_after * 1ps);
+                #(wait_after_ns);
             end else begin
-                #(period_ps * 1ps);
+                #(period_ns);
             end
         end
 
@@ -193,7 +195,7 @@ class uart_bfm_driver #(
             end else begin
                 vif.txd = parity_bit;
             end
-            #(period_ps * 1ps);
+            #(period_ns);
         end
 
         //=========================================
@@ -206,10 +208,10 @@ class uart_bfm_driver #(
         end
 
         case (uart_bfm_cfg.stop_bit_width)
-            2'b00: #((period_ps / 2) * 1ps);
-            2'b01: #(period_ps * 1ps);
-            2'b10: #((period_ps + (period_ps / 2)) * 1ps);
-            2'b11: #((period_ps * 2) * 1ps);
+            2'b00: #( (period_ns / 2) );
+            2'b01: #(period_ns);
+            2'b10: #( (period_ns + (period_ns / 2)) );
+            2'b11: #( (period_ns * 2) );
         endcase
 
         vif.txd = !uart_bfm_cfg.tx_env;

@@ -99,7 +99,7 @@ module uart_tx_fifo_async #(
     // 1-stage delay for edge detection
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            tx_int_fifo_th_prev_aclkr <= 1'b0;
+            tx_int_fifo_th_prev_aclkr <= 1'b1;
         end else begin
             tx_int_fifo_th_prev_aclkr <= tx_int_fifo_th_aclk;
         end

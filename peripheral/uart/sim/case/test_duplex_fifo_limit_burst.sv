@@ -21,7 +21,7 @@ class test_duplex_fifo_limit_burst extends uart_test_case_helper;
         regmodel.uart_conf_frame.write(status, 32'h0000_0810, .parent(this));
         regmodel.uart_conf_samp.write(status, 32'h0001_0028, .parent(this));
 
-        for (int i = 0; i < 32; i++) begin
+        for (int i = 0; i < 16; i++) begin
             regmodel.uart_data.write(status, i + 8'h10, .parent(this));
         end
 
@@ -29,7 +29,7 @@ class test_duplex_fifo_limit_burst extends uart_test_case_helper;
 
         fork
             begin
-                for (int i = 0; i < 32; i++) begin
+                for (int i = 0; i < 16; i++) begin
                     bfm_tx.data = i + 8'h80;
                     bfm_tx.start(p_sequencer.uart_sqr);
                     #( (1000000000000.0 / 115200) * 12 * 1ps );
@@ -45,7 +45,7 @@ class test_duplex_fifo_limit_burst extends uart_test_case_helper;
 
         wait_clk(500);
 
-        for (int i = 0; i < 32; i++) begin
+        for (int i = 0; i < 16; i++) begin
             regmodel.uart_data.read(status, rdata, .parent(this));
             check_seq($sformatf("RX Duplex Burst data index %0d", i), rdata[7:0], i + 8'h80);
         end

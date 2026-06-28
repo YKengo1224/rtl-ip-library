@@ -22,15 +22,13 @@ class test_rx_timeout_clear extends uart_test_case_helper;
         regmodel.uart_conf_samp.write(status, 32'h0001_0028, .parent(this));
         regmodel.uart_int_ctrl.write(status, 32'h0000_1000, .parent(this));
 
-        wait_clk(50);
+        wait_clk(100);
         bfm_tx.data = 8'h5A;
         bfm_tx.start(p_sequencer.uart_sqr);
 
-        #( (1000000000000.0 / 115200) * 12 * 1ps );
-        wait_clk(100);
+        wait_clk(20000); // Wait for transmission to finish
 
-        #( (1000000000000.0 / 115200) * 50 * 1ps );
-        wait_clk(1000);
+        wait_clk(120000); // Wait for timeout to occur
 
         regmodel.uart_int_rs.read(status, rdata, .parent(this));
         check_seq("RX Timeout active before read", rdata[12], 1'b1);

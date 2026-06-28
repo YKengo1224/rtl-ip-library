@@ -14,6 +14,7 @@ TEST_CASE := test_master_standard_seq
 
 COV_EN ?= 1
 WAVE_EN ?= 1
+TIMEOUT ?=
 
 ifeq ($(COV_EN),1)
   COV_OPT = -c
@@ -27,8 +28,14 @@ else
   WAVE_OPT =
 endif
 
+ifneq ($(TIMEOUT),)
+  TIMEOUT_OPT = --timeout $(TIMEOUT)
+else
+  TIMEOUT_OPT =
+endif
+
 run:
-	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) $(TEST_CASE)
+	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) $(TIMEOUT_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) $(TEST_CASE)
 
 run_all:
-	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) -a
+	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) $(TIMEOUT_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) -a

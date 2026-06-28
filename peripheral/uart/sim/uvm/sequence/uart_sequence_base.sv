@@ -14,6 +14,9 @@ class uart_seq_base extends uvm_sequence;
 
     uart_reg_block regmodel;
     axi4lite_default_interface vif;
+    uart_bfm_default_interface uart_vif;
+    virtual crgen_if crgen_vif;
+    virtual uart_monitor_if mon_vif;
     test_result result_obj;
 
     // Instantiated sequences inside the base sequence
@@ -29,6 +32,15 @@ class uart_seq_base extends uvm_sequence;
         // Get virtual interface from config_db
         if (!uvm_config_db#(axi4lite_default_interface)::get(null, "", "axil_vif", vif)) begin
             `uvm_fatal("UART_SEQ", "axil_vif virtual interface not found in config_db")
+        end
+        if (!uvm_config_db#(uart_bfm_default_interface)::get(null, "", "uart_vif", uart_vif)) begin
+            `uvm_fatal("UART_SEQ", "uart_vif virtual interface not found in config_db")
+        end
+        if (!uvm_config_db#(virtual crgen_if)::get(null, "", "crgen_vif", crgen_vif)) begin
+            `uvm_fatal("UART_SEQ", "crgen_vif virtual interface not found in config_db")
+        end
+        if (!uvm_config_db#(virtual uart_monitor_if)::get(null, "", "mon_vif", mon_vif)) begin
+            `uvm_fatal("UART_SEQ", "mon_vif virtual interface not found in config_db")
         end
         
         // Create instances of all sequences

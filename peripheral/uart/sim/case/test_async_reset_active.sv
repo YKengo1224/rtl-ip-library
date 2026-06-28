@@ -24,9 +24,11 @@ class test_async_reset_active extends uart_test_case_helper;
         regmodel.uart_data.write(status, 32'h0000_005A, .parent(this));
         wait_clk(50);
 
-        vif.force_reset = 1'b1;
+        crgen_vif.aresetn = 1'b0;
+        crgen_vif.sysrst_n = 1'b0;
         wait_clk(20);
-        vif.force_reset = 1'b0;
+        crgen_vif.aresetn = 1'b1;
+        crgen_vif.sysrst_n = 1'b1;
         wait_clk(50);
 
         regmodel.uart_ctrl.read(status, rdata, .parent(this));

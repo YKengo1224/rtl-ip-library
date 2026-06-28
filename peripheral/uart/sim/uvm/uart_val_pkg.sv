@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 `ifndef _H_UART_VAL_PKG_SV
 `define _H_UART_VAL_PKG_SV
 

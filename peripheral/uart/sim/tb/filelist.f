@@ -12,4 +12,6 @@
 
 ${UART_SIM_PATH}/uvm/uart_val_pkg.sv
 ${UART_SIM_PATH}/case/case_pkg.sv
+${UART_SIM_PATH}/tb/crgen_if.sv
+${UART_SIM_PATH}/tb/uart_monitor_if.sv
 ${UART_SIM_PATH}/tb/tb_top.sv

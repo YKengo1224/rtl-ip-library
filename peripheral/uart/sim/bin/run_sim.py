@@ -34,6 +34,11 @@ class Runsim:
 
         lines = self._recursive_flatten_filelist(original_f)
         
+        # Prepend timescale_dummy.sv to force default 1ns/1ps timescale in xvlog
+        dummy_file = self.bin_dir.parent / "tb" / "timescale_dummy.sv"
+        if dummy_file.exists():
+            lines.insert(0, str(dummy_file.resolve()))
+        
         with open(processed_f, 'w') as f_out:
             for line in lines:
                 line = os.path.expandvars(line)
@@ -79,6 +84,7 @@ class Runsim:
         self.parser.add_argument('testname', nargs='?', default=None, help="")
         self.parser.add_argument('-el','--env_path_list', default='', help="設定する環境変数のlistを取得")
         self.parser.add_argument('-a', '--all', action='store_true', help="caseディレクトリにあるすべてのケースを実行")
+        self.parser.add_argument('--timeout', default=None, help="UVM simulation timeout (e.g., 300ms, 500us)")
         
         
     def parse_arg(self):
@@ -138,6 +144,8 @@ class Runsim:
                 if not self.args.no_uvm:
                     self.run_cmd.extend(['--testplusarg', 'UVM_TESTNAME=tb_test_base'])
                     self.run_cmd.extend(['--testplusarg', f'TEST_CASE={self.args.testname}'])
+                    if self.args.timeout:
+                        self.run_cmd.extend(['--testplusarg', f'UVM_TIMEOUT={self.args.timeout},NO'])
 
             case _:
                 raise NotImplementedError(f"Simulator {self.simulator.name} is not implemented yet.")

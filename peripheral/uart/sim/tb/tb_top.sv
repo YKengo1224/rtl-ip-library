@@ -13,38 +13,52 @@ module tb_top;
 
     // Clock and Reset Signals
     logic aclk;
-    logic aresetn;
+    logic gen_aresetn;
     logic sysclk;
-    logic sysrst_n;
+    logic gen_sysrst_n;
 
     // Clock generation
     initial begin
         aclk = 0;
-        forever #5ns aclk = ~aclk; // 100MHz
+        forever #5 aclk = ~aclk; // 100MHz (5ns delay)
     end
 
     initial begin
         sysclk = 0;
-        forever #6.7797ns sysclk = ~sysclk; // 73.750MHz
+        forever #6.7797 sysclk = ~sysclk; // 73.750MHz (6.7797ns delay)
     end
 
     // Reset generation
     initial begin
-        aresetn = 0;
-        sysrst_n = 0;
-        #100ns;
-        aresetn = 1;
-        sysrst_n = 1;
+        gen_aresetn = 0;
+        gen_sysrst_n = 0;
+        #100; // 100ns delay
+        gen_aresetn = 1;
+        gen_sysrst_n = 1;
     end
+
+    // Crgen interface instantiation
+    crgen_if crgen_vif();
+
+    logic test_reset_n;
+    logic test_sysrst_n;
+    assign test_reset_n = gen_aresetn && crgen_vif.aresetn;
+    assign test_sysrst_n = gen_sysrst_n && crgen_vif.sysrst_n;
 
     // Interface Instantiations
     axi4lite_if axil_if(
         .aclk(aclk),
-        .aresetn(aresetn)
+        .aresetn(test_reset_n)
     );
 
     uart_bfm_if uart_if(
-        .rst_n(aresetn)
+        .rst_n(test_reset_n)
+    );
+
+    // Monitor interface instantiation
+    uart_monitor_if mon_if(
+        .clk(aclk),
+        .rst_n(test_reset_n)
     );
 
     // DUT (Device Under Test) Instantiation
@@ -54,9 +68,9 @@ module tb_top;
         .VARID_ADDR_BITWIDTH(8)
     ) dut (
         .aclk(aclk),
-        .aresetn(aresetn),
+        .aresetn(test_reset_n),
         .sysclk(sysclk),
-        .sysrst_n(sysrst_n),
+        .sysrst_n(test_sysrst_n),
         
         // AXI4-Lite Channels
         .awaddr(axil_if.awaddr[31:0]),
@@ -86,7 +100,7 @@ module tb_top;
         .i_uart_ctsn(uart_if.rtsn),
         
         // Interrupt
-        .o_interrupt_aclkr()
+        .o_interrupt_aclkr(mon_if.o_interrupt_aclkr)
     );
 
     // UVM setup and run_test
@@ -94,9 +108,30 @@ module tb_top;
         // Pass virtual interfaces to UVM configuration database
         uvm_config_db#(virtual axi4lite_if)::set(null, "*", "axil_vif", axil_if);
         uvm_config_db#(virtual uart_bfm_if)::set(null, "*", "uart_vif", uart_if);
+        uvm_config_db#(virtual crgen_if)::set(null, "*", "crgen_vif", crgen_vif);
+        uvm_config_db#(virtual uart_monitor_if)::set(null, "*", "mon_vif", mon_if);
         
         // Start UVM phase execution
+        // Start UVM phase execution
         run_test();
+    end
+
+    // Debug helper to trace RX state during testcase execution
+    initial begin
+        #0;
+        while ($time < 1500000) begin // Dump from 0 to 1.5 ms
+            #10000; // Check every 10 us (10,000 ns)
+            $display("[DEBUG_TB_TOP] time=%0t, state=%0d, empty=%0b, cnt=%0d, clken=%0b, rxd=%0b, rst=%0b, sysrst=%0b",
+                $time,
+                dut.uart_rx.state,
+                dut.uart_rx.i_fifo_empty_sysclk,
+                dut.uart_rx.over_samp_timeout_cnt_sysclkr,
+                dut.uart_rx.i_over_samp_clken_sysclk,
+                dut.uart_rx.uart_rxd_sysclk,
+                dut.aresetn,
+                dut.sysrst_n
+            );
+        end
     end
 
 endmodule

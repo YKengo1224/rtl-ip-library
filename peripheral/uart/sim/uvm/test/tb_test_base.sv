@@ -16,8 +16,19 @@ class tb_test_base extends uvm_test;
 
     virtual function void build_phase(uvm_phase phase);
         my_report_server custom_server;
+        string test_case;
 
         super.build_phase(phase);
+
+        // Set default simulation timeout to prevent test hang
+        uvm_top.set_timeout(300ms);
+
+        // Override timeout specifically for known problematic testcases
+        if ($value$plusargs("TEST_CASE=%s", test_case)) begin
+            if (test_case == "test_rtx_stopbit_2") begin
+                uvm_top.set_timeout(500us);
+            end
+        end
 
         // Instantiate custom report server for standard output format
         custom_server = new();

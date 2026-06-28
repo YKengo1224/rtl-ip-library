@@ -20,11 +20,11 @@ module uart_rx_fifo_async #(
     //=========================================
     // FIFO Status Interface
     //=========================================
-    output wire o_rx_fifo_empty_sysclkr,
+    output reg  o_rx_fifo_empty_sysclkr,
     output wire o_rx_fifo_full_sysclkr,
     output wire o_rx_fifo_almost_full_sysclkr,
     output wire o_rx_fifo_almost_empty_sysclkr,
-    output wire o_rx_fifo_empty_aclkr,
+    output reg  o_rx_fifo_empty_aclkr,
     output wire o_rx_fifo_full_aclkr,
     output wire o_rx_fifo_almost_full_aclkr,
     output wire o_rx_fifo_almost_empty_aclkr,
@@ -42,10 +42,12 @@ module uart_rx_fifo_async #(
     logic       rx_fifo_ren_aclk;
     wire  [8:0] rx_fifo_rdata_aclk;
     wire        rx_fifo_rdata_valid_aclk;
-
+    wire        rx_fifo_empty_sysclk;
+    wire        rx_fifo_empty_aclk;
     // FWFT hold registers
     reg   [8:0] rx_fifo_rdata_hold_aclkr;
     reg         rx_fifo_rdata_hold_valid_aclkr;
+    wire        rx_fifo_rdata_hold_valid_sysclkr;
 
     // Interrupt generation signals
     wire  [4:0] rx_fifo_available_aclk;
@@ -73,12 +75,12 @@ module uart_rx_fifo_async #(
         .R_EN_RCLK           (rx_fifo_ren_aclk),
         .DATA_OUT_RCLKR      (rx_fifo_rdata_aclk),
         .DATA_OUT_VALID_RCLKR(rx_fifo_rdata_valid_aclk),
-        .EMPTY_WCLKR         (o_rx_fifo_empty_sysclkr),
+        .EMPTY_WCLKR         (rx_fifo_empty_sysclk),
         .FULL_WCLKR          (o_rx_fifo_full_sysclkr),
         .ALMOST_FULL_WCLKR   (o_rx_fifo_almost_full_sysclkr),
         .ALMOST_EMPTY_WCLKR  (o_rx_fifo_almost_empty_sysclkr),
         .FIFO_AVAILABLE_WCLKR(),
-        .EMPTY_RCLKR         (o_rx_fifo_empty_aclkr),
+        .EMPTY_RCLKR         (rx_fifo_empty_aclk),
         .FULL_RCLKR          (o_rx_fifo_full_aclkr),
         .ALMOST_FULL_RCLKR   (o_rx_fifo_almost_full_aclkr),
         .ALMOST_EMPTY_RCLKR  (o_rx_fifo_almost_empty_aclkr),
@@ -128,6 +130,32 @@ module uart_rx_fifo_async #(
     // Direct output to the AXI bus
     assign o_uart_rx_data_aclkr = rx_fifo_rdata_hold_aclkr;
 
+
+
+    uart_synchronizer #(
+        .FF_DEPTH(SYNC_FF_DEPTH)
+    ) sync_hold_valid (
+        .CLK(sysclk),
+        .RST_N(sysrst_n),
+        .DATA_IN(rx_fifo_rdata_hold_valid_aclkr),
+        .DATA_OUT(rx_fifo_rdata_hold_valid_sysclkr)
+    );
+
+    always @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            o_rx_fifo_empty_aclkr <= 1'b1;
+        end else begin
+            o_rx_fifo_empty_aclkr <= rx_fifo_empty_aclk && !rx_fifo_rdata_hold_valid_aclkr;
+        end
+    end
+    always @(posedge sysclk or negedge sysrst_n) begin
+        if (!sysrst_n) begin
+            o_rx_fifo_empty_sysclkr <= 1'b1;
+        end else begin
+            o_rx_fifo_empty_sysclkr <= rx_fifo_empty_sysclk && !rx_fifo_rdata_hold_valid_sysclkr;
+        end
+    end
+
     //=========================================
     // Threshold Interrupt Logic
     //=========================================
@@ -144,7 +172,7 @@ module uart_rx_fifo_async #(
     // 1-stage delay for edge detection
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            rx_int_fifo_th_prev_aclkr <= 1'b0;
+            rx_int_fifo_th_prev_aclkr <= 1'b1;
         end else begin
             rx_int_fifo_th_prev_aclkr <= rx_int_fifo_th_aclk;
         end

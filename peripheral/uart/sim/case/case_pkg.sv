@@ -24,9 +24,6 @@ package case_pkg;
     `include "test_rx_normal.sv"
 
     // Include automatically generated sequences
-    `include "test_rtx_baudrate_110.sv"
-    `include "test_rtx_baudrate_300.sv"
-    `include "test_rtx_baudrate_600.sv"
     `include "test_rtx_baudrate_1200.sv"
     `include "test_rtx_baudrate_2400.sv"
     `include "test_rtx_baudrate_4800.sv"

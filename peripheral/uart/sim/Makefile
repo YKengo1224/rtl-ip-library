@@ -39,3 +39,7 @@ run:
 
 run_all:
 	$(RUN_SIM) -s $(SIMULATOR) --work_dir $(WORK_DIR) --log_dir $(LOG_DIR) --timescale $(TIMESCALE) $(COV_OPT) $(WAVE_OPT) $(TIMEOUT_OPT) -f $(FILELIST) -top $(TOP_MODULE) -el $(ENV_LIST) -a
+
+
+clean:
+	rm -rf $(WORK_DIR) $(LOG_DIR)

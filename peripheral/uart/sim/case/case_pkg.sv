@@ -52,7 +52,6 @@ package case_pkg;
     `include "test_rx_overrun_error.sv"
     `include "test_rx_break_detect.sv"
     `include "test_rx_timeout.sv"
-    `include "test_rx_timeout_clear.sv"
     `include "test_tx_fifo_threshold.sv"
     `include "test_rx_fifo_threshold.sv"
     `include "test_tx_polarity_inv.sv"

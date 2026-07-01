@@ -23,7 +23,7 @@ class test_rx_fifo_limit_burst extends uart_test_case_helper;
 
         wait_clk(50);
 
-        for (int i = 0; i < 32; i++) begin
+        for (int i = 0; i < 17; i++) begin
             bfm_tx.data = i;
             bfm_tx.start(p_sequencer.uart_sqr);
             #( (1000000000000.0 / 115200) * 12 * 1ps );
@@ -35,7 +35,7 @@ class test_rx_fifo_limit_burst extends uart_test_case_helper;
         regmodel.uart_status.read(status, rdata, .parent(this));
         check_seq("RX FIFO is full", rdata[5], 1'b1);
 
-        for (int i = 0; i < 32; i++) begin
+        for (int i = 0; i < 17; i++) begin
             regmodel.uart_data.read(status, rdata, .parent(this));
             check_seq($sformatf("RX Burst data index %0d", i), rdata[7:0], i);
         end

@@ -286,7 +286,7 @@ module uart_rx (
     always @(posedge sysclk or negedge sysrst_n) begin
         if (!sysrst_n) begin
             sample_bit_sysclkr <= 2'b0;
-        end else if ((state_next == S_D_WAIT_SAMPLE) || (state_next == S_P_WAIT_SAMPLE) || (state_next == S_S_WAIT_SAMPLE)) begin
+        end else if ((state == S_D_WAIT_SAMPLE) || (state == S_P_WAIT_SAMPLE) || (state == S_S_WAIT_SAMPLE)) begin
             if (sample_bit_trig_sysclk) begin
                 sample_bit_sysclkr <= sample_bit_sysclkr + uart_rxd_sysclk;
             end else begin

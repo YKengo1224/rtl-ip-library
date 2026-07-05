@@ -1,3 +1,0 @@
-
-.PHONY:
-	rm -rf build

@@ -4,7 +4,6 @@ module bram_sdp #(
     parameter int DATA_WIDTH = 32,
     parameter int RAM_DEPTH  = 1024,
     parameter int BYTE_WIDTH = 8,
-    parameter     WRITE_MODE = "READ_FIRST",
     parameter     INIT_FILE  = "",
     parameter int EN_REGISTER_MODE = 0
 )(
@@ -53,37 +52,7 @@ module bram_sdp #(
     end
 
     logic [DATA_WIDTH-1:0] ram_data;
-
-    generate
-        if (WRITE_MODE == "WRITE_FIRST") begin : gen_write_first
-            logic [DATA_WIDTH-1:0] fwd_data;
-            logic [NUM_BYTES-1:0]  fwd_we;
-
-            always_ff @(posedge RDCLK) begin
-                if (RDEN) begin
-                    if (WREN && (WRADDR == RDADDR)) begin
-                        fwd_we   <= WE;
-                        fwd_data <= DI;
-                    end else begin
-                        fwd_we   <= '0;
-                        fwd_data <= '0;
-                    end
-                end
-            end
-
-            always_comb begin
-                for (int i = 0; i < NUM_BYTES; i++) begin
-                    if (fwd_we[i]) begin
-                        ram_data[i*BYTE_WIDTH +: BYTE_WIDTH] = fwd_data[i*BYTE_WIDTH +: BYTE_WIDTH];
-                    end else begin
-                        ram_data[i*BYTE_WIDTH +: BYTE_WIDTH] = raw_ram_data[i*BYTE_WIDTH +: BYTE_WIDTH];
-                    end
-                end
-            end
-        end else begin : gen_read_first
-            assign ram_data = raw_ram_data;
-        end
-    endgenerate
+    assign ram_data = raw_ram_data;
 
     generate
         if (EN_REGISTER_MODE == 1) begin : gen_out_reg

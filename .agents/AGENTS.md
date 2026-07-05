@@ -7,6 +7,8 @@
   - Prefix input signals with `i_` and output signals with `o_` (excluding clock and reset signals).
   - Suffix all signal names with their corresponding clock domain name, excluding clock and reset signals (e.g., `data_aclk`).
   - For `reg` type signals, append `r` to the clock domain suffix (e.g., `data_aclkr`).
+  - **1 File 1 Module Rule**: Apply a strict one-module-per-file layout. Do not define helper or wrapper modules in the same file.
+  - **Interface Arrays & Logic Binding**: When mapping interface arrays (e.g., `axi_if s_axi[N]`) to internal logic signals, map them to flat/multidimensional `logic` arrays. To bypass Vivado `xvlog` compiler errors for non-constant indexing of interface members, perform the mapping inside a `generate` loop using an `always_comb` block inside the main module (do not define separate binder modules).
 - **UVM**:
   - Use UVM for all RTL simulation code.
 
@@ -35,6 +37,17 @@
 - **Testbench Directory Structure & Waveform Dumps**:
   - テストベンチ最上位である `tb_top.sv` は `sim/tb` ディレクトリに配置し、UVMクラス関連の検証パッケージやファイル群は `sim/uvm` 内に配置すること。
   - `tb_top.sv` などのテストベンチコード内には波形ダンプ（`$dumpfile` や `$dumpvars` 等）を直接記述せず、シミュレーション用TCLや実行スクリプト側で動的に制御すること。
+
+- **UVM Timeout Configuration**:
+  - `uvm_top.set_timeout` を用いたタイムアウトの設定・上書きは、シーケンスの `body` タスクなど `run_phase` 開始後に行ってもタイマー起動済みのため反映されない。必ず `build_phase` （例: `tb_test_base`）などのシミュレーション開始前フェーズにて実行すること。
+  - タイムアウト値は、極低速なテストケース（例: 110ボー等の長大シミュレーション）を考慮しつつ、ハング時に時間を浪費しないよう適切に定義し、シミュレーション実行スクリプトやMakefile側からコマンドライン引数（`+UVM_TIMEOUT` 等）で上書き可能にすること。
+
+- **Virtual Interface Arrays**: When dynamically indexing interface arrays inside testbench loops or procedural blocks, assign the interfaces to a `virtual interface` array (e.g., `typedef virtual axi_if vif_t; vif_t vifs[N];`) at startup/initial phase, and index the virtual interface array.
+- **Task Assignments**: In testbench tasks (especially `automatic` tasks), use blocking assignments (`=`) for task local (automatic) variables to prevent elaboration errors in `xelab`.
+
+- **Xsim Simulation Options**:
+  - `xsim` でカバレッジのデータベースディレクトリを指定するオプションは、`-covdir` ではなく `--cov_db_dir` を使用すること。
+  - Always specify `-timescale 1ns/1ps` in the `xelab` compilation command in Makefiles/run scripts to prevent simulation data flow errors due to missing timescales in interfaces or design components.
 
 ## Rum simulation
 - テストケースをsimulationを実行する際、RTLの修正は勝手に行わず、エラーが出たことを教えること

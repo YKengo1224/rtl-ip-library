@@ -16,7 +16,7 @@ class Simulator(Enum):
 class Runsim:
     def __init__(self):
         self.simulator = Simulator.XSIM
-        self.home_dir = Path.cwd()
+        self.home_dir = Path(__file__).resolve().parent.parent
         self.work_dir = self.home_dir / "work"
         self.log_dir = self.home_dir / "log"
         self.bin_dir = self.home_dir / "bin"
@@ -141,9 +141,14 @@ class Runsim:
 
     def def_env(self):
         env_items = []
+
+        base_dir = self.home_dir
         
         if self.args.env_path_list and os.path.isfile(self.args.env_path_list):
-            with open(self.args.env_path_list, 'r') as f:
+            env_list_path = Path(self.args.env_path_list).resolve()
+            base_dir = env_list_path.parent
+            
+            with open(env_list_path, 'r') as f:
                 env_items = f.readlines()        
                 
         for item in env_items:
@@ -156,9 +161,14 @@ class Runsim:
                 key, value = item.split('=', 1)
                 # 重要：valueの中にある別の環境変数（${HOME}など）も展開してセットする
                 expanded_value = os.path.expandvars(value.strip())
+
+                if expanded_value.startswith('../') or expanded_value.startswith('./'):
+                    abs_path = (base_dir / expanded_value).resolve()
+                    expanded_value = str(abs_path)
+                
                 os.environ[key.strip()] = expanded_value
                 # デバッグ用に print しておくと安心
-                # print(f"ENV: {key.strip()} = {expanded_value}")
+                print(f"ENV: {key.strip()} = {expanded_value}")
                 
     def execute_cmd(self):
         self.work_dir.mkdir(parents=True, exist_ok=True)

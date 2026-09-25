@@ -1,0 +1,34 @@
+register name ,field name ,bit position ,bit width , R/W,description
+
+SDR_SDRAM_CTRL, self_reflesh_en, 2, 1, R/W, Enable Self Reflesh mode
+SDR_SDRAM_CTRL, sdr_sdram_enable, 0, 1, R/W, Enable SDRAM controller
+
+
+SDR_SDRAM_STATUS, in_pwr_down, 3, 1, R/W, in power down mode
+SDR_SDRAM_STATUS, in_self_reflesh, 2, 1, R/W, in self reflesh mode
+SDR_SDRAM_STATUS, init_done, 1, 1, R/W, initial seq done flag
+SDR_SDRAM_STATUS, idle, 0, 1, R/W, status idle()
+
+SDR_SDRAM_INIT_CONF, auto_refresh_num, 16, 4, R/W, Number of auto-refresh commands to initiate
+SDR_SDRAM_INIT_CONF, init_wait, 0, 16, R/W, Wait cycles for SDRAM initialization
+
+SDR_SDRAM_AC_CONF, trc, 24, 4, R/W, ACTIVE to ACTIVE command delay(cycle)
+SDR_SDRAM_AC_CONF, tras, 20, 4, R/W, ACTIVE to PRECHAGE command delay(cycle)
+SDR_SDRAM_AC_CONF, trcd, 16, 4, R/W, ACTIVE to READ or WRITE delay(cycle)
+SDR_SDRAM_AC_CONF, tdpl, 12, 4, R/W, Data-in to PRECHARGE delay(cycle)
+SDR_SDRAM_AC_CONF, twp, 12, 4, R/W, WRITE recovery time(cycle) 
+SDR_SDRAM_AC_CONF, tmrd, 8, 4, R/W, LOAD MODE REGISTER to ACTIVE or ReFRESH command period(cycle)
+SDR_SDRAM_AC_CONF, trfc, 4, 4, R/W, Auto-refresh command period(cycle)
+SDR_SDRAM_AC_CONF, trp, 0, 4, R/W, Precharge command period(cycle)
+
+SDR_SDRAM_REF_CONF, tref,0,32, Reflesh period(cycle)
+
+SDR_SDRAM_MR_CONF, wb_mode, 8, 1, R/W, Write burst mode configuration
+SDR_SDRAM_MR_CONF, op_mode, 7, 2, R/W, Operation mode configuration
+SDR_SDRAM_MR_CONF, cas_latency, 4, 3, R/W, CAS latency configuration
+SDR_SDRAM_MR_CONF, burst_type, 3, 1, R/W, Burst type configuration
+SDR_SDRAM_MR_CONF, burst_length, 0, 3, R/W, Burst length configuration
+
+SDR_SDRAM_SIG_GEOM, bus_width, 0, 2, R/W, external bus width(00:8bit, 01:16bit,10:32bit)
+SDR_SDRAM_SIG_GEOM, bunk_num, 2, 2, R/W, bank num(01:4,other:reserved)
+

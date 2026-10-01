@@ -27,37 +27,97 @@ AXI IFを持ちます。このAXI IFからメモリマップにマッピング�
 
 FIFOに溜まったAXI トランザクションをSDRAMデバイスの各アクセス命令にデコードします。
 
-addr trans fifo　はAXI AR,AWトランザクションをfifoに格納します。fifoの深さは16です。
-
-本モジュールにおけるarready,awreadyのdefault値はlowです。アドレスチャネルのvalid信号(axvalid)が
+aw_fifo,ar_fifoはAXI AR,AWトランザクションをfifoに格納します。fifoの深さは16です。
+wdata trans fifoはWトランザクションをfifoに格納します。fifoの深さは16です。
+本モジュールにおけるarready,awready,wreadyのdefault値はlowです。各チャネルのvalid信号が
 highになると、本モジュールはfifoがfull出ないことを確認し、fifoにデータを書き込むと同時に、
-対応チャネルのready信号(axready)をhighにし、トランザクションを完了します。
-AR,AWチャネルの書き込みは、先に来たトランザクションを優先してFIFOに格納します。
-AR,AWチャネルのトランザクションが同時に来た場合、AWチャネルのトランザクションを優先して
-FIFOに書き込みます。
+対応チャネルのready信号をhighにし、トランザクションを完了します。
 
-wdata trans fifoはWトランザクションをfifoに格納します。fifoの深さは64です。
-本モジュールにおけるwreadyのdefault値はlowです。wvalidがhighになると、
-本モジュールはwdata trans fifoがfull出ないことを確認し、fifoにデータを書き込むと同時に、
-wreadyをhighにし、トランザクションを完了します。
+wdataは、sdramのバス幅に合わせてデータを整形してFIFOに書き込みます。
+rdataは、AXIのバス幅に合わせてデータを整形してFIFOに書き込みます。
 
-fifoにデータが溜まると、FIFOからトランザクションし、SDRAMの各アクセス命令にデコードし、
-sdr_sdram_ctrl_dev_ifモジュールに命令を渡します。
+
+bresp_fifoにデータが存在する場合、データを取り出し、Bチャネルのトランザクションを発行します。
+bresp_fifoにはBIDが格納されます。
+
+### sdr_sdram_ctrl_decoder
+
+本モジュールは AXIの各チャネルのFIFOのデータを取り出し、SDRAMの各コマンドに変換します。
+また、SDRAMの読み出しデータRチャネルのFIFOに、writeの完了時にBチャネルのデータの書き込みを行います。
+
+本モジュール内で、SDRAMの各バンクの状態を独立して管理します。
+AXIの各ビートは、アドレスから各バンクの簡易queueに振り分けられます。
+
+
+
+FSMを以下に示します
+```mermaid
+stateDiagram-v2
+    [*] --> S_IDLE:0
+    S_IDLE --> S_FETCH_AW_FIFO: 1
+    S_IDLE --> S_FETCH_AR_FIFO: 2
+    
+    S_FETCH_AW_FIFO --> S_DECODE_WRITE:3
+    
+    S_DECODE_WRITE --> S_WAIT_WDATA:4
+    S_DECODE_WRITE --> S_IDLE:5
+    
+    S_WAIT_WDATA --> S_DECODE_WRITE:6
+    
+    S_FETCH_AR_FIFO --> S_DECODE_READ:7
+    
+    S_DECODE_READ --> S_IDLE:8 
+    
+            
+```
+
+| 遷移番号 | fsm遷移条件                                                                                       |
+| 1        | aw_fifo != empty && wチャネルのフェッチ条件(後述) && (writeの調停結果がwrite or ar_fifo == empty) |
+| 2        | ar\_fifo != empty  && r_data_fifo != almost full  && (readの調停結果がread or aw_fifo == empty)   |
+| 3        | 無条件                                                                                            |
+| 4        | write cmdのデコード完了 && !wチャネルのフェッチ条件                                               |
+| 5        | write cmdのデコード完了 && 1トランザクションのwrite完了                                           |
+| 6        | wチャネルのフェッチ条件                                                                           |
+| 7        | 無条件                                                                                            |
+| 8        | rad cmdのデコード完了                                                                             |
+
+wチャネルのフェッチ条件は以下の通りです。
+w\_trans\_flg && ((w\_fifo == full) \|\| (w\_fifo のサイズがsdramのburst lengthと一致) \|\| (w\_fifoのサイズが残りの転送数と一致) )
+ 
+
+read,writeの調停はラウンドロビンで調停を行います。
+
+S_DECODE_WRITEでは、AWチャネルの情報、wstrbから
+
+
+
 
 dev_ifモジュールに渡す信号を以下に示します
 
-|信号名|ビット幅|方向(axi_ifモジュールから見た方向)|概要|
-|-|-|-|-|
-|valid|1| output |valid信号|
-|readh|1| input |ready信号|
-|is_write|1|output|0の場合、read,1の場合、write|
-|banck|2|output|バンクNo|
-|row|13|output|行No|
-|col|10|output|列No|
-|wdata|32|output|write data
-|rdata|32|input|read data|
-|prechage_sel|2|output|0:信号アクセス後、prechage命令発行、1: auto_prechage,2prechageなし|
+| 信号名       | ビット幅 | 方向(axi_ifモジュールから見た方向) | 概要                                                               |
+|--------------|----------|------------------------------------|--------------------------------------------------------------------|
+| trans_valid        | 1        | output                             | valid信号                                                          |
+| trans_ready        | 1        | input                              | ready信号                                                          |
+| trans_is_write     | 1        | output                             | 0の場合、read,1の場合、write                                       |
+| trans_dqm     | 1        | output                             | dqm                                       |
+| trans_banck        | 2        | output                             | バンクNo                                                           |
+| trans_row          | 13       | output                             | 行No                                                               |
+| trans_col          | 10       | output                             | 列No                                                               |
+| trans_wdata        | 32       | output                             | write data                                                         |
+| trans_rdata        | 32       | input                              | read data                                                          |
+| trans_prechage_sel | 2        | output                             | 0:信号アクセス後、prechage命令発行、1: auto_prechage,2prechageなし |
 
+writeトランザクションがdev_ifモジュールに渡された時、Bチャネルのトランザクションを発行します。
+
+read動作を行った場合、dev_ifからDRAMのreadコマンドで得られたデータをもらいます。
+
+| 信号名       | ビット幅 | 方向(axi_ifモジュールから見た方向) | 概要                                                               |
+|--------------|----------|------------------------------------|--------------------------------------------------------------------|
+| rdata_valid        | 1        | input                             | valid信号                                                          |
+| rdata_ready        | 1        | output                              | ready信号                                                          |
+| rdata_out          | 32       | input                             | 読み出しデータ                                                               |
+
+rdataはAXIのburst_sizeに応じて出力されます。
 
 ### sdr_sdram_ctrl_dev_if
 sdramデバイスとのIFを持ちます。
